@@ -462,7 +462,7 @@ public class Printer extends DepthFirstAdapter {
 
     @Override
     public void inADiv1RestSigns(ADiv1RestSigns node) {
-        System.out.print("[Div] " + node.getDiv1().toString() );
+        System.out.print("[Div] " + node.getDivSpace().toString() );
     }
 
     @Override
@@ -471,7 +471,7 @@ public class Printer extends DepthFirstAdapter {
 
     @Override
     public void inAModRestSigns(AModRestSigns node) {
-        System.out.print("[Mod] " + node.getMod().toString());
+        System.out.print("[Mod] " + node.getModSpace().toString());
     }
 
     @Override
@@ -488,16 +488,6 @@ public class Printer extends DepthFirstAdapter {
         System.out.print(node.getRPar().toString());
     }
 
-    @Override
-    public void inAWithPlminExprSigns(AWithPlminExprSigns node) {
-        System.out.print("[Constant]: ");
-
-    }
-    @Override
-    public void outAWithPlminExprSigns(AWithPlminExprSigns node) {
-        System.out.print(node.getConstant().toString() + " ) " );
-
-    }
 
     @Override
     public void inAPlusPlusMinus2(APlusPlusMinus2 node) {
@@ -512,13 +502,6 @@ public class Printer extends DepthFirstAdapter {
     }
 
 
-
-
-    @Override
-    public void inAWithoutPlminExprSigns(AWithoutPlminExprSigns node) {
-        System.out.print("[Constant]: "+ node.getConstant().toString() );
-    }
-
     @Override
     public void inALetterFactor(ALetterFactor node) {
         System.out.print("[Constant character]: "+ node.getConstantCharacter().toString() );
@@ -531,6 +514,11 @@ public class Printer extends DepthFirstAdapter {
     @Override
     public void outAExprCalcFactor(AExprCalcFactor node) {
         System.out.print(node.getRPar().toString());
+    }
+
+    @Override
+    public void inAConstantFactor(AConstantFactor node) {
+        System.out.print(node.getConstant().toString());
     }
 
     @Override

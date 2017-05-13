@@ -13,10 +13,14 @@ Helpers
     lowercase = ['a' .. 'z'];
     uppercase = ['A' .. 'Z'];
     number = ['0' .. '9']+;
+    digit = ['0' .. '9'];
 
 
     letter = lowercase | uppercase;
-    hex_num = (number letter)*;
+
+    hex_prefix = 'x';
+    hex_digit = [digit + [['a' .. 'f'] + ['A' .. 'F']]];
+    hex_constant = hex_prefix hex_digit hex_digit;
 
     underscore='_';
     backslash = '\';
@@ -30,12 +34,14 @@ Helpers
     esc_ch_bs='\\';
     esc_ch_me= backslash mono_eisagwgiko;
     esc_ch_de='\"';
-    esc_ch_asc=backslash hex_num;
+    esc_ch_asc=backslash hex_constant;
 
     esc_ch = esc_ch_nl | esc_ch_tab | esc_ch_cr | esc_ch0 | esc_ch_bs | esc_ch_me | esc_ch_de | esc_ch_asc;
 
-    symbol = '!' | ':' | backslash | '@' | '$' | '%' | '^' | '&' | '*'
-             | '.' | '(' | ')'|';'|'<'|'>'| ',' | '?' | '/' | '|' | '{' | '}' | '[' | ']' | '`' | '~';
+    symbol_without_backslash = '!' | ':' | '@' | '$' | '%' | '^' | '&' | '*' | '.' | '(' | ')'|';'|'<'|'>'| ',' | '?' | '/' | '|' | '{' | '}' | '[' | ']' | '`' | '~' | esc_ch | sp;
+    symbol = symbol_without_backslash | backslash;
+
+
 
     plus = '+';
     minus = '-';
@@ -70,16 +76,19 @@ Helpers
 
     mul_comment_line = double_dollar all_not_dol* double_dollar;
 
+    mod = 'mod';
+    div1 = 'div';
+
 Tokens
     and = 'and';
     char = 'char';
-    div1 = 'div';
+    div1 = div1;
     do = 'do';
     else = 'else';
     fun = 'fun';
     if = 'if';
     int = 'int';
-    mod = 'mod';
+    mod = mod;
     not = 'not';
     nothing = 'nothing';
     or = 'or';
@@ -89,22 +98,24 @@ Tokens
     var = 'var';
     while = 'while';
 
-
-
+    mod_space = sp mod sp;
+    div_space = sp div1 sp;
 
     var_name = letter (letter | number |  underscore)*;
     constant = number*;
 
-    constant_character = mono_eisagwgiko (esc_ch |letter |number)* mono_eisagwgiko;
 
-    constant_string = diplo_eisagwgiko (letter | number | esc_ch | symbol | white_space2)* diplo_eisagwgiko;
+    constant_character = mono_eisagwgiko (esc_ch |letter |number | symbol) mono_eisagwgiko;
+
+    constant_string = diplo_eisagwgiko (letter | number | esc_ch | symbol_without_backslash | white_space2)* diplo_eisagwgiko;
 
 
     white_space = white_space;
     comment_line = comment_line;
     mul_comment_line = mul_comment_line;
 
-    array = ('int' | 'char') ('['  (number*)? ']')*;
+    array = ('int' | 'char') '[' ']' ('['  number ']')*
+            | ('int' | 'char') ('['  number ']')*;
 
     another_type = 'another type';
     l_par = l_par;
@@ -252,23 +263,20 @@ Productions
 
 
 
-    factor = {number} expr_signs
+    factor = {with_plmin} plus_minus2 factor
             | {letter} constant_character
             | {l_value} l_value
             | {expr_calc} l_par expr_calc r_par
-            | {fun} func_call;
+            | {fun} func_call
+            | {constant} constant;
 
-    expr_signs = {with_plmin} plus_minus2 constant
-                | {without_plmin} constant;
 
     parentheses_expr =  {parexpr} l_par general_expr r_par;
 
     plus_minus = {plus} plus | {minus} minus;
     plus_minus2 = {plus} plus | {minus} minus;
 
-    rest_signs = {mult} mult | {div} div | {div1} div1 | {mod} mod;
-
-
+    rest_signs = {mult} mult | {div} div | {div1} div_space | {mod} mod_space;
 
 
     cond = {cond_in_par} cond_in_par
@@ -293,13 +301,12 @@ Productions
                  | {and} term_cond2 logical_and term_cond1;
 
     term_cond1 = {factor_c} factor_cond
-                | {not} logical_not factor_cond;
+                | {not} logical_not* factor_cond;
 
     logical_and = and;
     logical_or = or;
     logical_not = not;
 
-
-
     factor_cond = {as_cond} ass_cond;
+
 

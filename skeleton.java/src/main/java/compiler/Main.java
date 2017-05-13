@@ -12,13 +12,14 @@ public class Main
 {
 	public static void main(String[] arguments) throws FileNotFoundException
 	{
+		File file = new File("D:/σχολη/6o εξαμηνο/Μεταγλωττιστες/εργασια/examples/test.grace");
 		try
 		{
 			Parser p =
 					new Parser(
 							new Lexer(
 									new PushbackReader(
-											new InputStreamReader(new FileInputStream("D:/σχολη/6o εξαμηνο/Μεταγλωττιστες/εργασια/examples/test.grace")/*System.in*/), 1024)));
+											new InputStreamReader(new FileInputStream(file)), 1024)));
 		// Parse the input.
 		Start tree = p.parse();
 		tree.apply(new Printer());
