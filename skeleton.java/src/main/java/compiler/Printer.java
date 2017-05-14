@@ -572,17 +572,6 @@ public class Printer extends DepthFirstAdapter {
         System.out.print(")");
     }
 
-
-    @Override
-    public void inACondparCondInPar(ACondparCondInPar node) {
-        System.out.print(node.getLPar().toString());
-    }
-
-    @Override
-    public void outACondparCondInPar(ACondparCondInPar node) {
-        System.out.print(node.getRPar().toString());
-    }
-
     @Override
     public void inAEqualAssSigns(AEqualAssSigns node) {
         System.out.print("[Equal] " + node.getEqual().toString());
@@ -989,6 +978,18 @@ public class Printer extends DepthFirstAdapter {
     public void inARbrId(ARbrId node)
     {
         System.out.print(node.getRBr().toString());
+    }
+
+    @Override
+    public void inAParFactorCond(AParFactorCond node)
+    {
+        System.out.print( node.getLPar().toString());
+    }
+
+    @Override
+    public void outAParFactorCond(AParFactorCond node)
+    {
+        System.out.print( node.getRPar().toString());
     }
 
 

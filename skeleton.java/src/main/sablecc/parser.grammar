@@ -251,8 +251,9 @@ Productions
                | {gen} general_expr;
 
 
+    general_expr =  {parexpr} parentheses_expr;
 
-    general_expr =   {parexpr} parentheses_expr;
+    parentheses_expr =  {parexpr} l_par general_expr r_par;
 
 
     expr_calc = {term} term
@@ -271,7 +272,6 @@ Productions
             | {constant} constant;
 
 
-    parentheses_expr =  {parexpr} l_par general_expr r_par;
 
     plus_minus = {plus} plus | {minus} minus;
     plus_minus2 = {plus} plus | {minus} minus;
@@ -279,12 +279,8 @@ Productions
     rest_signs = {mult} mult | {div} div | {div1} div_space | {mod} mod_space;
 
 
-    cond = {cond_in_par} cond_in_par
-           | {cond_exp} cond_expr;
+    cond =  {cond_exp} cond_expr;
 
-    ass_cond = {exprsigns} [before]:all_expr ass_signs [after]:all_expr;
-
-    cond_in_par = {condpar} l_par cond r_par;
 
 
     ass_signs = {equal} equal
@@ -307,6 +303,9 @@ Productions
     logical_or = or;
     logical_not = not;
 
-    factor_cond = {as_cond} ass_cond;
 
+    factor_cond = {as_cond} ass_cond
+                   | {par} l_par cond r_par;
+
+    ass_cond =  {exprsigns} [before]:all_expr ass_signs [after]:all_expr;
 
