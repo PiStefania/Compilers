@@ -148,57 +148,73 @@ Ignored Tokens
 
 Productions
 
-    program = {func_def} func_def {->New program(func_def)};      /* func_def */
+    program = {func_def} func_def{->New program(func_def)};      /* func_def */
 
-    func_def =  header local_def* block{->New func_def.func_def_all(header,[local_def],block)};     /*header local_def* block*/
+    func_def = {func_def} header local_def* block{->New func_def.all(New head_help(header.head_help, [local_def.head_help]),block.func_def)};     /*header local_def* block*/
 
-    header{->func_def} = {with_header_helper_bigger} fun var_name l_par header_helper_bigger header_helper2 ret_type
-            | {without_header_helper_bigger} fun var_name l_par header_helper2 ret_type;    /* fun var_name ret_type*/
+    header{->func_def} = {with_header_helper_bigger} fun var_name l_par header_helper_bigger header_helper2 ret_type{->New func_def.header(New head(fun, var_name),ret_type.func_def)}
+                | {without_header_helper_bigger} fun var_name l_par header_helper2 ret_type {->New func_def.header(New head(fun, var_name),ret_type.func_def)};    /* fun var_name ret_type*/
 
-    header_helper{->func_def} = semicolon fpar_def;
-    header_helper_bigger{->func_def} = fpar_def header_helper*;
-    header_helper2{->func_def} = r_par colon;
+    header_helper{->func_def} = semicolon fpar_def{->fpar_def.func_def};
+    header_helper_bigger{->func_def} = fpar_def header_helper*{->fpar_def.func_def};
+    header_helper2 = r_par colon;
 
-    fpar_def{->func_def} = {with_ref} ref var_name var_def_helper* colon_id fpar_type       /*ref var_name fpar_type */
-               |{no_ref} var_name var_def_helper* colon_id fpar_type;
+    fpar_def{->func_def} = {with_ref} ref var_name var_def_helper* colon_id fpar_type{->New func_def.fpar_def(New fpar(ref, var_name),fpar_type.func_def)}        /*ref var_name fpar_type */
+               |{no_ref} var_name var_def_helper* colon_id fpar_type{->fpar_type.func_def};
 
-    data_type{->func_def} = {int} int
-    | {char} char;
+    data_type{->func_def} = {int} int {->New data_type.int(int)}
+    | {char} char {->New data_type.char(char)};
 
-    type{->func_def} = {dt} data_type type_helper*  /*constant*/
-            | {ar} array;               /* array */
-    type_helper{->func_def} = l_br constant r_br;
+    type{->func_def} = {dt} data_type type_helper*{->data_type.func_def}  /*constant*/
+            | {ar} array   {->New func_def.array(array)} ;          /* array */
+    type_helper{->func_def} = l_br constant r_br {->New func_def.constant(constant)};
 
-    ret_type{->func_def} = {dt} data_type
-    | {nothing} nothing;
+    ret_type{->func_def} = {dt} data_type {->data_type.func_def}
+    | {nothing} nothing {->New func_def.nothing(nothing)} ;
 
-    fpar_type{->func_def} = {dt_with_helper} data_type fpar_type_helper2
-                | {dt_without_helper} data_type
-                | {arr} array;
+    fpar_type{->func_def} = {dt_with_helper} data_type fpar_type_helper2 {->data_type.func_def}
+                | {dt_without_helper} data_type {->data_type.func_def}
+                | {arr} array {->New func_def.array(array)};
 
-    brs{->func_def} = l_br r_br;
-    fpar_type_helper{->func_def} = l_br constant r_br;
-    fpar_type_helper2{->func_def} = {with_brs} brs fpar_type_helper*
+    brs = l_br r_br;
+    fpar_type_helper = l_br constant r_br;
+    fpar_type_helper2 = {with_brs} brs fpar_type_helper*
                         | {without_brs} fpar_type_helper*;
 
 
-    local_def{->func_def} = {func_def} func_def
-    | {func_decl} func_decl
-    | {var_def} var_def;
+    local_def{->func_def} = {func_def} func_def {->func_def.func_def}
+    | {func_decl} func_decl {->func_decl.func_def}
+    | {var_def} var_def{->var_def.func_def};
 
-    var_def{->func_def} = var var_name var_def_helper* colon_id type semicolon;
-    var_def_helper{->func_def} = comma var_name;
-    colon_id {->func_def}= colon;
+    var_def{->func_def} = var var_name var_def_helper* colon_id type semicolon{->New func_def.var_def(New var1(var,var_name),type.func_def)};
+    var_def_helper{->func_def} = comma var_name{->New func_def.var_help(var_name)};
+    colon_id = colon;
 
-    func_decl{->func_def} = header semicolon;
+    func_decl{->func_def} = header semicolon{->header.func_def};
 
-    block{->func_def} = {block} curly_l_br curly_r_br;
+    block = {block} curly_l_br curly_r_br;
 
 
 Abstract Syntax Tree
 
- program = func_def;
+    program = func_def;
 
- func_def = {func_def_all} [l]:func_def [c]:func_def* [r]:func_def;
+    func_def = {all} head_help func_def
+               | {header} [l]:head [r]:func_def
+               | {fpar_def} [l]:fpar [r]:func_def
+               | {data_type} func_def
+               | {constant} constant
+               | {nothing} nothing
+               | {array} array
+               | {var_def} var1 func_def
+               | {var_help} var_name;
 
+    data_type = {int} int
+                | {char} char;
+
+
+    head_help = [l]:head_help [r]:head_help*;
+    head = fun var_name;
+    fpar = ref var_name;
+    var1 = var var_name;
 
