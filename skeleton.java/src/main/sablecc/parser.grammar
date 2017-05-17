@@ -150,7 +150,7 @@ Productions
 
     program = {func_def} func_def{->New program(func_def)};      /* func_def */
 
-    func_def = {func_def} header local_def* block{->New func_def.all(New head_help(header.head_help, [local_def.head_help]),block.func_def)};     /*header local_def* block*/
+    func_def = {func_def} header local_def* block{->New func_def.all(New head_help.all(header.func_def, [local_def.func_def]),block.func_def)};     /*header local_def* block*/
 
     header{->func_def} = {with_header_helper_bigger} fun var_name l_par header_helper_bigger header_helper2 ret_type{->New func_def.header(New head(fun, var_name),ret_type.func_def)}
                 | {without_header_helper_bigger} fun var_name l_par header_helper2 ret_type {->New func_def.header(New head(fun, var_name),ret_type.func_def)};    /* fun var_name ret_type*/
@@ -162,8 +162,8 @@ Productions
     fpar_def{->func_def} = {with_ref} ref var_name var_def_helper* colon_id fpar_type{->New func_def.fpar_def(New fpar(ref, var_name),fpar_type.func_def)}        /*ref var_name fpar_type */
                |{no_ref} var_name var_def_helper* colon_id fpar_type{->fpar_type.func_def};
 
-    data_type{->func_def} = {int} int {->New data_type.int(int)}
-    | {char} char {->New data_type.char(char)};
+    data_type{->func_def} = {int} int {->New func_def.int(int)}
+    | {char} char {->New func_def.char(char)};
 
     type{->func_def} = {dt} data_type type_helper*{->data_type.func_def}  /*constant*/
             | {ar} array   {->New func_def.array(array)} ;          /* array */
@@ -192,28 +192,26 @@ Productions
 
     func_decl{->func_def} = header semicolon{->header.func_def};
 
-    block = {block} curly_l_br curly_r_br;
+    block{->func_def} = {block} curly_l_br curly_r_br{->New func_def.block(curly_l_br,curly_r_br)};
 
 
 Abstract Syntax Tree
 
     program = func_def;
 
-    func_def = {all} head_help func_def
+    func_def = {all} [l]: head_help [r]: func_def
                | {header} [l]:head [r]:func_def
                | {fpar_def} [l]:fpar [r]:func_def
-               | {data_type} func_def
+               | {int} int
+               | {char} char
                | {constant} constant
                | {nothing} nothing
                | {array} array
-               | {var_def} var1 func_def
-               | {var_help} var_name;
+               | {var_def} [l]: var1 [r]: func_def
+               | {var_help} var_name
+               | {block} [l]: curly_l_br [r]:curly_r_br;
 
-    data_type = {int} int
-                | {char} char;
-
-
-    head_help = [l]:head_help [r]:head_help*;
+    head_help = {all} [l]:func_def [r]:func_def*;
     head = fun var_name;
     fpar = ref var_name;
     var1 = var var_name;

@@ -22,7 +22,7 @@ public class Main
 											new InputStreamReader(new FileInputStream(file)), 1024)));
 		// Parse the input.
 		Start tree = p.parse();
-		//tree.apply(new PrinterAST());
+		tree.apply(new PrinterAST());
 		}
 		catch (LexerException e) {
 			System.err.printf("Lexing error: %s\n", e.getMessage());
