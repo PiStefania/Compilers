@@ -150,43 +150,43 @@ Productions
 
     program = {func_def} func_def{->New program(func_def)};      /* func_def */
 
-    func_def = {func_def} header local_def* block{->New func_def.all(New head_help.all(header.func_def, [local_def.func_def]),[block.stmt])};     /*header local_def* block*/
+    func_def = {func_def} header local_def* block{->New func_def.all(New func_definition(header.func_def, [local_def.func_def]),[block.stmt])};     /*header local_def* block*/
 
-    header{->func_def} = {with_header_helper_bigger} fun var_name l_par header_helper_bigger header_helper2 ret_type{->New func_def.header(New head(fun, var_name),ret_type.func_def)}
-                | {without_header_helper_bigger} fun var_name l_par header_helper2 ret_type {->New func_def.header(New head(fun, var_name),ret_type.func_def)};    /* fun var_name ret_type*/
+    header{->func_def} = {with_header_helper_bigger} fun var_name l_par header_helper_bigger header_helper2 ret_type{->New func_def.header_with(New head(var_name, header_helper_bigger.func_def),ret_type.func_def)}
+                | {without_header_helper_bigger} fun var_name l_par header_helper2 ret_type {->New func_def.header(var_name,ret_type.func_def)};    /* fun var_name ret_type*/
 
     header_helper{->func_def} = semicolon fpar_def{->fpar_def.func_def};
     header_helper_bigger{->func_def} = fpar_def header_helper*{->New func_def.header_big(fpar_def.func_def,[header_helper.func_def])};
     header_helper2 = r_par colon;
 
-    fpar_def{->func_def} = {with_ref} ref var_name var_def_helper* colon_id fpar_type{->New func_def.fpar_def(New fpar(ref, var_name),fpar_type.func_def)}        /*ref var_name fpar_type */
-               |{no_ref} var_name var_def_helper* colon_id fpar_type{->fpar_type.func_def};
+    fpar_def{->func_def} = {with_ref} ref var_name var_def_helper* colon_id fpar_type{->New func_def.fpar_def(New fpar(var_name, [var_def_helper.func_def]),fpar_type.func_def)}        /*ref var_name fpar_type */
+               |{no_ref} var_name var_def_helper* colon_id fpar_type {->New func_def.fpar_def_no_ref(New no_ref(var_name, [var_def_helper.func_def]),fpar_type.func_def)};
 
     data_type{->func_def} = {int} int {->New func_def.int(int)}
     | {char} char {->New func_def.char(char)};
 
-    type{->func_def} = {dt} data_type type_helper*{->data_type.func_def}  /*constant*/
+    type{->func_def} = {dt} data_type type_helper*{-> New func_def.type(data_type.func_def,[type_helper.func_def])}  /*constant*/
             | {ar} array   {->New func_def.array(array)} ;          /* array */
     type_helper{->func_def} = l_br constant r_br {->New func_def.constant(constant)};
 
     ret_type{->func_def} = {dt} data_type {->data_type.func_def}
     | {nothing} nothing {->New func_def.nothing(nothing)} ;
 
-    fpar_type{->func_def} = {dt_with_helper} data_type fpar_type_helper2 {->data_type.func_def}
+    fpar_type{->func_def} = {dt_with_helper} data_type fpar_type_helper2 {-> New func_def.fpar_type(data_type.func_def,fpar_type_helper2.func_def)}
                 | {dt_without_helper} data_type {->data_type.func_def}
-                | {arr} array {->New func_def.array(array)};
+                | {arr} array {->New func_def.array2(array)};
 
     brs = l_br r_br;
-    fpar_type_helper = l_br constant r_br;
-    fpar_type_helper2 = {with_brs} brs fpar_type_helper*
-                        | {without_brs} fpar_type_helper*;
+    fpar_type_helper{->func_def} = l_br constant r_br {->New func_def.fpar_type_helper(constant)};
+    fpar_type_helper2{->func_def} = {with_brs} brs fpar_type_helper* {-> New func_def.with_brs([fpar_type_helper.func_def])}
+                        | {without_brs} fpar_type_helper* {-> New func_def.without_brs([fpar_type_helper.func_def])};
 
 
     local_def{->func_def} = {func_def} func_def {->func_def.func_def}
     | {func_decl} func_decl {->func_decl.func_def}
     | {var_def} var_def{->var_def.func_def};
 
-    var_def{->func_def} = var var_name var_def_helper* colon_id type semicolon{->New func_def.var_def(New var1(var,var_name),type.func_def)};
+    var_def{->func_def} = var var_name var_def_helper* colon_id type semicolon{->New func_def.var_def(New var1(var_name,[var_def_helper.func_def]),type.func_def)};
     var_def_helper{->func_def} = comma var_name{->New func_def.var_help(var_name)};
     colon_id = colon;
 
@@ -197,150 +197,159 @@ Productions
 
 
 
-        stmt {->stmt*} = {semicolon} semicolon {->[]}
-              | {expression} l_value assign_id all_expr semicolon_id   {->[New stmt.expression([l_value.stmt], all_expr.all_expr)]}
-              | {block} block                                          {->[block.stmt]}
-              | {funcall} func_call semicolon_id                       {->[func_call.stmt]}
-              | {if} if_stmt                                           {->[if_stmt.stmt]}
-              | {while} while cond do_id stmt                          {->[New stmt.while(cond.cond, [stmt.stmt])]}
-              | {return_with_expr} return parentheses_expr semicolon_id     {->parentheses_expr.all_expr}
-              | {return_expr} return all_expr semicolon_id                {->all_expr.all_expr}
-              | {return} return semicolon                            {-> []};
+    stmt{->stmt*} = {semicolon} semicolon {->[]}
+          | {expression} l_value assign_id all_expr semicolon_id   {->[New stmt.expression([l_value.stmt], all_expr.all_expr)]}
+          | {block} block                                          {->[block.stmt]}
+          | {funcall} func_call semicolon_id                       {->[func_call.stmt]}
+          | {if} if_stmt                                           {->[if_stmt.stmt]}
+          | {while} while cond do_id stmt                          {->[New stmt.while(cond.cond, [stmt.stmt])]}
+          | {return_with_expr} return parentheses_expr semicolon_id     {->[New stmt.return_with(parentheses_expr.all_expr)]}
+          | {return_expr} return all_expr semicolon_id                {->[New stmt.return_expr(all_expr.all_expr)]}
+          | {return} return semicolon                            {->[]};
 
 
 
 
-        if_stmt {->stmt*} = {no_else} if cond then_id [then_stmt]:stmt     {->New stmt.no_else(cond.cond, [then_stmt.stmt])}
-                  | {with_else} if cond then_id stmt_with_else else_id [else_stmt]:stmt   {->New  stmt.with_else(cond.cond,New stmt_with_else([stmt_with_else.stmt],[else_stmt.stmt]))};
+    if_stmt{->stmt}  = {no_else} if cond then_id [then_stmt]:stmt     {->New stmt.no_else(cond.cond, [then_stmt.stmt])}
+              | {with_else} if cond then_id stmt_with_else else_id [else_stmt]:stmt   {->New stmt.with_else(cond.cond,New stmt_with_else([stmt_with_else.stmt],[else_stmt.stmt]))};
 
 
-        stmt_with_else{->stmt*} = {semicolon} semicolon {-> []}
-                         | {expression} l_value assign_id all_expr semicolon_id  {->New stmt.expression_else([l_value.stmt], all_expr.all_expr)}
-                         | {block} block                                          {->[block.stmt]}
-                         | {funcall} func_call semicolon_id                       {->[func_call.stmt]}
-                         | {if_else} if_else_stmt                                   {->[if_else_stmt.stmt]}
-                         | {while} while cond do_id stmt_with_else                   {->New stmt.while_else(cond.cond, [stmt_with_else.stmt])}       //while?
-                         | {return_with_expr} return parentheses_expr semicolon_id   {->parentheses_expr.all_expr} //return?
-                         | {return_expr} return all_expr semicolon_id               {->all_expr.all_expr}  //return?
-                         | {return} return semicolon                          {-> []};
+    stmt_with_else{->stmt*} = {semicolon} semicolon {->[]}
+                     | {expression} l_value assign_id all_expr semicolon_id  {->[New stmt.expression_else([l_value.stmt], all_expr.all_expr)]}
+                     | {block} block                                          {->[block.stmt]}
+                     | {funcall} func_call semicolon_id                       {->[func_call.stmt]}
+                     | {if_else} if_else_stmt                                   {->[if_else_stmt.stmt]}
+                     | {while} while cond do_id stmt_with_else                   {->[New stmt.while_else(cond.cond, [stmt_with_else.stmt])]}       //while?
+                     | {return_with_expr} return parentheses_expr semicolon_id   {->[New stmt.return_with2(parentheses_expr.all_expr)]}
+                     | {return_expr} return all_expr semicolon_id               {->[New stmt.return_expr2(all_expr.all_expr)]}
+                     | {return} return semicolon                          {->[]};
 
-        if_else_stmt{->stmt*} = if cond then_id [then_stmt]:stmt_with_else else_id [else_stmt]:stmt_with_else   {->New  stmt.with_else2(cond,New stmt_with_else2([then_stmt.stmt],[else_stmt.stmt]))};
+    if_else_stmt{->stmt} = if cond then_id [then_stmt]:stmt_with_else else_id [else_stmt]:stmt_with_else   {->New  stmt.with_else2(cond,New stmt_with_else2([then_stmt.stmt],[else_stmt.stmt]))};
 
-        semicolon_id = semicolon;
-        do_id = do;
-        then_id = then;
-        else_id = else;
+    semicolon_id = semicolon;
+    do_id = do;
+    then_id = then;
+    else_id = else;
 
-        assign_id = assign;
+    assign_id = assign;
 
-        block{->stmt*}  = {block} curly_l_br stmt* curly_r_br     {->[stmt.stmt]};
-
-
-        func_call{->stmt} = {with_par} var_name l_par parameters r_par    {->New stmt.func_call_with(var_name,parameters.stmt)}
-                    | {without_par} var_name l_par r_par   {->New stmt.func_call_without(var_name)}  ;
-
-        parameters{->stmt} = {parameters} all_expr parameter* {->New stmt.parameters(all_expr.all_expr,[parameter.stmt])};
-        parameter{->stmt} = {parameter} comma all_expr    {->all_expr.all_expr}  ;
-
-        l_value{->stmt*} = {var} var_name                {->New stmt.var(var_name)}
-                  | {constant_string} constant_string      {->New stmt.string(constant_string)}
-                  | {l_value} l_value lbr_id all_expr rbr_id  {->New stmt.l_value([l_value.stmt],all_expr.all_expr)} ;
-
-        lbr_id = l_br;
-        rbr_id = r_br;
+    block{->stmt*}  = {block} curly_l_br stmt* curly_r_br     {->[stmt.stmt]};
 
 
+    func_call{->stmt} = {with_par} var_name l_par parameters r_par    {->New stmt.func_call_with(var_name,parameters.all_expr)}
+                | {without_par} var_name l_par r_par   {->New stmt.func_call_without(var_name)}  ;
 
+    parameters{->all_expr} = {parameters} all_expr parameter* {->New all_expr.parameters(all_expr.all_expr,[parameter.all_expr])};
+    parameter{->all_expr} = {parameter} comma all_expr    {->all_expr.all_expr}  ;
 
-        all_expr = {exprcalc} expr_calc        {->expr_calc.all_expr}
-                   | {gen} general_expr        {->general_expr.all_expr}    ;
+    l_value{->stmt} = {var} var_name                {->New stmt.var(var_name)}
+              | {constant_string} constant_string      {->New stmt.string(constant_string)}
+              | {l_value} l_value lbr_id all_expr rbr_id  {->New stmt.l_value([l_value.stmt],all_expr.all_expr)} ;
 
-
-        general_expr{->all_expr} =  {parexpr} parentheses_expr       {->parentheses_expr.all_expr}    ;
-
-        parentheses_expr{->all_expr} =  {parexpr} l_par general_expr r_par  {-> general_expr.all_expr}     ;
-
-
-        expr_calc{->all_expr} = {term} term                        {->term.all_expr}
-                    | {add_sub} expr_calc plus_minus term    {->New all_expr.add_sub(New add_sub_expr(expr_calc.all_expr,plus_minus),term.all_expr)} ;
-
-        term{->all_expr} = {factor} factor                    {->factor.all_expr}
-               | {rest_signs} term rest_signs factor  {->New all_expr.rest_signs(New rest_signs_expr(term.all_expr,rest_signs),factor.all_expr)}  ;
+    lbr_id = l_br;
+    rbr_id = r_br;
 
 
 
-        factor{->all_expr} = {with_plmin} plus_minus2 factor      {->New all_expr.with_plmin(plus_minus2,factor.all_expr)}
-                | {letter} constant_character          {->New all_expr.letter(constant_character)}
-                | {l_value} l_value                     {->[l_value.stmt]}
-                | {expr_calc} l_par expr_calc r_par      {->expr_calc.all_expr}
-                | {fun} func_call                         {->func_call.stmt}
-                | {constant} constant                    {->New all_expr.constant(constant)} ;
+
+    all_expr = {exprcalc} expr_calc        {->expr_calc.all_expr}
+               | {gen} general_expr        {->general_expr.all_expr}    ;
+
+
+    general_expr{->all_expr} =  {parexpr} parentheses_expr       {->parentheses_expr.all_expr}    ;
+
+    parentheses_expr{->all_expr} =  {parexpr} l_par general_expr r_par  {-> general_expr.all_expr}     ;
+
+
+    expr_calc{->all_expr} = {term} term                        {->term.all_expr}
+                | {add_sub} expr_calc plus_minus term    {->New all_expr.add_sub(New add_sub_expr(expr_calc.all_expr,plus_minus),term.all_expr)} ;
+
+    term{->all_expr} = {factor} factor                    {->factor.all_expr}
+           | {rest_signs} term rest_signs factor  {->New all_expr.rest_signs(New rest_signs_expr(term.all_expr,rest_signs),factor.all_expr)}  ;
 
 
 
-        plus_minus = {plus} plus {-> New plus_minus.plus(plus)}
-                    | {minus} minus {-> New plus_minus.minus(minus)};
-        plus_minus2 = {plus} plus {-> New plus_minus2.plus(plus)}
-                     | {minus} minus {-> New plus_minus2.minus(minus)};
-
-        rest_signs = {mult} mult {-> New rest_signs.mult(mult)}
-                    | {div} div {-> New rest_signs.div(div)}
-                    | {div1} div_space  {-> New rest_signs.div1(div_space)}
-                    | {mod} mod_space  {-> New rest_signs.mod(mod_space)};
-
-
-        cond =  {cond_exp} cond_expr  {->cond_expr.cond}   ;
+    factor{->all_expr} = {with_plmin} plus_minus2 factor      {->New all_expr.with_plmin(plus_minus2,factor.all_expr)}
+            | {letter} constant_character          {->New all_expr.letter(constant_character)}
+            | {l_value} l_value                     {->New all_expr.l_value(l_value.stmt)}
+            | {expr_calc} l_par expr_calc r_par      {->expr_calc.all_expr}
+            | {fun} func_call                         {->New all_expr.func(func_call.stmt)}
+            | {constant} constant                    {->New all_expr.constant(constant)} ;
 
 
 
-        ass_signs = {equal} equal   {-> New ass_signs.equal(equal)}
-                    | {ne} not_equal    {-> New ass_signs.ne(not_equal)}
-                    | {small} smaller   {-> New ass_signs.small(smaller)}
-                    | {great} greater   {-> New ass_signs.great(greater)}
-                    | {smalle} smaller_eq   {-> New ass_signs.smalle(smaller_eq)}
-                    | {greate} greater_eq  {-> New ass_signs.greate(greater_eq)};
+    plus_minus = {plus} plus {-> New plus_minus.plus(plus)}
+                | {minus} minus {-> New plus_minus.minus(minus)};
+    plus_minus2 = {plus} plus {-> New plus_minus2.plus(plus)}
+                 | {minus} minus {-> New plus_minus2.minus(minus)};
 
-        cond_expr{->cond} = {term_cond2} term_cond2  {->term_cond2.cond}
-                    | {or} cond_expr logical_or term_cond2  {->New cond.or(cond_expr.cond,term_cond2.cond)};
-
-        term_cond2{->cond} = {term_cond1} term_cond1 {->term_cond1.cond}
-                     | {and} term_cond2 logical_and term_cond1 {->New cond.and(term_cond2.cond,term_cond1.cond)};
-
-        term_cond1{->cond} = {factor_c} factor_cond {->factor_cond.cond}
-                    | {not} logical_not* factor_cond    {->New cond.not([logical_not],factor_cond.cond)} ;
-
-        logical_and = and;
-        logical_or = or;
-        logical_not = not {->New logical_not(not)};
+    rest_signs = {mult} mult {-> New rest_signs.mult(mult)}
+                | {div} div {-> New rest_signs.div(div)}
+                | {div1} div_space  {-> New rest_signs.div1(div_space)}
+                | {mod} mod_space  {-> New rest_signs.mod(mod_space)};
 
 
-        factor_cond{->cond} = {as_cond} ass_cond      {->ass_cond.cond}
-                       | {par} l_par cond r_par       {->cond.cond}   ;
+    cond =  {cond_exp} cond_expr  {->cond_expr.cond}   ;
 
-        ass_cond{->cond} =  {exprsigns} [before]:all_expr ass_signs [after]:all_expr  {->New cond.exprsigns(New ass_signs_cond(before.all_expr,ass_signs),after.all_expr)}  ;
+
+
+    ass_signs = {equal} equal   {-> New ass_signs.equal(equal)}
+                | {ne} not_equal    {-> New ass_signs.ne(not_equal)}
+                | {small} smaller   {-> New ass_signs.small(smaller)}
+                | {great} greater   {-> New ass_signs.great(greater)}
+                | {smalle} smaller_eq   {-> New ass_signs.smalle(smaller_eq)}
+                | {greate} greater_eq  {-> New ass_signs.greate(greater_eq)};
+
+    cond_expr{->cond} = {term_cond2} term_cond2  {->term_cond2.cond}
+                | {or} cond_expr logical_or term_cond2  {->New cond.or(cond_expr.cond,term_cond2.cond)};
+
+    term_cond2{->cond} = {term_cond1} term_cond1 {->term_cond1.cond}
+                 | {and} term_cond2 logical_and term_cond1 {->New cond.and(term_cond2.cond,term_cond1.cond)};
+
+    term_cond1{->cond} = {factor_c} factor_cond {->factor_cond.cond}
+                | {not} logical_not* factor_cond    {->New cond.not([logical_not],factor_cond.cond)} ;
+
+    logical_and = and;
+    logical_or = or;
+    logical_not = not {->New logical_not(not)};
+
+
+    factor_cond{->cond} = {as_cond} ass_cond      {->ass_cond.cond}
+                   | {par} l_par cond r_par       {->cond.cond}   ;
+
+    ass_cond{->cond} =  {exprsigns} [before]:all_expr ass_signs [after]:all_expr  {->New cond.exprsigns(New ass_signs_cond(before.all_expr,ass_signs),after.all_expr)}  ;
 
 
 Abstract Syntax Tree
 
     program = func_def;
 
-    func_def = {all} [l]: head_help [r]: stmt*                          //done
-               | {header} [l]:head [r]:func_def                            //done
+    func_def = {all} [l]: func_definition [r]: stmt*                          //done
+               | {header_with} [l]:head [r]:func_def                            //done
+               | {header} [l]:var_name [r]:func_def
                | {fpar_def} [l]:fpar [r]:func_def                          //done
+               | {fpar_def_no_ref} [l]:no_ref [r]:func_def
                | {header_big} [l]:func_def [r]:func_def*
                | {int} int                                                 //done
                | {char} char                                               //done
+               | {type} [l]:func_def [r]:func_def*
                | {constant} constant                                       //done
                | {nothing} nothing                                         //done
                | {array} array                                             //done
+               | {array2} array
+               | {fpar_type} [l]:func_def [r]:func_def
                | {var_def} [l]: var1 [r]: func_def                         //done
-               | {var_help} var_name ;                                      //done
+               | {var_help} var_name                                     //done
+               | {fpar_type_helper} constant
+               | {with_brs} func_def*
+               | {without_brs} func_def*;
 
 
-    head_help = {all} [l]:func_def [r]:func_def*;
-    head = [l]:fun [r]:var_name;                                            //done
-    fpar = [l]:ref [r]:var_name;                                            //done
-    var1 = [l]:var [r]:var_name;                                            //done
+    func_definition = [l]:func_def [r]:func_def*;
+    head = [l]:var_name [r]:func_def;                                            //done
+    fpar = [l]:var_name [r]:func_def*;                                            //done
+    no_ref = [l]:var_name [r]:func_def*;
+    var1 = [l]:var_name [r]:func_def*;                                            //done
 
 
 
@@ -351,23 +360,32 @@ Abstract Syntax Tree
               | {expression_else} [l]:stmt*  [r]:all_expr
               | {while_else} [l]:cond  [r]:stmt*
               | {with_else2}   [l] :cond  [r]:stmt_with_else2
-              | {func_call_with} [l]:var_name [r]: stmt
+              | {func_call_with} [l]:var_name [r]: all_expr
               | {func_call_without} var_name
-              | {parameters} [l]: all_expr [r]:stmt*
               | {var} var_name
               | {string} constant_string
-              | {l_value}[l]: stmt* [r]:all_expr;
+              | {l_value}[l]: stmt* [r]:all_expr
+              | {return_with} all_expr
+              | {return_expr} all_expr
+              | {return} stmt*
+              | {return_with2} all_expr
+              | {return_expr2} all_expr
+              | {return2} stmt*;
+
 
 
     stmt_with_else =  [l]: stmt* [r]:stmt*;
     stmt_with_else2 = [l]: stmt* [r]:stmt*;
 
 
-    all_expr =  | {add_sub} [l]:add_sub_expr [r]:all_expr
+    all_expr =   {add_sub} [l]:add_sub_expr [r]:all_expr
                  | {rest_signs} [l]:rest_signs_expr [r]:all_expr
                  | {with_plmin} [l]:plus_minus2 [r]:all_expr
                  | {letter} constant_character
-                 | {constant} constant;
+                 | {constant} constant
+                 | {parameters} [l]: all_expr [r]:all_expr*
+                 | {l_value} stmt
+                 | {func} stmt;
 
 
     rest_signs_expr = [l]:all_expr [r]:rest_signs;
@@ -405,4 +423,3 @@ Abstract Syntax Tree
 
      plus_minus2 = {plus} plus
                   | {minus} minus;
-
