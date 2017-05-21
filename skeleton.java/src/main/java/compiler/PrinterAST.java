@@ -87,7 +87,7 @@ public class PrinterAST extends DepthFirstAdapter{
     {
         addIndentationLevel();
         printIndentation();
-        System.out.println("(FPar Definition");
+        System.out.println("(FPar Definition ");
     }
 
     @Override
@@ -103,7 +103,7 @@ public class PrinterAST extends DepthFirstAdapter{
     {
         addIndentationLevel();
         printIndentation();
-        System.out.println("(FPar Definition");
+        System.out.println("(FPar Definition ");
     }
 
     @Override
@@ -120,7 +120,7 @@ public class PrinterAST extends DepthFirstAdapter{
     {
         addIndentationLevel();
         printIndentation();
-        System.out.println("(FPar Definition" + node.getL().toString());
+        System.out.println("(FPar Definition " + node.getL().toString());
     }
 
     @Override
@@ -368,7 +368,7 @@ public class PrinterAST extends DepthFirstAdapter{
     {
         addIndentationLevel();
         printIndentation();
-        System.out.print("(Function Name: " + node.getL().toString() + node.getR().toString());
+        System.out.print("(Function Name : " + node.getL().toString() + node.getR().toString());
     }
 
     @Override
@@ -424,6 +424,7 @@ public class PrinterAST extends DepthFirstAdapter{
         addIndentationLevel();
         printIndentation();
         System.out.print("(Variable: " + node.getL().toString() + node.getR().toString());
+
     }
 
     @Override
@@ -1225,7 +1226,7 @@ public class PrinterAST extends DepthFirstAdapter{
     {
         addIndentationLevel();
         printIndentation();
-        System.out.print("(Plus: " + node.getMinus().toString());
+        System.out.print("(Minus: " + node.getMinus().toString());
     }
 
     @Override
@@ -1259,7 +1260,7 @@ public class PrinterAST extends DepthFirstAdapter{
     {
         addIndentationLevel();
         printIndentation();
-        System.out.print("(Plus: " + node.getMinus().toString());
+        System.out.print("(Minus: " + node.getMinus().toString());
     }
 
     @Override
