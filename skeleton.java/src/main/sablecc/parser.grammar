@@ -190,7 +190,7 @@ Productions
     var_def_helper{->func_def} = comma var_name{->New func_def.var_help(var_name)};
     colon_id = colon;
 
-    func_decl{->func_def} = header semicolon{->header.func_def};
+    func_decl{->func_def} = header semicolon{->New func_def.func_decl(header.func_def)};
 
     //block{->func_def} = {block} curly_l_br curly_r_br{->New func_def.block(curly_l_br,curly_r_br)};
 
@@ -342,7 +342,8 @@ Abstract Syntax Tree
                | {var_help} var_name                                     //done
                | {fpar_type_helper} constant
                | {with_brs} func_def*
-               | {without_brs} func_def*;
+               | {without_brs} func_def*
+               | {func_decl} func_def;
 
 
     func_definition = [l]:func_def [r]:func_def*;

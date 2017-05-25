@@ -67,22 +67,11 @@ public class PrinterAST extends DepthFirstAdapter{
         System.out.println("(Header:");
         System.out.println("aleaafaaaataaaaaaaaaaaaaaaaaaaaaa " +node.getL().toString() + " right "+ node.getR().toString());
 
-        ScopeObject obj =   new ScopeObject(node.getL().toString(),node.getR().toString()) ;
 
-       /* if(table.getPosition()==-1){
-            table.enter(obj);
-        }
-        else{
-            if(table.lookup(obj)){
-                System.out.println("TRUE");
-                table.enter(obj);
 
-            }
-            else{
-                System.out.println("False");
-                table.insert(obj);
-            }
-        }*/
+        List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
+        System.out.println("LISTA"+myList);
+        ScopeObject obj =   new ScopeObject(myList.get(0).trim(),node.getR().toString().trim(),"func") ;
         table.enter(obj);
 
 
@@ -110,24 +99,13 @@ public class PrinterAST extends DepthFirstAdapter{
         addIndentationLevel();
         printIndentation();
         System.out.println("(Header: " + node.getL().toString());
-        System.out.println("aleaafaaaataaaaaaaaaaaaaaaaaaaaaa " +node.getL().toString() + " right "+ node.getR().toString());
+        //System.out.println("aleaafaaaataaaaaaaaaaaaaaaaaaaaaa " +node.getL().toString() + " right "+ node.getR().toString());
 
-        ScopeObject obj =   new ScopeObject(node.getL().toString(),node.getR().toString()) ;
 
-       /* if(table.getPosition()==-1){
-            table.enter(obj);
-        }
-        else{
-            if(table.lookup(obj)){
-                System.out.println("TRUE");
-                table.enter(obj);
 
-            }
-            else{
-                System.out.println("False");
-                table.insert(obj);
-            }
-        }*/
+        List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
+        System.out.println("LISTA"+myList);
+        ScopeObject obj =   new ScopeObject(myList.get(0).trim(),node.getR().toString().trim(),"func") ;
         table.enter(obj);
 
 
@@ -168,13 +146,16 @@ public class PrinterAST extends DepthFirstAdapter{
         printIndentation();
         System.out.println("(FPar Definition ");
         System.out.println(" fsf?");
-        ScopeObject obj =   new ScopeObject(node.getL().toString(),node.getR().toString()) ;
-        System.out.println(" asas?");
-        table.insert(obj);
-        System.out.println(" whaaaaa?");
 
-        Set list = table.getMap().entrySet();
-        System.out.println("MAPPINGSsdsd" + list);
+        String type = node.getR().toString();
+        List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
+        System.out.print("MGKAS "+ myList);
+        for(int i=0;i<myList.size();i++){
+            ScopeObject obj =   new ScopeObject(myList.get(i).trim(),type.trim(),"par") ;
+            table.insert(obj);
+            Set list = table.getMap().entrySet();
+            System.out.println("MAPPINGSsdsd" + list);
+        }
 
 
     }
@@ -194,7 +175,7 @@ public class PrinterAST extends DepthFirstAdapter{
         printIndentation();
         System.out.println("(FPar Definition ");
         System.out.println(" fsf?");
-        ScopeObject obj =   new ScopeObject(node.getL().toString(),node.getR().toString()) ;
+        ScopeObject obj =   new ScopeObject(node.getL().toString().trim(),node.getR().toString().trim(),"par") ;
         System.out.println(" asas?");
         table.insert(obj);
         System.out.println(" whaaaaa?");
@@ -362,15 +343,20 @@ public class PrinterAST extends DepthFirstAdapter{
     {
         addIndentationLevel();
         printIndentation();
-        System.out.println("(Variable Definition " + node.getL().toString() + node.getR().toString());
+        System.out.println("(Variable Definition fefe " + node.getL().toString() + " right "+node.getR().toString());
 
-        ScopeObject obj =   new ScopeObject(node.getL().toString(),node.getR().toString()) ;
-        System.out.println(" asas?");
-        table.insert(obj);
-        System.out.println(" whaaaaa?");
 
-        Set list = table.getMap().entrySet();
-        System.out.println("MAPPINGSsdsd" + list);
+
+        String type = node.getR().toString();
+        List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
+        System.out.print("MGKAS "+ myList);
+        for(int i=0;i<myList.size();i++){
+            ScopeObject obj =   new ScopeObject(myList.get(i).trim(),type.trim(),"var") ;
+            table.insert(obj);
+            Set list = table.getMap().entrySet();
+            System.out.println("MAPPINGSsdsd" + list);
+        }
+
 
     }
 
@@ -388,13 +374,6 @@ public class PrinterAST extends DepthFirstAdapter{
         addIndentationLevel();
         printIndentation();
         System.out.print("(Variable Name: " + node.getVarName().toString());
-        /*ScopeObject obj =   new ScopeObject(node.getL().toString(),node.getR().toString()) ;
-        System.out.println(" asas?");
-        table.insert(obj);
-        System.out.println(" whaaaaa?");
-
-        Set list = table.getMap().entrySet();
-        System.out.println("MAPPINGSsdsd" + list);*/
     }
 
     @Override
@@ -453,6 +432,25 @@ public class PrinterAST extends DepthFirstAdapter{
         System.out.println(")" );
         removeIndentationLevel();
     }
+
+    @Override
+    public void inAFuncDeclFuncDef(AFuncDeclFuncDef node)
+    {
+        addIndentationLevel();
+        printIndentation();
+
+        System.out.println("FUNCTION DECLARATION" + node.getFuncDef().toString() );
+    }
+
+    @Override
+    public void outAFuncDeclFuncDef(AFuncDeclFuncDef node)
+    {
+        printIndentation();
+        System.out.println("ENDDDDDDDDDDDDDD)" );
+        removeIndentationLevel();
+    }
+
+
 
     //FUNC_DEFINITION
 
@@ -571,7 +569,8 @@ public class PrinterAST extends DepthFirstAdapter{
     {
         addIndentationLevel();
         printIndentation();
-        System.out.print("(While stmt: " + node.getL().toString() + node.getR().toString());
+        System.out.print("(While stmt: " + "left " + node.getL().toString() + "right "+node.getR().toString() + "  end");
+
     }
 
     @Override

@@ -6,10 +6,12 @@ package compiler;
 class ScopeObject {
     private String name;
     private String type;
+    private String genre;
 
-    public ScopeObject(String name, String type){
+    public ScopeObject(String name, String type,String genre){
         this.name = name;
         this.type = type;
+        this.genre = genre;
 
 
         //System.out.println("CONSTRUCTPOR: " + this.name + this.type);
@@ -23,8 +25,25 @@ class ScopeObject {
         return type;
     }
 
-    public boolean sameObject(String name, String type){
-        if (this.getName().equals(name) && this.getType().equals(type))
+    public String getGenre() {
+        return genre;
+    }
+
+    public boolean sameObject(String name){
+
+        System.out.println("insidde samme");
+
+        //System.out.println("nameobj:" + this.getName()+ "!");
+        //System.out.println("nammeeeee: " + name.trim()+ "!");
+        if (this.getName().equals(name) ) {
+            System.out.println("insidde if");
+            return true;
+        }
+        return false;
+    }
+
+    public boolean sameObjectFunc(String name, String genre){
+        if (this.getName().equals(name) && genre.equals("func"))
             return true;
         return false;
     }
