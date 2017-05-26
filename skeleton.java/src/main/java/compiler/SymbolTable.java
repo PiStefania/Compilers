@@ -11,27 +11,36 @@ class SymbolTable {
 
     private Map<Integer,Integer> map;
     private Stack<ScopeObject> mystack;
-    private int position;
+        private int position;
 
     public SymbolTable(){   //constructor
-        map = new HashMap<Integer,Integer>();
-        mystack = new Stack<ScopeObject>();
+            map = new HashMap<Integer,Integer>();
+            mystack = new Stack<ScopeObject>();
         position = -1;
     }
 
-
+    public void print(){
+        System.out.println("printing stack");
+        for (int i=0; i<this.mystack.size();i++){
+            System.out.println(this.mystack.get(i).getName());
+        }
+        System.out.println("end of printing stack");
+    }
 
 
     public void enter(ScopeObject obj){
 
         try{
-            if(lookupFunc(obj)){
-                //System.err.println("FOUND SAME VARIABLE");
+            if(lookupFunc(obj)) {
+                System.err.println("asdsadsadasda");
                 throw new MyException("FOUND SAME FUNCTION");
-            }else{
+            } else if (lookupDecl(obj)) {
+                System.err.println("FOUND DIFFERENT TYPE");
+                throw new MyException("FOUND DIFFERENT TYPE");
+            } else {
                 position++;
                 System.out.println("ENTER");
-                map.put(position,mystack.size());
+                map.put(position, mystack.size());
                 mystack.push(obj);
             }
         }catch (MyException e){
@@ -47,20 +56,25 @@ class SymbolTable {
 
         System.out.println("INSERTTTTTT: "+position);
 
+        if (obj.getGenre().equals("par")) {
+            obj = this.findDecl(obj);
+        }
+
         try{
             if(lookupVar(obj)){
                 //System.err.println("FOUND SAME VARIABLE");
                 throw new MyException("FOUND SAME VARIABLE");
-            }else{
-                map.put(position,mystack.size());
-                mystack.push(obj);
             }
-
-            if(lookupVarAndFunc(obj)){
+            else if (lookupVarAndFunc(obj)){
                 //System.err.println("FOUND SAME VARIABLE AND FUNC");
                 throw new MyException("FOUND SAME VARIABLE AND FUNC");
-            }else{
+            }
+            else if(lookupPar(obj)){
+                throw new MyException("FOUND SAME PARAMETER AND FUNC");
+            }
+            else{
                 map.put(position,mystack.size());
+
                 mystack.push(obj);
             }
         }catch (MyException e){
@@ -85,12 +99,12 @@ class SymbolTable {
             value2  = map.get(position-1);
             for(int i=value;i>value2;i--){
                 ScopeObject obj2 = (ScopeObject) mystack.get(i);
-                System.out.println("NAME2 " + obj2.getName());
-                System.out.println("NAME " + obj.getName());
-                System.out.println("fsfs");
-                System.out.println(i);
-                if (obj.sameObject(obj2.getName())){
-                    System.out.println("ffffffffffffffffff");
+                //System.out.println("NAME2 " + obj2.getName());
+                //System.out.println("NAME " + obj.getName());
+                //System.out.println("fsfs");
+                //System.out.println(i);
+                if (obj.sameObject(obj2.getName(),obj2.getGenre())){
+                    //System.out.println("ffffffffffffffffff");
                     return true;
                 }
 
@@ -100,12 +114,12 @@ class SymbolTable {
         else{
             for(int i=value;i>=0;i--){
                 ScopeObject obj2 = (ScopeObject) mystack.get(i);
-                System.out.println("NAME2 " + obj2.getName());
+                /*System.out.println("NAME2 " + obj2.getName());
                 System.out.println("NAME " + obj.getName());
                 System.out.println("fsfs");
-                System.out.println(i);
-                if (obj.sameObject(obj2.getName())){
-                    System.out.println("ffffffffffffffffff");
+                System.out.println(i);*/
+                if (obj.sameObject(obj2.getName(),obj2.getGenre())){
+                    //System.out.println("ffffffffffffffffff");
                     return true;
                 }
             }
@@ -113,15 +127,68 @@ class SymbolTable {
         }
     }
 
+
+    public boolean lookupPar(ScopeObject obj){
+        System.out.println("PARAAAAAAAAAAAAAAAA");
+        if(!obj.getGenre().equals("par_decl"))
+        {
+            System.out.println("PTOTO IF");
+            return false;
+        }
+
+        System.out.println("ONJ: "+ obj.getName()+"!");
+        int i = mystack.size()-1;
+        while (i>=0) {
+            System.out.println(i);
+            ScopeObject obj2 = (ScopeObject) mystack.get(i);
+            System.out.println(obj2.getGenre());
+            if (!obj2.getGenre().equals("decl") && !obj2.getGenre().equals("par_decl")){
+                System.out.println("TEUTERO");
+                break;
+            }
+            if(obj.sameObjectPar(obj2.getName(),obj2.getGenre()))
+                return true;
+            i--;
+        }
+        System.out.println("TRITO");
+        return false;
+
+    }
+
+    public boolean lookupDecl(ScopeObject obj){
+        System.out.println("PARAAAAAAAAAAAAAAAA");
+
+
+        System.out.println("ONJ: "+ obj.getName()+"!");
+        int i = mystack.size()-1;
+        while (i>=0) {
+            System.out.println(i);
+            ScopeObject obj2 = (ScopeObject) mystack.get(i);
+            System.out.println(obj2.getGenre());
+            if(obj.getName().equals(obj2.getName()) && obj2.getGenre().equals("decl")) {
+
+                if(!obj.getType().equals(obj2.getType()))
+                    return true;
+            }
+            i--;
+        }
+        System.out.println("TRITO");
+        return false;
+
+    }
+
+
+
+
     public boolean lookupFunc(ScopeObject obj){
 
         System.out.println("ONJ: "+ obj.getName()+"!");
 
         for(int i = mystack.size()-1;i>=0;i--){
-            System.out.println("ITEM: "+ i);
+            //System.out.println("ITEM: "+ i);
             ScopeObject obj2 = (ScopeObject) mystack.get(i);
 
-            if (obj.sameObject(obj2.getName()) ){
+            if (obj.sameObject(obj2.getName(),obj2.getGenre()) ){
                 return true;
             }
         }
@@ -134,7 +201,7 @@ class SymbolTable {
         System.out.println("ONJ: "+ obj.getName()+"!");
 
         for(int i = mystack.size()-1;i>=0;i--){
-            System.out.println("ITEM: "+ i);
+           // System.out.println("ITEM: "+ i);
             ScopeObject obj2 = (ScopeObject) mystack.get(i);
 
             if (obj.sameObjectFunc(obj2.getName(),obj2.getGenre()) ){
@@ -144,6 +211,25 @@ class SymbolTable {
         return false;
 
     }
+
+    public ScopeObject findDecl(ScopeObject obj){
+
+        System.out.println("ONJ: "+ obj.getName()+"!");
+
+        // System.out.println("ITEM: "+ i);
+        ScopeObject obj2 = (ScopeObject) mystack.get(mystack.size()-1);
+        if(obj2.getGenre().equals("decl")){
+            obj.setGenre("par_decl");
+
+        }
+        else if(obj2.getGenre().equals("par_decl")){
+            obj.setGenre("par_decl");
+        }
+
+        return obj;
+
+    }
+
 
 
     public void exit(){

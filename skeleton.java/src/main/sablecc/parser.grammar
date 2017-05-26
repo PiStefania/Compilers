@@ -150,13 +150,16 @@ Productions
 
     program = {func_def} func_def{->New program(func_def)};      /* func_def */
 
-    func_def = {func_def} header local_def* block{->New func_def.all(New func_definition(header.func_def, [local_def.func_def]),[block.stmt])};     /*header local_def* block*/
+    func_def = {func_def} header local_def* block{->New func_def.all(header.func_def,New func_definition( [local_def.func_def],[block.stmt]))};     /*header local_def* block*/
 
     header{->func_def} = {with_header_helper_bigger} fun var_name l_par header_helper_bigger header_helper2 ret_type{->New func_def.header_with(New head(var_name, header_helper_bigger.func_def),ret_type.func_def)}
                 | {without_header_helper_bigger} fun var_name l_par header_helper2 ret_type {->New func_def.header(var_name,ret_type.func_def)};    /* fun var_name ret_type*/
 
-    header_helper{->func_def} = semicolon fpar_def{->fpar_def.func_def};
+    header_helper{->func_def} =  semicolon fpar_def{->fpar_def.func_def};
+
     header_helper_bigger{->func_def} = fpar_def header_helper*{->New func_def.header_big(fpar_def.func_def,[header_helper.func_def])};
+
+
     header_helper2 = r_par colon;
 
     fpar_def{->func_def} = {with_ref} ref var_name var_def_helper* colon_id fpar_type{->New func_def.fpar_def(New fpar(var_name, [var_def_helper.func_def]),fpar_type.func_def)}        /*ref var_name fpar_type */
@@ -190,7 +193,9 @@ Productions
     var_def_helper{->func_def} = comma var_name{->New func_def.var_help(var_name)};
     colon_id = colon;
 
+
     func_decl{->func_def} = header semicolon{->New func_def.func_decl(header.func_def)};
+
 
     //block{->func_def} = {block} curly_l_br curly_r_br{->New func_def.block(curly_l_br,curly_r_br)};
 
@@ -324,7 +329,7 @@ Abstract Syntax Tree
 
     program = func_def;
 
-    func_def = {all} [l]: func_definition [r]: stmt*                          //done
+    func_def = {all} [l]: func_def [r]: func_definition                         //done
                | {header_with} [l]:head [r]:func_def                            //done
                | {header} [l]:var_name [r]:func_def
                | {fpar_def} [l]:fpar [r]:func_def                          //done
@@ -346,7 +351,9 @@ Abstract Syntax Tree
                | {func_decl} func_def;
 
 
-    func_definition = [l]:func_def [r]:func_def*;
+
+
+    func_definition = [l]:func_def* [r]:stmt*;
     head = [l]:var_name [r]:func_def;                                            //done
     fpar = [l]:var_name [r]:func_def*;                                            //done
     no_ref = [l]:var_name [r]:func_def*;

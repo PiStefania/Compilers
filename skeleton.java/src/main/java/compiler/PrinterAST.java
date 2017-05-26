@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.*;
 import compiler.SymbolTable;
 import compiler.ScopeObject;
+import sun.reflect.generics.scope.Scope;
 
 
 public class PrinterAST extends DepthFirstAdapter{
@@ -56,27 +57,46 @@ public class PrinterAST extends DepthFirstAdapter{
         addIndentationLevel();
         printIndentation();
         System.out.println("(Function Definition:");
+        System.out.println("whaataahaha " +node.getL().toString() + " right "+ node.getR().toString() +"!!!!!!!!!!!");
+
+
+
+        List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
+        System.out.println("LISTA"+myList);
+
+        List<String> keyWords = new ArrayList<String>();
+        keyWords.add("int");
+        keyWords.add("char");
+
+        List<String> listParam = new ArrayList<String>(myList);
+
+        listParam.remove(0);
+        listParam.remove(listParam.size()-1);
+
+        System.out.println("LISTA LISSTTTTTTTTTT"+listParam);
+
+
+        for(int i=0;i<listParam.size();i++){
+
+        }
+
+
+
+
+        ScopeObject obj =   new ScopeObject(myList.get(0).trim(),myList.get(myList.size()-1).trim(),"func",-1) ;
+
+        table.enter(obj);
+        Set list = table.getMap().entrySet();
+        System.out.println("MAPPINGS" + list + obj.getName());
+        table.print();
+
 
     }
 
     @Override
     public void inAHeaderWithFuncDef(AHeaderWithFuncDef node)
     {
-        addIndentationLevel();
-        printIndentation();
-        System.out.println("(Header:");
-        System.out.println("aleaafaaaataaaaaaaaaaaaaaaaaaaaaa " +node.getL().toString() + " right "+ node.getR().toString());
 
-
-
-        List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
-        System.out.println("LISTA"+myList);
-        ScopeObject obj =   new ScopeObject(myList.get(0).trim(),node.getR().toString().trim(),"func") ;
-        table.enter(obj);
-
-
-        Set list = table.getMap().entrySet();
-        System.out.println("MAPPINGS" + list);
     }
 
     @Override
@@ -96,21 +116,7 @@ public class PrinterAST extends DepthFirstAdapter{
     @Override
     public void inAHeaderFuncDef(AHeaderFuncDef node)
     {
-        addIndentationLevel();
-        printIndentation();
-        System.out.println("(Header: " + node.getL().toString());
-        //System.out.println("aleaafaaaataaaaaaaaaaaaaaaaaaaaaa " +node.getL().toString() + " right "+ node.getR().toString());
 
-
-
-        List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
-        System.out.println("LISTA"+myList);
-        ScopeObject obj =   new ScopeObject(myList.get(0).trim(),node.getR().toString().trim(),"func") ;
-        table.enter(obj);
-
-
-        Set list = table.getMap().entrySet();
-        System.out.println("MAPPINGS" + list);
     }
 
     @Override
@@ -126,6 +132,10 @@ public class PrinterAST extends DepthFirstAdapter{
         System.out.println("MAPPINGSOUTTTTTT" + list);*/
     }
 
+
+
+
+
     @Override
     public void outAAllFuncDef(AAllFuncDef node)
     {
@@ -139,23 +149,26 @@ public class PrinterAST extends DepthFirstAdapter{
 
     }
 
+
     @Override
     public void inAFparDefFuncDef(AFparDefFuncDef node)
     {
         addIndentationLevel();
         printIndentation();
-        System.out.println("(FPar Definition ");
+        System.out.println("(FPar DefinitionAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ");
         System.out.println(" fsf?");
 
         String type = node.getR().toString();
         List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
         System.out.print("MGKAS "+ myList);
         for(int i=0;i<myList.size();i++){
-            ScopeObject obj =   new ScopeObject(myList.get(i).trim(),type.trim(),"par") ;
+            ScopeObject obj =   new ScopeObject(myList.get(i).trim(),type.trim(),"par",-1) ;
             table.insert(obj);
             Set list = table.getMap().entrySet();
-            System.out.println("MAPPINGSsdsd" + list);
+            System.out.println("MAPPINGSsdsdfggf" + list+ obj.getName());
         }
+
+        table.print();
 
 
     }
@@ -173,16 +186,28 @@ public class PrinterAST extends DepthFirstAdapter{
     {
         addIndentationLevel();
         printIndentation();
-        System.out.println("(FPar Definition ");
-        System.out.println(" fsf?");
-        ScopeObject obj =   new ScopeObject(node.getL().toString().trim(),node.getR().toString().trim(),"par") ;
-        System.out.println(" asas?");
-        table.insert(obj);
-        System.out.println(" whaaaaa?");
+        System.out.println("(FPar DefinitionBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB ");
 
-        Set list = table.getMap().entrySet();
-        System.out.println("MAPPINGSsdsd" + list);
+        String type = node.getR().toString();
+        List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
+        System.out.print("MGKAS "+ myList);
+        for(int i=0;i<myList.size();i++){
+            ScopeObject obj =   new ScopeObject(myList.get(i).trim(),type.trim(),"par",-1 ) ;
+            table.insert(obj);
+            Set list = table.getMap().entrySet();
+            System.out.println("MAPPINGSsdsdfggf" + list+ obj.getName());
+        }
+
+        table.print();
+
+
+
+
     }
+
+
+
+
 
     @Override
     public void outAFparDefNoRefFuncDef(AFparDefNoRefFuncDef node)
@@ -343,20 +368,21 @@ public class PrinterAST extends DepthFirstAdapter{
     {
         addIndentationLevel();
         printIndentation();
-        System.out.println("(Variable Definition fefe " + node.getL().toString() + " right "+node.getR().toString());
+        //System.out.println("(Variable Definition fefe " + node.getL().toString() + " right "+node.getR().toString());
 
 
 
         String type = node.getR().toString();
         List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
-        System.out.print("MGKAS "+ myList);
+        //System.out.print("MGKAS "+ myList);
         for(int i=0;i<myList.size();i++){
-            ScopeObject obj =   new ScopeObject(myList.get(i).trim(),type.trim(),"var") ;
+            ScopeObject obj =   new ScopeObject(myList.get(i).trim(),type.trim(),"var",-1) ;
+            System.out.println("PRINTING "+ myList.get(i));
             table.insert(obj);
             Set list = table.getMap().entrySet();
-            System.out.println("MAPPINGSsdsd" + list);
+            System.out.println("MAPPINGSsdsd" + list+ obj.getName());
         }
-
+        table.print();
 
     }
 
@@ -439,14 +465,22 @@ public class PrinterAST extends DepthFirstAdapter{
         addIndentationLevel();
         printIndentation();
 
-        System.out.println("FUNCTION DECLARATION" + node.getFuncDef().toString() );
+        System.out.println("FUNCTION DECLARATIONaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" + node.getFuncDef().toString() );
+        List<String> myList = new ArrayList<String>(Arrays.asList(node.getFuncDef().toString().split(" ")));
+        System.out.println("LISTADECL"+myList);
+
+        ScopeObject obj = new ScopeObject(myList.get(0).toString().trim(),myList.get(myList.size()-1).toString().trim(),"decl",-1);
+        table.insert(obj);
+
+        Set list = table.getMap().entrySet();
+        System.out.println("MAPPINGSsdsd" + list+ obj.getName());
     }
 
     @Override
     public void outAFuncDeclFuncDef(AFuncDeclFuncDef node)
     {
         printIndentation();
-        System.out.println("ENDDDDDDDDDDDDDD)" );
+        System.out.println("ENDDDDDDDDDDDDDDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa)" );
         removeIndentationLevel();
     }
 
@@ -459,7 +493,7 @@ public class PrinterAST extends DepthFirstAdapter{
     {
         addIndentationLevel();
         printIndentation();
-        System.out.print("(Func definition:" );
+        System.out.print("(Func definition:NNNNNNNNNNNNNN"  + "left: " +node.getL().toString()+" right: "+node.getR().toString());
     }
 
     @Override
