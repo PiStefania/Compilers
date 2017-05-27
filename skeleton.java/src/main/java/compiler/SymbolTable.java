@@ -212,6 +212,106 @@ class SymbolTable {
 
     }
 
+
+
+    public boolean lookupVarAndType(ScopeObject obj){
+
+
+        System.out.println("lookupVarAndType");
+        int value = map.get(position);
+        int value2 = 0;
+        System.out.println("a");
+        if (position!=0){
+            value2  = map.get(position-1);
+            for(int i=value;i>value2;i--){
+                ScopeObject obj2 = (ScopeObject) mystack.get(i);
+
+                if (obj.getName().equals(obj2.getName())){
+                    if (!obj.getType().equals(obj2.getType())){
+                        System.out.println("error1");
+                        return true;
+                    }
+                    else return false;
+                }
+
+            }
+            System.out.println("error2");
+            return true;    //den to vrhke
+        }
+        else{
+            for(int i=value;i>=0;i--){
+                System.out.println(i);
+                ScopeObject obj2 = (ScopeObject) mystack.get(i);
+                System.out.println("obj "+obj.getName() + obj.getType());
+                System.out.println("obj2 "+obj2.getName() + obj2.getType());
+                if (obj.getName().trim().equals(obj2.getName().trim())){
+                    System.out.println("whaa");
+                    if (!obj.getType().equals(obj2.getType())){
+                        System.out.println("error3");
+                        return true;
+                    }
+                    else return false;
+                }
+            }
+            System.out.println("error4");
+            return true;  //den to vrhke
+        }
+    }
+
+
+
+
+
+    public String FindVariableType(String name){
+
+
+        System.out.println("FindVariableType");
+        int value = map.get(position);
+        int value2 = 0;
+        System.out.println("a");
+        if (position!=0){
+            value2  = map.get(position-1);
+            for(int i=value;i>value2;i--){
+                ScopeObject obj = (ScopeObject) mystack.get(i);
+
+                if (obj.getName().equals(name)){
+                    return obj.getType();
+                }
+
+            }
+            return null;    //den to vrhke
+        }
+        else{
+            for(int i=value;i>=0;i--){
+                ScopeObject obj = (ScopeObject) mystack.get(i);
+
+                if (obj.getName().equals(name)){
+                    return obj.getType();
+                }
+            }
+            return null;  //den to vrhke
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     public ScopeObject findDecl(ScopeObject obj){
 
         System.out.println("ONJ: "+ obj.getName()+"!");

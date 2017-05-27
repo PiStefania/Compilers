@@ -31,6 +31,16 @@ class ScopeObject {
         return genre;
     }
 
+
+
+
+
+
+
+
+
+
+
     public boolean sameObject(String name, String genre){
 
         System.out.println("insidde samme");

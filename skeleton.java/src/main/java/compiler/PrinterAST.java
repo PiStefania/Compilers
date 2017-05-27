@@ -70,15 +70,15 @@ public class PrinterAST extends DepthFirstAdapter{
 
         List<String> listParam = new ArrayList<String>(myList);
 
-        listParam.remove(0);
-        listParam.remove(listParam.size()-1);
+        //listParam.remove(0);
+        //listParam.remove(listParam.size()-1);
 
         System.out.println("LISTA LISSTTTTTTTTTT"+listParam);
 
 
-        for(int i=0;i<listParam.size();i++){
+       // for(int i=0;i<listParam.size();i++){
 
-        }
+        //}
 
 
 
@@ -146,6 +146,7 @@ public class PrinterAST extends DepthFirstAdapter{
 
         Set list = table.getMap().entrySet();
         System.out.println("MAPPINGSOUTTTTTT" + list);
+        System.out.println("aaaass" );
 
     }
 
@@ -587,14 +588,78 @@ public class PrinterAST extends DepthFirstAdapter{
     {
         addIndentationLevel();
         printIndentation();
-        System.out.print("(Stmt: " + node.getL().toString() + node.getR().toString());
+        System.out.print("(StmtSTMTSTMTSTMT: " + node.getL().toString() + " right " +node.getR().toString() +"!");
+        System.out.println(node.getR().getClass().getSimpleName());
+
+        String name=node.getL().toString().trim();
+        name = name.replace("[","");
+        System.out.println("nameEEEEEEE= "+name);
+        name = name.replace("]","");
+        name = name.trim();
+        String type;//="";
+        String str=node.getR().toString().trim();
+        System.out.print("(str:" + str +"!");
+        //checking for value
+        if (str.contains("\"")){
+            System.out.println("STRING");
+            //not sure about this one
+            int length=str.length()-1;
+            type = "char[" +length+"]";
+            System.out.println("type= "+ type);
+        }
+        else if (node.getR().getClass().getSimpleName().equals("ALetterAllExpr")) {
+            System.out.println("CHAR");
+            type= "char";
+
+        }
+        else if (node.getR().getClass().getSimpleName().equals("AConstantAllExpr")){
+            System.out.println("CONSTANT");
+            type= "int";
+        }
+        else {
+            System.out.println("VARIABLE");
+            //find variables type
+            type = table.FindVariableType(str);
+            if (type==null){
+                System.err.println("errork");
+            }
+            //find second variable type
+        }
+
+        System.out.println("YUYUY" +type);
+
+        //WHAT ABOUT X<-Y+1;
+        //WHAT ABOUT ARRAYS
+
+
+
+
+
+
+
+        System.out.println("named= "+name +type);
+        ScopeObject obj = new ScopeObject(name,type,"var",-1);
+        if (table.lookupVarAndType(obj)) {
+            //incorrect type
+            //throw error
+            System.err.println("error");
+
+        }
+        else {
+            //Correct Type
+            System.out.println("CORRECT");
+        }
+
+
+
+
     }
 
     @Override
     public void outAExpressionStmt(AExpressionStmt node)
     {
         printIndentation();
-        System.out.println(")");
+        System.out.println("StmtSTMTSTMTSTMT)");
         removeIndentationLevel();
     }
 
