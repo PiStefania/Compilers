@@ -11,7 +11,7 @@ class SymbolTable {
 
     private Map<Integer,Integer> map;
     private Stack<ScopeObject> mystack;
-        private int position;
+    private int position;
 
     public SymbolTable(){   //constructor
             map = new HashMap<Integer,Integer>();
@@ -229,7 +229,7 @@ class SymbolTable {
                 if (obj.getName().equals(obj2.getName())){
                     if (!obj.getType().equals(obj2.getType())){
                         System.out.println("error1");
-                        return true;
+                        return true;            //diaforetikoi tupoi
                     }
                     else return false;
                 }
@@ -266,6 +266,7 @@ class SymbolTable {
 
 
         System.out.println("FindVariableType");
+        System.out.println(name);
         int value = map.get(position);
         int value2 = 0;
         System.out.println("a");
@@ -275,6 +276,7 @@ class SymbolTable {
                 ScopeObject obj = (ScopeObject) mystack.get(i);
 
                 if (obj.getName().equals(name)){
+                    System.out.println("found");
                     return obj.getType();
                 }
 
@@ -286,6 +288,7 @@ class SymbolTable {
                 ScopeObject obj = (ScopeObject) mystack.get(i);
 
                 if (obj.getName().equals(name)){
+                    System.out.println("found");
                     return obj.getType();
                 }
             }

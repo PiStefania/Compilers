@@ -354,10 +354,10 @@ Abstract Syntax Tree
 
 
     func_definition = [l]:func_def* [r]:stmt*;
-    head = [l]:var_name [r]:func_def;                                            //done
-    fpar = [l]:var_name [r]:func_def*;                                            //done
+    head = [l]:var_name [r]:func_def;
+    fpar = [l]:var_name [r]:func_def*;
     no_ref = [l]:var_name [r]:func_def*;
-    var1 = [l]:var_name [r]:func_def*;                                            //done
+    var1 = [l]:var_name [r]:func_def*;
 
 
 
@@ -368,8 +368,8 @@ Abstract Syntax Tree
               | {expression_else} [l]:stmt*  [r]:all_expr
               | {while_else} [l]:cond  [r]:stmt*
               | {with_else2}   [l] :cond  [r]:stmt_with_else2
-              | {func_call_with} [l]:var_name [r]: all_expr
-              | {func_call_without} var_name
+              | {func_call_with} [l]:var_name [r]: all_expr                                                 //AAAAAAA
+              | {func_call_without} var_name                                                     //AAAAAAA
               | {var} var_name
               | {string} constant_string
               | {l_value}[l]: stmt* [r]:all_expr
