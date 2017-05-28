@@ -7,16 +7,12 @@ class ScopeObject {
     private String name;
     private String type;
     private String genre;
-    private int noOfParams;  //-1 if not func
+    private int noOfParams;
 
-    public ScopeObject(String name, String type,String genre ,int noOfParams){
+    public ScopeObject(String name, String type,String genre ){
         this.name = name;
         this.type = type;
         this.genre = genre;
-        this.noOfParams = noOfParams;
-
-
-        //System.out.println("CONSTRUCTPOR: " + this.name + this.type);
     }
 
     public String getName() {
@@ -33,45 +29,22 @@ class ScopeObject {
 
 
 
+    public boolean sameObject(String name, String genre){    //an to name twn objects einai idio kai to ena object den einai function declaration return true
 
-
-
-
-
-
-
-
-    public boolean sameObject(String name, String genre){
-
-        System.out.println("insidde samme");
-
-        //System.out.println("nameobj:" + this.getName()+ "!");
-        //System.out.println("nammeeeee: " + name.trim()+ "!");
-        System.out.println("GENRE: " + genre+ "!");
         if (this.getName().equals(name) && !genre.equals("decl") && !genre.equals("par_decl") ) {
-            System.out.println("insidde if");
             return true;
         }
         return false;
     }
 
 
-    public boolean sameObjectPar(String name, String genre){
-
-        System.out.println("insidde samme");
-
-        //System.out.println("nameobj:" + this.getName()+ "!");
-        //System.out.println("nammeeeee: " + name.trim()+ "!");
-        System.out.println("GENRE PARAMETER: " + genre+ "!");
+    public boolean sameObjectPar(String name, String genre){  //an to name twn objects einai idio kai to ena object  einai function declaration return true
 
         if (this.getName().equals(name) && this.getGenre().equals(genre)  ) {
-            System.out.println("insidde if");
-            System.out.println("GENRE PARAMETER true 1111: " + genre+ "!");
             return true;
         }
         else if(this.getName().equals(name) && genre.equals("decl"))
         {
-            System.out.println("GENRE PARAMETER true 2222: " + genre+ "!");
             return true;
         }
 
@@ -80,13 +53,14 @@ class ScopeObject {
 
 
 
-    public boolean sameObjectFunc(String name, String genre){
+    public boolean sameObjectFunc(String name, String genre){   //an exoume 2 synarthseis me idio onoma kai h mia dn einai dhlwsh ths allhs return true
         if (this.getName().equals(name) && genre.equals("func") && !this.getGenre().equals("decl") )
             return true;
         return false;
     }
 
-    public void setGenre(String genre) {
+    public void setGenre(String genre)
+    {
         this.genre = genre;
     }
 }
