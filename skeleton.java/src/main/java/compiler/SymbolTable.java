@@ -17,6 +17,7 @@ class SymbolTable {
     public SymbolTable(){   //constructor
         map = new HashMap<Integer,Integer>();
         mystack = new Stack<ScopeObject>();
+        funcStack = new Stack<FuncScope>();
         position = -1;
     }
 
@@ -302,12 +303,87 @@ class SymbolTable {
 
     }
 
-    public void insertFuncStack(String funcName,int scope,Map parameters){      //insert funcScope obj to stack
-
-        FuncScope funcObj = new FuncScope(funcName,scope,parameters);
-
+    public void insertFuncStack(FuncScope funcObj){      //insert funcScope obj to stack
         funcStack.push(funcObj);
     }
+
+    public void printFuncStack(){            //print stack
+        System.out.println("PRINTING FUNC STACK");
+        for (int i=0; i<this.funcStack.size();i++){
+            System.out.println("Name: " + this.funcStack.get(i).getFuncName());
+            System.out.println("Scope: " + this.funcStack.get(i).getScope());
+            System.out.println("Parameters: " + this.funcStack.get(i).getParameters().entrySet());
+            System.out.println("Type: " + this.funcStack.get(i).getType());
+        }
+        System.out.println("END OF PRINTING FUNC STACK");
+    }
+
+    public boolean checkScopeWithout(String name,int scopeCall){
+        System.out.println("CHECKING SCOPE FOR FUNC WITHOUT PAR:");
+
+        //System.out.println("FOR name: " + name +" and scope: " + scopeCall);
+
+        String funcName;
+        int scopeFunc;
+        for (int i=0; i<this.funcStack.size();i++){
+
+            funcName = this.funcStack.get(i).getFuncName();
+            scopeFunc = this.funcStack.get(i).getScope();
+
+            //System.out.println("Func: "+ funcName + " scope: " + scopeFunc);
+
+            if(name.equals(funcName)){
+                System.out.println("FOUND");
+                if(scopeFunc >= scopeCall){
+                    //System.out.println("TRUE");
+                    return true;
+                }
+                else{
+                    //System.out.println("FALSE");
+                    return false;
+                }
+            }
+        }
+        System.out.println("END OF CHECKING SCOPE FOR FUNC WITHOUT PAR");
+        //System.out.println("NOT FOUND");
+        return false;
+
+    }
+
+    public boolean checkScopeWith(String name,int scopeCall,List par){
+        System.out.println("CHECKING SCOPE FOR FUNC WITH PAR:");
+
+        System.out.println("FOR name: " + name +" and scope: " + scopeCall + " param: " + par + " num of par: " + par.size());
+
+        String funcName;
+        int scopeFunc;
+        int numParams;
+        for (int i=0; i<this.funcStack.size();i++){
+
+            funcName = this.funcStack.get(i).getFuncName();
+            scopeFunc = this.funcStack.get(i).getScope();
+            numParams = this.funcStack.get(i).getNumOfParams();
+
+            //System.out.println("Func: "+ funcName + " scope: " + scopeFunc);
+
+            if(name.equals(funcName)){
+                System.out.println("FOUND");
+                if(scopeFunc >= scopeCall && numParams == par.size()){
+                    System.out.println("TRUE");
+                    return true;
+                }
+                else{
+                    //System.out.println("FALSE");
+                    return false;
+                }
+            }
+        }
+        System.out.println("END OF CHECKING SCOPE FOR FUNC WITH PAR");
+        System.out.println("NOT FOUND");
+        return false;
+
+    }
+
 
     public int getPosition() {
         return position;

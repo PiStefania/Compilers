@@ -90,6 +90,9 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
 
+        System.out.println("ALL PARAMETERS: " + listParamHelp + "ONLY PAR: " +firstList);
+
+
         List<String> parList = new ArrayList<String>();
         Map<String,List> parType = new HashMap<String,List>();
         int i=0;
@@ -142,10 +145,10 @@ public class PrinterAST extends DepthFirstAdapter{
                     i++;
                 }
                 //teleutaio par
-                parList.add(listParamHelp.get(i));
-                i++;
                 List previousList ;
-                if(!parType.isEmpty()){
+                int key = i+1;
+
+                if(listParamHelp.size()-1 == i){
                     if(parType.containsKey(listParamHelp.get(i)))
                     {
                         previousList = parType.get(listParamHelp.get(i));
@@ -155,13 +158,25 @@ public class PrinterAST extends DepthFirstAdapter{
                         }
                         parType.put(listParamHelp.get(i),previousList);
                     }
+                    else{
+                        parType.put(listParamHelp.get(i),parList);
+                    }
                 }
-
-                else{
-                    parType.put(listParamHelp.get(i),parList);
+                else if(listParamHelp.size()-2 == i){
+                    parList.add(listParamHelp.get(i));
+                    if(parType.containsKey(listParamHelp.get(key))){
+                        previousList = parType.get(listParamHelp.get(key));
+                        for(int m=0;m<parList.size();m++)
+                        {
+                            previousList.add(parList.get(m));
+                        }
+                        parType.put(listParamHelp.get(key),previousList);
+                    }
+                    else{
+                        parType.put(listParamHelp.get(key),parList);
+                    }
                 }
                 break;
-
             }
 
             if(listParamHelp.get(i).equals(firstList.get(k)))
@@ -195,9 +210,20 @@ public class PrinterAST extends DepthFirstAdapter{
 
         ScopeObject obj =   new ScopeObject(myList.get(0).trim(),myList.get(myList.size()-1).trim(),"func") ;
         table.enter(obj);
+
+        //insert to funcStack
+
+        FuncScope funcObj = new FuncScope(myList.get(0).trim(),table.getPosition(),parType,myList.get(myList.size()-1).trim(),firstList.size());
+
+        table.insertFuncStack(funcObj);
+
+        table.printFuncStack();
+
         Set list = table.getMap().entrySet();
         System.out.println("MAPPINGS" + list + obj.getName());
         table.print();
+
+
 
 
     }
@@ -551,6 +577,42 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
     }
+
+    @Override
+    public void inAFuncCallWithoutStmt(AFuncCallWithoutStmt node){
+        System.out.println("FUNC CALL WITHOUT PAR: " + node.getVarName().toString().trim() + "!");
+        String funcName = node.getVarName().toString().trim();
+
+        try{
+            if(!table.checkScopeWithout(funcName,table.getPosition())){
+                throw new MyException("CANNOT CALL FUNCTION WITHOUT PREVIOUSLY STATED.CHECK NAME AND SCOPE ACCORDINGLY.");
+            }
+        }catch (MyException e){
+            throw new IllegalStateException("CANNOT CALL FUNCTION WITHOUT PREVIOUSLY STATED.CHECK NAME AND SCOPE ACCORDINGLY.");
+        }
+    }
+
+    @Override
+    public void inAFuncCallWithStmt(AFuncCallWithStmt node){
+        System.out.println("FUNC CALL WITH PAR: " + node.getL().toString() + "!" + node.getR().toString() + "!");
+
+        String funcName = node.getL().toString().trim();
+        List<String> parameters = new ArrayList<String>(Arrays.asList(node.getR().toString().split(" ")));
+
+        System.out.println(parameters + "!");
+
+
+        try{
+            if(!table.checkScopeWith(funcName,table.getPosition(),parameters)){
+                throw new MyException("CANNOT CALL FUNCTION WITHOUT PREVIOUSLY STATED.\nCHECK NAME,SCOPE AND NUMBER OF PARAMETERS ACCORDINGLY.");
+            }
+        }catch (MyException e){
+            throw new IllegalStateException("CANNOT CALL FUNCTION WITHOUT PREVIOUSLY STATED.\nCHECK NAME,SCOPE AND NUMBER OF PARAMETERS ACCORDINGLY.");
+        }
+    }
+
+
+
 
 
 }
