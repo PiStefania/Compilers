@@ -96,14 +96,34 @@ public class PrinterAST extends DepthFirstAdapter{
         int k=0;
         while(i<listParamHelp.size() && k<firstList.size()){
             if(k==firstList.size()-1){
+                if(k==0){
+                    //teleutaio par
+                    parList.add(listParamHelp.get(i));
+                    i++;
+                    List previousList ;
+                    if(!parType.isEmpty()){
+                        if(parType.containsKey(listParamHelp.get(i)))
+                        {
+                            previousList = parType.get(listParamHelp.get(i));
+                            for(int m=0;m<parList.size();m++)
+                            {
+                                previousList.add(parList.get(m));
+                            }
+                            parType.put(listParamHelp.get(i),previousList);
+                        }
+                    }
+
+                    else{
+                        parType.put(listParamHelp.get(i),parList);
+                    }
+                    break;
+                }
                 if(listParamHelp.get(i).equals(firstList.get(k))){
                     parList.add(listParamHelp.get(i));
                     i++;
-
-                    //k++;
+                    k++;
                 }
                 else{
-                    parList.add(listParamHelp.get(i));
                     List previousList ;
                     if(parType.containsKey(listParamHelp.get(i)))
                     {
@@ -140,6 +160,7 @@ public class PrinterAST extends DepthFirstAdapter{
                 else{
                     parType.put(listParamHelp.get(i),parList);
                 }
+                break;
 
             }
 
@@ -180,10 +201,6 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
     }
-
-
-
-
 
 
     @Override
