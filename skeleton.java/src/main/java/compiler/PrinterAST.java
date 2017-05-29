@@ -161,7 +161,7 @@ public class PrinterAST extends DepthFirstAdapter{
         funcObj = new FuncScope("strcat",parType,"nothing",par.size());
         table.insertFuncStack(funcObj);
 
-        //table.printFuncStack();
+       // table.printFuncStack();
 
     }
 
@@ -170,6 +170,8 @@ public class PrinterAST extends DepthFirstAdapter{
         //exit stoiva sunarthsewn
         table.deleteFuncStack();
 
+        System.out.println("Successful compilation!");
+
     }
 
 
@@ -177,9 +179,8 @@ public class PrinterAST extends DepthFirstAdapter{
     @Override
     public void inAAllFuncDef(AAllFuncDef node)
     {
-        addIndentationLevel();
-        printIndentation();
-        //System.out.println("(Function Definition:");
+
+       // System.out.println("(Function Definition:");
 
 
 
@@ -228,7 +229,7 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
        //
-        // System.out.println("ALL PARAMETERS: " + listParamHelp + "ONLY PAR: " +firstList);
+         //System.out.println("ALL PARAMETERS: " + listParamHelp + "ONLY PAR: " +firstList);
 
 
         List<String> parList = new ArrayList<String>();
@@ -355,11 +356,11 @@ public class PrinterAST extends DepthFirstAdapter{
 
         table.insertFuncStack(funcObj);
 
-        table.printFuncStack();
+
 
         Set list = table.getMap().entrySet();
         //System.out.println("MAPPINGS" + list + obj.getName());
-        table.print();
+        //table.print();
 
 
 
@@ -392,7 +393,7 @@ public class PrinterAST extends DepthFirstAdapter{
           //  System.out.println("MAPPINGS " + list+ obj.getName());
         }
 
-        table.print();
+       // table.print();
 
 
     }
@@ -416,7 +417,7 @@ public class PrinterAST extends DepthFirstAdapter{
         //    System.out.println("MAPPINGS" + list+ obj.getName());
         }
 
-        table.print();
+       // table.print();
 
 
 
@@ -440,7 +441,7 @@ public class PrinterAST extends DepthFirstAdapter{
             Set list = table.getMap().entrySet();
           //  System.out.println("MAPPINGS" + list+ obj.getName());
         }
-        table.print();
+       // table.print();
 
     }
 
@@ -718,7 +719,7 @@ public class PrinterAST extends DepthFirstAdapter{
     public void inAExprsignsCond(AExprsignsCond node)
     {
 
-        System.out.print("(EXPRESSION CONDITION: left child " + node.getL().toString() + " right child "+node.getR().toString() + "!");
+        //System.out.print("(EXPRESSION CONDITION: left child " + node.getL().toString() + " right child "+node.getR().toString() + "!");
 
 
 
