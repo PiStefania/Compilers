@@ -36,6 +36,143 @@ public class PrinterAST extends DepthFirstAdapter{
     }
 
 
+    @Override
+    public void inAProgram(AProgram node){
+        //insert sunarthseis vivliothikhs
+
+        //fun puti (n: int):nothing;
+        Map<String,List> parType = new HashMap<String,List>();
+        List<String> par = new ArrayList<String>();
+        par.add("n");
+        parType.put("int",par);
+        FuncScope funcObj = new FuncScope("puti",parType,"nothing",par.size());
+        table.insertFuncStack(funcObj);
+
+
+        //fun putc (c: char):nothing;
+        parType = new HashMap<String,List>();
+        par = new ArrayList<String>();
+        par.add("c");
+        parType.put("char",par);
+        funcObj = new FuncScope("putc",parType,"nothing",par.size());
+        table.insertFuncStack(funcObj);
+
+
+        //fun puts (ref s: char[]):nothing;
+        parType = new HashMap<String,List>();
+        par = new ArrayList<String>();
+        par.add("s");
+        parType.put("char[]",par);
+        funcObj = new FuncScope("puts",parType,"nothing",par.size());
+        table.insertFuncStack(funcObj);
+
+
+        //fun geti ():int;
+        parType = new HashMap<String,List>();
+        par = new ArrayList<String>();
+        funcObj = new FuncScope("geti",parType,"int",par.size());
+        table.insertFuncStack(funcObj);
+
+
+        //fun getc ():char;
+        parType = new HashMap<String,List>();
+        par = new ArrayList<String>();
+        funcObj = new FuncScope("getc",parType,"char",par.size());
+        table.insertFuncStack(funcObj);
+
+
+        //fun gets (n:int ; ref s:char[]):nothing;
+        parType = new HashMap<String,List>();
+        par = new ArrayList<String>();
+        par.add("n");
+        parType.put("int",par);
+        par.remove("n");
+        par.add("s");
+        parType.put("char[]",par);
+        funcObj = new FuncScope("gets",parType,"nothing",par.size());
+        table.insertFuncStack(funcObj);
+
+
+        //fun abs (n : int):int;
+        parType = new HashMap<String,List>();
+        par = new ArrayList<String>();
+        par.add("n");
+        parType.put("int",par);
+        funcObj = new FuncScope("abs",parType,"int",par.size());
+        table.insertFuncStack(funcObj);
+
+
+        //fun ord (c: char):int;
+        parType = new HashMap<String,List>();
+        par = new ArrayList<String>();
+        par.add("c");
+        parType.put("char",par);
+        funcObj = new FuncScope("ord",parType,"int",par.size());
+        table.insertFuncStack(funcObj);
+
+
+        //fun chr (n : int):char;
+        parType = new HashMap<String,List>();
+        par = new ArrayList<String>();
+        par.add("n");
+        parType.put("int",par);
+        funcObj = new FuncScope("chr",parType,"char",par.size());
+        table.insertFuncStack(funcObj);
+
+
+        //fun strlen (ref s:char[]):int;
+        parType = new HashMap<String,List>();
+        par = new ArrayList<String>();
+        par.add("s");
+        parType.put("char[]",par);
+        funcObj = new FuncScope("strlen",parType,"int",par.size());
+        table.insertFuncStack(funcObj);
+
+
+        //fun strcmp (ref s1, s2 :char[]):int;
+        parType = new HashMap<String,List>();
+        par = new ArrayList<String>();
+        par.add("s1");
+        par.add("s2");
+        parType.put("char[]",par);
+        funcObj = new FuncScope("strcmp",parType,"int",par.size());
+        table.insertFuncStack(funcObj);
+
+
+        //fun strcpy (ref trg ,src :char[]):nothing;
+        parType = new HashMap<String,List>();
+        par = new ArrayList<String>();
+        par.add("trg");
+        par.add("src");
+        parType.put("char[]",par);
+        funcObj = new FuncScope("strcpy",parType,"nothing",par.size());
+        table.insertFuncStack(funcObj);
+
+
+        //fun strcat (ref trg ,src :char[]):nothing;
+        parType = new HashMap<String,List>();
+        par = new ArrayList<String>();
+        par.add("trg");
+        par.add("src");
+        parType.put("char[]",par);
+        funcObj = new FuncScope("strcat",parType,"nothing",par.size());
+        table.insertFuncStack(funcObj);
+
+        table.printFuncStack();
+
+    }
+
+    @Override
+    public void outAProgram(AProgram node){
+        //exit stoiva sunarthsewn
+    }
+
+
+
+
+
+
+
 
     @Override
     public void inAAllFuncDef(AAllFuncDef node)
@@ -213,7 +350,7 @@ public class PrinterAST extends DepthFirstAdapter{
 
         //insert to funcStack
 
-        FuncScope funcObj = new FuncScope(myList.get(0).trim(),table.getPosition(),parType,myList.get(myList.size()-1).trim(),firstList.size());
+        FuncScope funcObj = new FuncScope(myList.get(0).trim(),parType,myList.get(myList.size()-1).trim(),firstList.size());
 
         table.insertFuncStack(funcObj);
 
@@ -325,22 +462,47 @@ public class PrinterAST extends DepthFirstAdapter{
     @Override
     public void inAExpressionStmt(AExpressionStmt node)
     {
-        addIndentationLevel();
-        printIndentation();
+
         System.out.print("(STMT: Left child " + node.getL().toString() + " Right child " +node.getR().toString() +"!");
         System.out.println(node.getR().getClass().getSimpleName());
 
-        String name=node.getL().toString().trim();
+
+
+
+        List<String> leftList = new ArrayList<String>(Arrays.asList(node.getL().toString().trim().split(" ")));
+        List<String> rightList = new ArrayList<String>(Arrays.asList(node.getR().toString().trim().split(" ")));
+
+
+
+        String name=leftList.get(0).trim();
         name = name.replace("[","");
         name = name.replace("]","");
-        name = name.trim();
-        String type;//="";
-        String str=node.getR().toString().trim();
+        String type;
+        String str=rightList.get(0).trim();
+        str = str.replace("[","");
+        str = str.replace("]","");
+
+
         //checking for value
+
         if (str.contains("\"")){
             //not sure about this one
             int length=str.length()-1;
             type = "char[" +length+"]";
+        }
+        else if (node.getR().getClass().getSimpleName().equals("AFuncAllExpr")) {
+            System.out.println("FUNCTION CALL");
+            List<String> myList = new ArrayList<String>(Arrays.asList(node.getR().toString().split(" ")));
+            String funcName = myList.get(0);
+            type= table.getFuncType(funcName);
+            try{
+                if(type==null){
+                    throw new MyException("ERROR! A FUNCTION THAT WASN'T DECLARED");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("ERROR! A FUNCTION THAT WASN'T DECLARED");
+            }
+
         }
         else if (node.getR().getClass().getSimpleName().equals("ALetterAllExpr")) {
             System.out.println("CHAR");
@@ -366,8 +528,13 @@ public class PrinterAST extends DepthFirstAdapter{
             System.out.println("VARIABLE");
             //find variables type
             type = table.FindVariableType(str);
-            if (type==null){
-                System.err.println("ERROR! A VARIABLE WITH NO TYPE");
+            try{
+                if(type==null){
+                    System.err.println("name "+str);
+                    throw new MyException("ERROR! A VARIABLE WITH NO TYPE");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("ERROR! A VARIABLE WITH NO TYPE");
             }
             //find second variable type
         }
@@ -377,15 +544,17 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
         ScopeObject obj = new ScopeObject(name,type,"var");
-        if (table.lookupVarAndType(obj)) {
-            //incorrect type
-            //throw error
-            System.err.println("ERROR INCORECT TYPE OF VARIABLE");
+        try{
+            if (table.lookupVarAndType(obj)){
+                throw new MyException("ERROR INCORECT TYPE OF VARIABLE");
+            }
+        }
+        catch (MyException e){
+            throw new IllegalStateException("ERROR INCORECT TYPE OF VARIABLE");
+        }
 
-        }
-        else {
-            System.out.println("CORRECT STMT");
-        }
+
+
 
     }
 
@@ -393,13 +562,17 @@ public class PrinterAST extends DepthFirstAdapter{
     @Override
     public void inAVarStmt(AVarStmt node)
     {
-        addIndentationLevel();
-        printIndentation();
+
         System.out.print("(Variable name : " + node.getVarName().toString());
 
-        if(table.FindVariableType(node.getVarName().toString().trim())==null)
-            System.err.println("found variable not declared!!!!");
-
+        try{
+            if(table.FindVariableType(node.getVarName().toString().trim())==null){
+                throw new MyException("FOUND VARIABLE NOT DECLARED");
+            }
+        }
+        catch (MyException e){
+            throw new IllegalStateException("FOUND VARIABLE NOT DECLARED");
+        }
 
     }
 
@@ -408,8 +581,7 @@ public class PrinterAST extends DepthFirstAdapter{
     @Override
     public void inAAddSubAllExpr(AAddSubAllExpr node)
     {
-        addIndentationLevel();
-        printIndentation();
+
         System.out.print("(ADD- SUB EXPRESSION left child: " + node.getL().toString() + "right child"+node.getR().toString()+"!");
         String ournode = node.getL().toString() + node.getR().toString();
 
@@ -420,9 +592,15 @@ public class PrinterAST extends DepthFirstAdapter{
             if (myList.get(i).equals("+") || myList.get(i).equals("-")) {
                 myList.remove(myList.get(i));
             }
-            if(myList.get(i).contains("'")){
-                System.err.println("Given char in numerical expression");
+            try{
+                if(myList.get(i).contains("'") || myList.get(i).contains("\"")){
+                    throw new MyException("GIVEN STRING IN NUMERICAL EXPRESSION");
+                }
             }
+            catch (MyException e){
+                throw new IllegalStateException("GIVEN STRING IN NUMERICAL EXPRESSION");
+            }
+
 
         }
         for(int i=0;i<myList.size();i++) {
@@ -430,9 +608,14 @@ public class PrinterAST extends DepthFirstAdapter{
             String type = table.FindVariableType(myList.get(i).trim());
             System.out.println("Type is " + type);
             if (type != null) {
-                if (!type.equals("int")) {
-                    System.err.println("error wrong expr type");
-                } else System.out.println("ok type");
+                try{
+                    if (!type.equals("int")){
+                        throw new MyException("ERROR WRONG EXPR TYPE");
+                    }
+                }
+                catch (MyException e){
+                    throw new IllegalStateException("ERROR WRONG EXPR TYPE");
+                }
             }
             else System.out.println("null type");
         }
@@ -447,13 +630,11 @@ public class PrinterAST extends DepthFirstAdapter{
     @Override
     public void inARestSignsAllExpr(ARestSignsAllExpr node)
     {
-        addIndentationLevel();
-        printIndentation();
+
         System.out.print("(Rest_signs expr: " + node.getL().toString() + " right child "+node.getR().toString());
 
 
-        addIndentationLevel();
-        printIndentation();
+
         String ournode = node.getL().toString() + node.getR().toString();
 
         List<String> myList = new ArrayList<String>(Arrays.asList(ournode.split(" ")));
@@ -464,9 +645,15 @@ public class PrinterAST extends DepthFirstAdapter{
                 myList.remove(myList.get(i));
             }
 
-            if(myList.get(i).contains("'")){
-                System.err.println("Given char in numerical expression");
+            try{
+                if(myList.get(i).contains("'") || myList.get(i).contains("\"")){
+                    throw new MyException("GIVEN STRING IN NUMERICAL EXPRESSION");
+                }
             }
+            catch (MyException e){
+                throw new IllegalStateException("GIVEN STRING IN NUMERICAL EXPRESSION");
+            }
+
 
         }
         for(int i=0;i<myList.size();i++) {
@@ -474,9 +661,14 @@ public class PrinterAST extends DepthFirstAdapter{
             String type = table.FindVariableType(myList.get(i).trim());
             System.out.println("Type is " + type);
             if (type != null) {
-                if (!type.equals("int")) {
-                    System.err.println("error wrong expr type");
-                } else System.out.println("ok type");
+                try{
+                    if (!type.equals("int")){
+                        throw new MyException("ERROR WRONG EXPR TYPE");
+                    }
+                }
+                catch (MyException e){
+                    throw new IllegalStateException("ERROR WRONG EXPR TYPE");
+                }
             }
             else System.out.println("null type");
         }
@@ -492,20 +684,29 @@ public class PrinterAST extends DepthFirstAdapter{
     @Override
     public void inAWithPlminAllExpr(AWithPlminAllExpr node)
     {
-        addIndentationLevel();
-        printIndentation();
+
         System.out.print("(PROSIMO expr: Left child " + node.getL().toString() + " right child "+ node.getR().toString()+"!");
-        if(node.getR().toString().contains("\"") || node.getR().toString().contains("'")){
-            System.err.println("Given string in numerical expression");
+        try{
+            if(node.getR().toString().contains("\"") || node.getR().toString().contains("'")){
+                throw new MyException("GIVEN STRING IN NUMERICAL EXPRESSION");
+            }
         }
+        catch (MyException e){
+            throw new IllegalStateException("GIVEN STRING IN NUMERICAL EXPRESSION");
+        }
+
+
 
         String type = table.FindVariableType(node.getR().toString().trim());
         if(type != null){
-            if (!type.equals("int")) {
-                System.err.println("error, wrong type expression");
+            try{
+                if (!type.equals("int")){
+                    throw new MyException("ERROR WRONG EXPR TYPE");
+                }
             }
-            else
-                System.out.println("ok");
+            catch (MyException e){
+                throw new IllegalStateException("ERROR WRONG EXPR TYPE");
+            }
         }
         else
             System.out.println("null");
@@ -515,8 +716,7 @@ public class PrinterAST extends DepthFirstAdapter{
     @Override
     public void inAExprsignsCond(AExprsignsCond node)
     {
-        addIndentationLevel();
-        printIndentation();
+
         System.out.print("(EXPRESSION CONDITION: left child " + node.getL().toString() + " right child "+node.getR().toString() + "!");
 
 
@@ -538,9 +738,14 @@ public class PrinterAST extends DepthFirstAdapter{
             String type = table.FindVariableType(name);
             System.out.println("Type is " + type);
             if (type != null) {
-                if (!type.equals("int")) {
-                    System.err.println("error wrong cond LEFT type");
-                } else System.out.println("ok type");
+                try{
+                    if (!type.equals("int")){
+                        throw new MyException("ERROR WRONG EXPR TYPE");
+                    }
+                }
+                catch (MyException e){
+                    throw new IllegalStateException("ERROR WRONG EXPR TYPE");
+                }
             }
             else System.out.println("null type");
         }
@@ -549,9 +754,14 @@ public class PrinterAST extends DepthFirstAdapter{
             String type = table.FindVariableType(name);
             System.out.println("Type is " + type);
             if (type != null) {
-                if (!type.equals("int")) {
-                    System.err.println("error wrong cond  RIGHT type");
-                } else System.out.println("ok type");
+                try{
+                    if (!type.equals("int")){
+                        throw new MyException("ERROR WRONG EXPR TYPE");
+                    }
+                }
+                catch (MyException e){
+                    throw new IllegalStateException("ERROR WRONG EXPR TYPE");
+                }
             }
             else{
                 System.out.println("null type");
@@ -569,8 +779,13 @@ public class PrinterAST extends DepthFirstAdapter{
 
         for(int i=0;i<listFinal.size();i++) {
 
-            if(listFinal.get(i).contains("\"") || listFinal.get(i).contains("'")){
-                System.err.println("GIVEN STRING IN NUMERICAL CONDITION");
+            try{
+                if(listFinal.get(i).contains("\"") || listFinal.get(i).contains("'")){
+                    throw new MyException("GIVEN STRING IN NUMERICAL EXPRESSION");
+                }
+            }
+            catch (MyException e){
+                throw new IllegalStateException("GIVEN STRING IN NUMERICAL EXPRESSION");
             }
 
         }
@@ -584,11 +799,11 @@ public class PrinterAST extends DepthFirstAdapter{
         String funcName = node.getVarName().toString().trim();
 
         try{
-            if(!table.checkScopeWithout(funcName,table.getPosition())){
-                throw new MyException("CANNOT CALL FUNCTION WITHOUT PREVIOUSLY STATED.CHECK NAME AND SCOPE ACCORDINGLY.");
+            if(!table.checkScopeWithout(funcName)){
+                throw new MyException("CANNOT CALL FUNCTION WITHOUT PREVIOUSLY STATED.CHECK NAME ACCORDINGLY.");
             }
         }catch (MyException e){
-            throw new IllegalStateException("CANNOT CALL FUNCTION WITHOUT PREVIOUSLY STATED.CHECK NAME AND SCOPE ACCORDINGLY.");
+            throw new IllegalStateException("CANNOT CALL FUNCTION WITHOUT PREVIOUSLY STATED.CHECK NAME ACCORDINGLY.");
         }
     }
 
@@ -603,11 +818,11 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
         try{
-            if(!table.checkScopeWith(funcName,table.getPosition(),parameters)){
-                throw new MyException("CANNOT CALL FUNCTION WITHOUT PREVIOUSLY STATED.\nCHECK NAME,SCOPE AND NUMBER OF PARAMETERS ACCORDINGLY.");
+            if(!table.checkScopeWith(funcName,parameters)){
+                throw new MyException("CANNOT CALL FUNCTION WITHOUT PREVIOUSLY STATED.\nCHECK NAME AND NUMBER OF PARAMETERS ACCORDINGLY.");
             }
         }catch (MyException e){
-            throw new IllegalStateException("CANNOT CALL FUNCTION WITHOUT PREVIOUSLY STATED.\nCHECK NAME,SCOPE AND NUMBER OF PARAMETERS ACCORDINGLY.");
+            throw new IllegalStateException("CANNOT CALL FUNCTION WITHOUT PREVIOUSLY STATED.\nCHECK NAME AND NUMBER OF PARAMETERS ACCORDINGLY.");
         }
     }
 
