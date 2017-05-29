@@ -22,17 +22,17 @@ class SymbolTable {
     }
 
     public void print(){            //print stack
-        System.out.println("printing stack");
+      //  System.out.println("printing stack");
         for (int i=0; i<this.mystack.size();i++){
             System.out.println(this.mystack.get(i).getName());
         }
-        System.out.println("end of printing stack");
+      //  System.out.println("end of printing stack");
     }
 
 
     public void enter(ScopeObject obj){             //enter obj to new scope
 
-        System.out.println("INSERT OBJECT TO MAP: ");
+      //  System.out.println("INSERT OBJECT TO MAP: ");
         try{
             if(lookupFunc(obj)) {
                 throw new MyException("FOUND SAME FUNCTION");
@@ -41,7 +41,7 @@ class SymbolTable {
                 throw new MyException("FOUND DIFFERENT TYPE");
             } else {
                 position++;
-                System.out.println("ENTER");
+                //System.out.println("ENTER");
                 map.put(position, mystack.size());
                 mystack.push(obj);
             }
@@ -56,7 +56,7 @@ class SymbolTable {
 
     public void insert(ScopeObject obj) {               //insert object to stack in same scope
 
-        System.out.println("INSERT OBJECT TO STACK: ");
+        ///System.out.println("INSERT OBJECT TO STACK: ");
 
         if (obj.getGenre().equals("par")) {
             obj = this.findDecl(obj);
@@ -91,7 +91,7 @@ class SymbolTable {
     public boolean lookupVar(ScopeObject obj){              //search for same vars in same scope
 
 
-        System.out.println("LOOKUP VAR:");
+        //System.out.println("LOOKUP VAR:");
         int value = map.get(position);
         int value2 = 0;
         if (position!=0){
@@ -99,7 +99,7 @@ class SymbolTable {
             for(int i=value;i>value2;i--){
                 ScopeObject obj2 = (ScopeObject) mystack.get(i);
                 if (obj.sameObject(obj2.getName(),obj2.getGenre())){
-                    System.out.println("Same object found in if");
+                    //System.out.println("Same object found in if");
                     return true;
                 }
 
@@ -110,7 +110,7 @@ class SymbolTable {
             for(int i=value;i>=0;i--){
                 ScopeObject obj2 = (ScopeObject) mystack.get(i);
                 if (obj.sameObject(obj2.getName(),obj2.getGenre())){
-                    System.out.println("Same object found in else");
+                    //System.out.println("Same object found in else");
                     return true;
                 }
             }
@@ -120,7 +120,7 @@ class SymbolTable {
 
 
     public boolean lookupPar(ScopeObject obj){      //search for same parameters inside function decl
-        System.out.println("LOOKUP PARAMETERS:");
+        //System.out.println("LOOKUP PARAMETERS:");
         if(!obj.getGenre().equals("par_decl"))
         {
             return false;
@@ -142,7 +142,7 @@ class SymbolTable {
 
     public boolean lookupDecl(ScopeObject obj){             //search for same func and decl names
 
-        System.out.println("LOOKUP DECLARATION:");
+        //System.out.println("LOOKUP DECLARATION:");
 
         int i = mystack.size()-1;
         while (i>=0) {
@@ -161,7 +161,7 @@ class SymbolTable {
 
     public boolean lookupFunc(ScopeObject obj){             //search for same func in all stack
 
-        System.out.println("LOOKUP FUNCTION: ");
+        //System.out.println("LOOKUP FUNCTION: ");
 
         for(int i = mystack.size()-1;i>=0;i--){
 
@@ -176,7 +176,7 @@ class SymbolTable {
 
     public boolean lookupVarAndFunc(ScopeObject obj){               //search for same function and variable names in all stack
 
-        System.out.println("LOOKUP VARIABLE AND FUNC: ");
+        //System.out.println("LOOKUP VARIABLE AND FUNC: ");
 
         for(int i = mystack.size()-1;i>=0;i--){
             ScopeObject obj2 = (ScopeObject) mystack.get(i);
@@ -193,11 +193,11 @@ class SymbolTable {
     public boolean lookupVarAndType(ScopeObject obj){                   //search variable in order to find the same variable in stack with diff type(true)
 
 
-        System.out.println("LOOKUP VAR AND TYPE:");
+        //System.out.println("LOOKUP VAR AND TYPE:");
         int value = map.get(position);
 
         for(int i=value;i>=0;i--){
-            System.out.println(i);
+            //System.out.println(i);
             ScopeObject obj2 = (ScopeObject) mystack.get(i);
             if (obj.getName().trim().equals(obj2.getName().trim())){
                 if(obj2.getType().contains("char[") && obj2.getType().contains("]")){
@@ -217,13 +217,13 @@ class SymbolTable {
                     }
                 }
                 if (!obj.getType().equals(obj2.getType())){
-                    System.out.println("DIFFERENT TYPES in else");
+                    //System.out.println("DIFFERENT TYPES in else");
                     return true;
                 }
                 else return false;
             }
         }
-        System.out.println("NOT FOUND");
+        //System.out.println("NOT FOUND");
         return true;  //den to vrhke
     }
 
@@ -235,18 +235,18 @@ class SymbolTable {
     public String FindVariableType(String name){
 
 
-        System.out.println("FIND VARIABLE TYPE:");
-        System.out.println(name);
+        //System.out.println("FIND VARIABLE TYPE:");
+        //System.out.println(name);
         int value = map.get(position);
         for(int i=value;i>=0;i--){
             ScopeObject obj = (ScopeObject) mystack.get(i);
-            System.out.println("item = " +obj.getName() + obj.getType() + " " + name + "!");
+            //System.out.println("item = " +obj.getName() + obj.getType() + " " + name + "!");
             if (obj.getName().equals(name)){
-                System.out.println("Found");
+                //System.out.println("Found");
                 return obj.getType();
             }
         }
-        System.out.println("Not found");
+       // System.out.println("Not found");
         return null;  //den to vrhke
     }
 
@@ -257,7 +257,7 @@ class SymbolTable {
 
     public ScopeObject findDecl(ScopeObject obj){               //search and set parameter of decl as "par_decl" and return it
 
-        System.out.println("FIND DECL:");
+        //System.out.println("FIND DECL:");
         ScopeObject obj2 = (ScopeObject) mystack.get(mystack.size()-1);
         if(obj2.getGenre().equals("decl")){
             obj.setGenre("par_decl");
@@ -273,7 +273,7 @@ class SymbolTable {
 
     public void exit(){             //remove scopes
 
-        System.out.println("EXIT:");
+        //System.out.println("EXIT:");
         int value = map.get(position);
         int value2 = 0;
         if (position!=0){
@@ -293,34 +293,39 @@ class SymbolTable {
     }
 
     public void printFuncStack(){            //print stack
-        System.out.println("PRINTING FUNC STACK");
+        //System.out.println("PRINTING FUNC STACK");
         for (int i=0; i<this.funcStack.size();i++){
             System.out.println("Name: " + this.funcStack.get(i).getFuncName());
             System.out.println("Parameters: " + this.funcStack.get(i).getParameters().entrySet());
             System.out.println("Type: " + this.funcStack.get(i).getType());
         }
-        System.out.println("END OF PRINTING FUNC STACK");
+        //System.out.println("END OF PRINTING FUNC STACK");
     }
 
     public boolean checkScopeWithout(String name){
-        System.out.println("CHECKING SCOPE FOR FUNC WITHOUT PAR:");
+        //System.out.println("CHECKING SCOPE FOR FUNC WITHOUT PAR:");
 
         //System.out.println("FOR name: " + name +" and scope: " + scopeCall);
 
         String funcName;
         int scopeFunc;
+        int numParams;
         for (int i=0; i<this.funcStack.size();i++){
 
             funcName = this.funcStack.get(i).getFuncName();
+            numParams = this.funcStack.get(i).getNumOfParams();
 
             //System.out.println("Func: "+ funcName + " scope: " + scopeFunc);
 
             if(name.equals(funcName)){
-                System.out.println("FOUND");
+                //System.out.println("FOUND");
+                if(numParams == 0){
                     return true;
                 }
+                return false;
+            }
         }
-        System.out.println("END OF CHECKING SCOPE FOR FUNC WITHOUT PAR");
+        //System.out.println("END OF CHECKING SCOPE FOR FUNC WITHOUT PAR");
         //System.out.println("NOT FOUND");
         return false;
 
@@ -329,9 +334,9 @@ class SymbolTable {
 
 
     public boolean checkScopeWith(String name,List par){
-        System.out.println("CHECKING FOR FUNC WITH PAR:");
+       // System.out.println("CHECKING FOR FUNC WITH PAR:");
 
-        System.out.println("FOR name: " + name + " param: " + par + " num of par: " + par.size());
+        //System.out.println("FOR name: " + name + " param: " + par + " num of par: " + par.size());
 
         String funcName;
         int numParams;
@@ -343,19 +348,25 @@ class SymbolTable {
             //System.out.println("Func: "+ funcName + " scope: " + scopeFunc);
 
             if(name.equals(funcName)){
-                System.out.println("FOUND");
+                //System.out.println("FOUND");
                 return true;
+
+                /*if(numParams==par.size())
+                {
+                    return true;
+                }
+                return false;*/
             }
         }
-        System.out.println("END OF CHECKING FOR FUNC WITH PAR");
-        System.out.println("NOT FOUND");
+        //System.out.println("END OF CHECKING FOR FUNC WITH PAR");
+        //System.out.println("NOT FOUND");
         return false;
 
     }
 
 
     public String getFuncType(String name){
-        System.out.println("Finding function type:");
+       // System.out.println("Finding function type:");
 
         //System.out.println("FOR name: " + name +" and scope: " + scopeCall);
 
@@ -367,14 +378,19 @@ class SymbolTable {
             //System.out.println("Func: "+ funcName + " scope: " + scopeFunc);
 
             if(name.equals(funcName)){
-                System.out.println("FOUND");
+            //    System.out.println("FOUND");
                 return this.funcStack.get(i).getType();
             }
         }
-        System.out.println("END OF Finding function type");
+       // System.out.println("END OF Finding function type");
         //System.out.println("NOT FOUND");
         return null;
 
+    }
+
+    public void deleteFuncStack(){
+        this.funcStack.clear();
+        //this.printFuncStack();
     }
 
 

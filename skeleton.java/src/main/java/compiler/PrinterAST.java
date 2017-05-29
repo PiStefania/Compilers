@@ -5,6 +5,9 @@ import compiler.node.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import compiler.SymbolTable;
 import compiler.ScopeObject;
 import sun.reflect.generics.scope.Scope;
@@ -31,7 +34,7 @@ public class PrinterAST extends DepthFirstAdapter{
         Iterator itr = list.iterator();
 
         while (itr.hasNext()){
-            System.out.print(itr.next());
+          //  System.out.print(itr.next());
         }
     }
 
@@ -158,19 +161,16 @@ public class PrinterAST extends DepthFirstAdapter{
         funcObj = new FuncScope("strcat",parType,"nothing",par.size());
         table.insertFuncStack(funcObj);
 
-        table.printFuncStack();
+        //table.printFuncStack();
 
     }
 
     @Override
     public void outAProgram(AProgram node){
         //exit stoiva sunarthsewn
+        table.deleteFuncStack();
+
     }
-
-
-
-
-
 
 
 
@@ -179,7 +179,7 @@ public class PrinterAST extends DepthFirstAdapter{
     {
         addIndentationLevel();
         printIndentation();
-        System.out.println("(Function Definition:");
+        //System.out.println("(Function Definition:");
 
 
 
@@ -227,7 +227,8 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
 
-        System.out.println("ALL PARAMETERS: " + listParamHelp + "ONLY PAR: " +firstList);
+       //
+        // System.out.println("ALL PARAMETERS: " + listParamHelp + "ONLY PAR: " +firstList);
 
 
         List<String> parList = new ArrayList<String>();
@@ -342,7 +343,7 @@ public class PrinterAST extends DepthFirstAdapter{
             }
         }
 
-        System.out.println("FULL DICTIONARY: " + parType.entrySet());
+        //System.out.println("FULL DICTIONARY: " + parType.entrySet());
 
 
         ScopeObject obj =   new ScopeObject(myList.get(0).trim(),myList.get(myList.size()-1).trim(),"func") ;
@@ -357,7 +358,7 @@ public class PrinterAST extends DepthFirstAdapter{
         table.printFuncStack();
 
         Set list = table.getMap().entrySet();
-        System.out.println("MAPPINGS" + list + obj.getName());
+        //System.out.println("MAPPINGS" + list + obj.getName());
         table.print();
 
 
@@ -369,7 +370,7 @@ public class PrinterAST extends DepthFirstAdapter{
     @Override
     public void outAAllFuncDef(AAllFuncDef node)            //exit functions
     {
-        System.out.println(")" );
+       // System.out.println(")" );
         table.exit();
         Set list = table.getMap().entrySet();
     }
@@ -379,16 +380,16 @@ public class PrinterAST extends DepthFirstAdapter{
     public void inAFparDefFuncDef(AFparDefFuncDef node)
     {
 
-        System.out.println("(FPar Definition With Ref ");
+        //System.out.println("(FPar Definition With Ref ");
 
         String type = node.getR().toString();
         List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
-        System.out.print("Printing List "+ myList);
+       // System.out.print("Printing List "+ myList);
         for(int i=0;i<myList.size();i++){
             ScopeObject obj =   new ScopeObject(myList.get(i).trim(),type.trim(),"par") ;
             table.insert(obj);
             Set list = table.getMap().entrySet();
-            System.out.println("MAPPINGS " + list+ obj.getName());
+          //  System.out.println("MAPPINGS " + list+ obj.getName());
         }
 
         table.print();
@@ -403,16 +404,16 @@ public class PrinterAST extends DepthFirstAdapter{
     {
        // addIndentationLevel();
        // printIndentation();
-        System.out.println("(FPar Definition No Ref ");
+        //System.out.println("(FPar Definition No Ref ");
 
         String type = node.getR().toString();
         List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
-        System.out.print("List "+ myList);
+      //  System.out.print("List "+ myList);
         for(int i=0;i<myList.size();i++){
             ScopeObject obj =   new ScopeObject(myList.get(i).trim(),type.trim(),"par") ;
             table.insert(obj);
             Set list = table.getMap().entrySet();
-            System.out.println("MAPPINGS" + list+ obj.getName());
+        //    System.out.println("MAPPINGS" + list+ obj.getName());
         }
 
         table.print();
@@ -434,10 +435,10 @@ public class PrinterAST extends DepthFirstAdapter{
         List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
         for(int i=0;i<myList.size();i++){
             ScopeObject obj =   new ScopeObject(myList.get(i).trim(),type.trim(),"var") ;
-            System.out.println("List "+ myList.get(i));
+          //  System.out.println("List "+ myList.get(i));
             table.insert(obj);
             Set list = table.getMap().entrySet();
-            System.out.println("MAPPINGS" + list+ obj.getName());
+          //  System.out.println("MAPPINGS" + list+ obj.getName());
         }
         table.print();
 
@@ -447,15 +448,15 @@ public class PrinterAST extends DepthFirstAdapter{
     public void inAFuncDeclFuncDef(AFuncDeclFuncDef node)
     {
 
-        System.out.println("FUNCTION DECLARATION" + node.getFuncDef().toString() );
+      //  System.out.println("FUNCTION DECLARATION" + node.getFuncDef().toString() );
         List<String> myList = new ArrayList<String>(Arrays.asList(node.getFuncDef().toString().split(" ")));
-        System.out.println("LISTA DECL"+myList);
+       // System.out.println("LISTA DECL"+myList);
 
         ScopeObject obj = new ScopeObject(myList.get(0).toString().trim(),myList.get(myList.size()-1).toString().trim(),"decl");
         table.insert(obj);
 
         Set list = table.getMap().entrySet();
-        System.out.println("MAPPINGS" + list+ obj.getName());
+      //  System.out.println("MAPPINGS" + list+ obj.getName());
     }
 
 
@@ -463,8 +464,8 @@ public class PrinterAST extends DepthFirstAdapter{
     public void inAExpressionStmt(AExpressionStmt node)
     {
 
-        System.out.print("(STMT: Left child " + node.getL().toString() + " Right child " +node.getR().toString() +"!");
-        System.out.println(node.getR().getClass().getSimpleName());
+      //  System.out.print("(STMT: Left child " + node.getL().toString() + " Right child " +node.getR().toString() +"!");
+      //  System.out.println(node.getR().getClass().getSimpleName());
 
 
 
@@ -491,7 +492,7 @@ public class PrinterAST extends DepthFirstAdapter{
             type = "char[" +length+"]";
         }
         else if (node.getR().getClass().getSimpleName().equals("AFuncAllExpr")) {
-            System.out.println("FUNCTION CALL");
+         //   System.out.println("FUNCTION CALL");
             List<String> myList = new ArrayList<String>(Arrays.asList(node.getR().toString().split(" ")));
             String funcName = myList.get(0);
             type= table.getFuncType(funcName);
@@ -505,32 +506,32 @@ public class PrinterAST extends DepthFirstAdapter{
 
         }
         else if (node.getR().getClass().getSimpleName().equals("ALetterAllExpr")) {
-            System.out.println("CHAR");
+         //   System.out.println("CHAR");
             type= "char";
         }
         else if (node.getR().getClass().getSimpleName().equals("AConstantAllExpr")){
-            System.out.println("CONSTANT");
+         //   System.out.println("CONSTANT");
             type= "int";
         }
         else if (node.getR().getClass().getSimpleName().equals("AAddSubAllExpr")){
-            System.out.println("AAddSubAllExpr");
+         //   System.out.println("AAddSubAllExpr");
             type= "int";
         }
         else if (node.getR().getClass().getSimpleName().equals("ARestSignsAllExpr")){
-            System.out.println("ARestSignsAllExpr");
+        //    System.out.println("ARestSignsAllExpr");
             type= "int";
         }
         else if (node.getR().getClass().getSimpleName().equals("AWithPlminAllExpr")){
-            System.out.println("AWithPlminAllExpr");
+          //  System.out.println("AWithPlminAllExpr");
             type= "int";
         }
         else {
-            System.out.println("VARIABLE");
+          //  System.out.println("VARIABLE");
             //find variables type
             type = table.FindVariableType(str);
             try{
                 if(type==null){
-                    System.err.println("name "+str);
+            //        System.err.println("name "+str);
                     throw new MyException("ERROR! A VARIABLE WITH NO TYPE");
                 }
             }catch (MyException e){
@@ -563,7 +564,7 @@ public class PrinterAST extends DepthFirstAdapter{
     public void inAVarStmt(AVarStmt node)
     {
 
-        System.out.print("(Variable name : " + node.getVarName().toString());
+        //System.out.print("(Variable name : " + node.getVarName().toString());
 
         try{
             if(table.FindVariableType(node.getVarName().toString().trim())==null){
@@ -582,11 +583,11 @@ public class PrinterAST extends DepthFirstAdapter{
     public void inAAddSubAllExpr(AAddSubAllExpr node)
     {
 
-        System.out.print("(ADD- SUB EXPRESSION left child: " + node.getL().toString() + "right child"+node.getR().toString()+"!");
+        //System.out.print("(ADD- SUB EXPRESSION left child: " + node.getL().toString() + "right child"+node.getR().toString()+"!");
         String ournode = node.getL().toString() + node.getR().toString();
 
         List<String> myList = new ArrayList<String>(Arrays.asList(ournode.split(" ")));
-        System.out.print("MYLIST "+ myList);
+        //System.out.print("MYLIST "+ myList);
         for(int i=0;i<myList.size();i++) {
 
             if (myList.get(i).equals("+") || myList.get(i).equals("-")) {
@@ -606,7 +607,7 @@ public class PrinterAST extends DepthFirstAdapter{
         for(int i=0;i<myList.size();i++) {
 
             String type = table.FindVariableType(myList.get(i).trim());
-            System.out.println("Type is " + type);
+           // System.out.println("Type is " + type);
             if (type != null) {
                 try{
                     if (!type.equals("int")){
@@ -617,11 +618,11 @@ public class PrinterAST extends DepthFirstAdapter{
                     throw new IllegalStateException("ERROR WRONG EXPR TYPE");
                 }
             }
-            else System.out.println("null type");
+          //  else System.out.println("null type");
         }
 
 
-        System.out.print("MYLIST IS "+ myList);
+     //   System.out.print("MYLIST IS "+ myList);
 
 
     }
@@ -631,14 +632,14 @@ public class PrinterAST extends DepthFirstAdapter{
     public void inARestSignsAllExpr(ARestSignsAllExpr node)
     {
 
-        System.out.print("(Rest_signs expr: " + node.getL().toString() + " right child "+node.getR().toString());
+       // System.out.print("(Rest_signs expr: " + node.getL().toString() + " right child "+node.getR().toString());
 
 
 
         String ournode = node.getL().toString() + node.getR().toString();
 
         List<String> myList = new ArrayList<String>(Arrays.asList(ournode.split(" ")));
-        System.out.print("MYLIST "+ myList);
+       // System.out.print("MYLIST "+ myList);
         for(int i=0;i<myList.size();i++) {
 
             if (myList.get(i).equals("*")  || myList.get(i).equals("mod") || myList.get(i).equals("div")) {
@@ -659,7 +660,7 @@ public class PrinterAST extends DepthFirstAdapter{
         for(int i=0;i<myList.size();i++) {
 
             String type = table.FindVariableType(myList.get(i).trim());
-            System.out.println("Type is " + type);
+         //   System.out.println("Type is " + type);
             if (type != null) {
                 try{
                     if (!type.equals("int")){
@@ -670,13 +671,13 @@ public class PrinterAST extends DepthFirstAdapter{
                     throw new IllegalStateException("ERROR WRONG EXPR TYPE");
                 }
             }
-            else System.out.println("null type");
+          //  else System.out.println("null type");
         }
 
 
 
 
-        System.out.print("MYLIST IS "+ myList);
+        //System.out.print("MYLIST IS "+ myList);
 
     }
 
@@ -685,7 +686,7 @@ public class PrinterAST extends DepthFirstAdapter{
     public void inAWithPlminAllExpr(AWithPlminAllExpr node)
     {
 
-        System.out.print("(PROSIMO expr: Left child " + node.getL().toString() + " right child "+ node.getR().toString()+"!");
+       // System.out.print("(PROSIMO expr: Left child " + node.getL().toString() + " right child "+ node.getR().toString()+"!");
         try{
             if(node.getR().toString().contains("\"") || node.getR().toString().contains("'")){
                 throw new MyException("GIVEN STRING IN NUMERICAL EXPRESSION");
@@ -708,8 +709,8 @@ public class PrinterAST extends DepthFirstAdapter{
                 throw new IllegalStateException("ERROR WRONG EXPR TYPE");
             }
         }
-        else
-            System.out.println("null");
+       // else
+          //  System.out.println("null");
     }
 
 
@@ -736,7 +737,7 @@ public class PrinterAST extends DepthFirstAdapter{
         if (myListLeft.size()==1){
             String name = myListLeft.get(0).trim();
             String type = table.FindVariableType(name);
-            System.out.println("Type is " + type);
+          //  System.out.println("Type is " + type);
             if (type != null) {
                 try{
                     if (!type.equals("int")){
@@ -747,12 +748,12 @@ public class PrinterAST extends DepthFirstAdapter{
                     throw new IllegalStateException("ERROR WRONG EXPR TYPE");
                 }
             }
-            else System.out.println("null type");
+          //  else System.out.println("null type");
         }
         if (myListRight.size()==1){
             String name = myListRight.get(0).trim();
             String type = table.FindVariableType(name);
-            System.out.println("Type is " + type);
+          //  System.out.println("Type is " + type);
             if (type != null) {
                 try{
                     if (!type.equals("int")){
@@ -763,10 +764,10 @@ public class PrinterAST extends DepthFirstAdapter{
                     throw new IllegalStateException("ERROR WRONG EXPR TYPE");
                 }
             }
-            else{
-                System.out.println("null type");
+          //  else{
+          //      System.out.println("null type");
 
-            }
+           // }
         }
 
 
@@ -775,7 +776,7 @@ public class PrinterAST extends DepthFirstAdapter{
         listFinal.addAll(myListRight);
 
 
-        System.out.print("MY LIST final IS "+ listFinal);
+       // System.out.print("MY LIST final IS "+ listFinal);
 
         for(int i=0;i<listFinal.size();i++) {
 
@@ -795,7 +796,7 @@ public class PrinterAST extends DepthFirstAdapter{
 
     @Override
     public void inAFuncCallWithoutStmt(AFuncCallWithoutStmt node){
-        System.out.println("FUNC CALL WITHOUT PAR: " + node.getVarName().toString().trim() + "!");
+      //  System.out.println("FUNC CALL WITHOUT PAR: " + node.getVarName().toString().trim() + "!");
         String funcName = node.getVarName().toString().trim();
 
         try{
@@ -809,12 +810,20 @@ public class PrinterAST extends DepthFirstAdapter{
 
     @Override
     public void inAFuncCallWithStmt(AFuncCallWithStmt node){
-        System.out.println("FUNC CALL WITH PAR: " + node.getL().toString() + "!" + node.getR().toString() + "!");
+       // System.out.println("FUNC CALL WITH PAR: " + node.getL().toString() + "!" + node.getR().toString() + "!");
 
         String funcName = node.getL().toString().trim();
-        List<String> parameters = new ArrayList<String>(Arrays.asList(node.getR().toString().split(" ")));
 
-        System.out.println(parameters + "!");
+        String nodeRight = node.getR().toString().trim();
+
+        List<String> parameters = new ArrayList<String>();
+        Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(nodeRight);
+
+        while (m.find())
+            parameters.add(m.group(1)); // Add .replace("\"", "") to remove surrounding quotes.
+
+
+       // System.out.println(parameters + "!");
 
 
         try{
