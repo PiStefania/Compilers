@@ -17,6 +17,8 @@ public class PrinterAST extends DepthFirstAdapter{
 
     SymbolTable table = new SymbolTable();
 
+    Intermediate im = new Intermediate();
+
     int indentation = 0;
     private void addIndentationLevel() {
         indentation++;
@@ -364,6 +366,7 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
 
+        im.genQuad("unit",myList.get(0).trim(),null,null);
 
     }
 
