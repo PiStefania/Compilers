@@ -166,15 +166,15 @@ public class PrinterAST extends DepthFirstAdapter{
 
        // table.printFuncStack();
 
-        operator relop= new operator("relop","<");
+        //operator relop = new operator("relop","<");
         //operator op1= new operator("op","+");
 
-        int x=0;
-        //im.genQuad(":=",x,null,5);
+        /*int x=0;
+        im.genQuad(":=",x,null,5);
         im.genQuad(relop,3,5,0);
-        im.genQuad(relop,5,3,0);
+        im.genQuad(relop,5,3,1);
         //im.genQuad(op1.,5,3,0);
-       // im.genQuad("jump",null,null,1);
+        im.genQuad("jump",null,null,1);
 
         System .out.println("NEXT LIST TAGS:" + im.nextList());
 
@@ -182,7 +182,7 @@ public class PrinterAST extends DepthFirstAdapter{
 
         System .out.println("FALSE LIST TAGS:" + im.falseList());
 
-        System .out.println("MERGED LIST :" + im.merge(im.falseList(),im.trueList()));
+        System .out.println("MERGED LIST :" + im.merge(im.falseList(),im.trueList(),im.nextList()));*/
 
         /*im.backpatch(3,10);
         im.print();*/
@@ -195,7 +195,10 @@ public class PrinterAST extends DepthFirstAdapter{
         //exit stoiva sunarthsewn
         table.deleteFuncStack();
 
+
         System.out.println("Successful compilation!");
+
+        im.print();
 
     }
 
@@ -391,9 +394,10 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
 
-        im.genQuad("unit",myList.get(0).trim(),null,null);
+        im.genQuad(im.getOpCode().getUnit(),myList.get(0).trim(),null,null);
 
     }
+
 
 
     @Override
@@ -402,6 +406,11 @@ public class PrinterAST extends DepthFirstAdapter{
        // System.out.println(")" );
         table.exit();
         Set list = table.getMap().entrySet();
+
+        List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
+
+        im.genQuad(im.getOpCode().getEndu(),myList.get(0).trim(),null,null);
+
     }
 
 
@@ -501,8 +510,6 @@ public class PrinterAST extends DepthFirstAdapter{
       //  System.out.println(node.getR().getClass().getSimpleName());
 
 
-
-
         List<String> leftList = new ArrayList<String>(Arrays.asList(node.getL().toString().trim().split(" ")));
         List<String> rightList = new ArrayList<String>(Arrays.asList(node.getR().toString().trim().split(" ")));
 
@@ -588,6 +595,8 @@ public class PrinterAST extends DepthFirstAdapter{
         }
 
 
+        im.genQuad(im.getOpCode().getAssignment(),node.getR().toString().trim(),null,name);
+
 
 
     }
@@ -616,11 +625,11 @@ public class PrinterAST extends DepthFirstAdapter{
     public void inAAddSubAllExpr(AAddSubAllExpr node)
     {
 
-        //System.out.print("(ADD- SUB EXPRESSION left child: " + node.getL().toString() + "right child"+node.getR().toString()+"!");
+        System.out.print("(ADD- SUB EXPRESSION left child: " + node.getL().toString() + "right child"+node.getR().toString()+"!");
         String ournode = node.getL().toString() + node.getR().toString();
 
         List<String> myList = new ArrayList<String>(Arrays.asList(ournode.split(" ")));
-        //System.out.print("MYLIST "+ myList);
+        System.out.print("MYLIST "+ myList);
         for(int i=0;i<myList.size();i++) {
 
             if (myList.get(i).equals("+") || myList.get(i).equals("-")) {
@@ -654,10 +663,24 @@ public class PrinterAST extends DepthFirstAdapter{
           //  else System.out.println("null type");
         }
 
+        System.out.println("OK");
+
+        Object w = im.newTemp(Integer.class);
+
+        operator op1= new operator("op",myList.get(1).trim());
+        //im.genQuad();
 
      //   System.out.print("MYLIST IS "+ myList);
 
 
+    }
+
+    @Override
+    public void outAAddSubAllExpr(AAddSubAllExpr node)
+    {
+        String ournode = node.getL().toString() + node.getR().toString();
+        List<String> myList = new ArrayList<String>(Arrays.asList(ournode.split(" ")));
+        System.out.print("OUT "+ myList);
     }
 
 
@@ -665,7 +688,7 @@ public class PrinterAST extends DepthFirstAdapter{
     public void inARestSignsAllExpr(ARestSignsAllExpr node)
     {
 
-       // System.out.print("(Rest_signs expr: " + node.getL().toString() + " right child "+node.getR().toString());
+        System.out.print("(Rest_signs expr: " + node.getL().toString() + " right child "+node.getR().toString());
 
 
 
@@ -713,6 +736,8 @@ public class PrinterAST extends DepthFirstAdapter{
         //System.out.print("MYLIST IS "+ myList);
 
     }
+
+
 
 
     @Override

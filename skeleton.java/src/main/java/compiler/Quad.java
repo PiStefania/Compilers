@@ -1,7 +1,5 @@
 package compiler;
 
-import jdk.internal.org.objectweb.asm.Opcodes;
-
 /**
  * Created by anton_000 on 30/5/2017.
  */

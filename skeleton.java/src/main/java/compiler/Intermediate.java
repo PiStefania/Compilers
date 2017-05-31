@@ -30,7 +30,12 @@ public class Intermediate {
     public void genQuad(Object op, Object arg1, Object arg2, Object arg3) {
         String forPrint ="";
         if (op != null)
-            forPrint += " " + op.toString();
+            if(op.getClass().getSimpleName().equals("operator")){
+                forPrint += " " + ((operator) op).getName().toString();
+            }
+            else{
+                forPrint += " " + op.toString();
+            }
         if (arg1 != null)
             forPrint += " " +arg1.toString();
         if (arg2 != null)
@@ -105,21 +110,21 @@ public class Intermediate {
 
         for(int i=0; i< quadList.size();i++){
 
-            operator p = (operator) quadList.get(i).getOp();
-            System.out.println("quadList.get(i).getOp() "+ p.getName() + p.getValue());
-            //System.out.println("opCode.getRelop().getName() "+opCode.getRelop().getName());
-
-            if (p.getName().equals("relop")) {
-                //System.out.println("AAAAAAA");
-                if (quadList.get(i).relopTrueFalse()) {
-                    tags.add(i);
+            if(quadList.get(i).getOp().getClass().getSimpleName().equals("operator")) {
+                operator p = (operator) quadList.get(i).getOp();
+                if (p.getName().equals("relop")) {
+                    if (quadList.get(i).relopTrueFalse()) {
+                        tags.add(i);
+                    }
                 }
             }
-            else if (p.equals(opCode.getIfb())) {
-                Boolean x = (Boolean) quadList.get(i).getArg1();
-                System.out.println("BB");
-                if(x){
-                    tags.add(i);
+            else {
+                String p = (String) quadList.get(i).getOp();
+                if (p.equals(opCode.getIfb())) {
+                    Boolean x = (Boolean) quadList.get(i).getArg1();
+                    if (x) {
+                        tags.add(i);
+                    }
                 }
             }
 
@@ -135,15 +140,21 @@ public class Intermediate {
 
         for(int i=0; i< quadList.size();i++){
 
-            if (quadList.get(i).getOp().equals(opCode.getRelop().getName())) {
-                if (!quadList.get(i).relopTrueFalse()) {
-                    tags.add(i);
+            if(quadList.get(i).getOp().getClass().getSimpleName().equals("operator")) {
+                operator p = (operator) quadList.get(i).getOp();
+                if (p.getName().equals("relop")) {
+                    if (!quadList.get(i).relopTrueFalse()) {
+                        tags.add(i);
+                    }
                 }
             }
-            else if (quadList.get(i).getOp().equals(opCode.getIfb())) {
-                Boolean x = (Boolean) quadList.get(i).getArg1();
-                if(!x){
-                    tags.add(i);
+            else {
+                String p = (String) quadList.get(i).getOp();
+                if (p.equals(opCode.getIfb())) {
+                    Boolean x = (Boolean) quadList.get(i).getArg1();
+                    if (!x) {
+                        tags.add(i);
+                    }
                 }
             }
 
@@ -174,7 +185,7 @@ public class Intermediate {
     public void print(){            //print stack
         //System.out.println("printing stack");
         for (int i=0; i<this.quadList.size();i++){
-            System.out.println(this.quadList.get(i).getOp() + " " +this.quadList.get(i).getArg3());
+            System.out.println(i + ": " + this.quadList.get(i).getOp() + ", " + this.quadList.get(i).getArg1().toString() + ", " + this.quadList.get(i).getArg2() + ", " + this.quadList.get(i).getArg3());
         }
         //System.out.println("end of printing stack");
     }
