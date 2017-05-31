@@ -19,6 +19,7 @@ public class PrinterAST extends DepthFirstAdapter{
 
     Intermediate im = new Intermediate();
 
+
     int indentation = 0;
     private void addIndentationLevel() {
         indentation++;
@@ -164,6 +165,28 @@ public class PrinterAST extends DepthFirstAdapter{
         table.insertFuncStack(funcObj);
 
        // table.printFuncStack();
+
+        operator relop= new operator("relop","<");
+        //operator op1= new operator("op","+");
+
+        int x=0;
+        //im.genQuad(":=",x,null,5);
+        im.genQuad(relop,3,5,0);
+        im.genQuad(relop,5,3,0);
+        //im.genQuad(op1.,5,3,0);
+       // im.genQuad("jump",null,null,1);
+
+        System .out.println("NEXT LIST TAGS:" + im.nextList());
+
+        System .out.println("TRUE LIST TAGS:" + im.trueList());
+
+        System .out.println("FALSE LIST TAGS:" + im.falseList());
+
+        System .out.println("MERGED LIST :" + im.merge(im.falseList(),im.trueList()));
+
+        /*im.backpatch(3,10);
+        im.print();*/
+
 
     }
 
@@ -360,6 +383,8 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
 
+
+
         Set list = table.getMap().entrySet();
         //System.out.println("MAPPINGS" + list + obj.getName());
         //table.print();
@@ -443,8 +468,12 @@ public class PrinterAST extends DepthFirstAdapter{
             table.insert(obj);
             Set list = table.getMap().entrySet();
           //  System.out.println("MAPPINGS" + list+ obj.getName());
+           // System.err.println(myList.get(i).trim() + " "+  table.FindVariablePosition(myList.get(i).trim()) + " "+ table.FindVariableType(myList.get(i).trim()) );
         }
        // table.print();
+
+
+
 
     }
 

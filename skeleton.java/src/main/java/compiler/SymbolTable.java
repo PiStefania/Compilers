@@ -250,6 +250,40 @@ class SymbolTable {
         return null;  //den to vrhke
     }
 
+    public int FindVariablePosition(String name){
+
+
+        // System.out.println("FIND VARIABLE TYPE:");
+        //System.out.println(name);
+        int value = map.get(position);
+        int i;
+        for(i=value;i>=0;i--){
+            ScopeObject obj = (ScopeObject) mystack.get(i);
+            //System.out.println("item = " +obj.getName() + obj.getType() + " " + name + "!");
+            if (obj.getName().equals(name)){
+                //System.out.println("Found");
+                break;
+                //return obj.getType();
+            }
+        }
+
+
+        Map<Integer, Integer> myNewHashMap = new HashMap();
+        for(Map.Entry<Integer, Integer> entry : map.entrySet()){
+            myNewHashMap.put(entry.getValue(), entry.getKey());
+        }
+
+        while (i<mystack.size()){
+            if (map.values().contains(i)){
+                return myNewHashMap.get(i);
+            }
+            i++;
+        }
+
+        // System.out.println("Not found");
+        return -1;  //den to vrhke
+    }
+
 
 
 
