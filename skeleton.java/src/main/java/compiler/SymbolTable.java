@@ -1,7 +1,9 @@
 package compiler;
 
 import java.util.*;
-
+import java.util.List;
+import java.util.LinkedList;
+import java.util.Scanner;
 
 
 /**
@@ -439,4 +441,9 @@ class SymbolTable {
     public Stack<ScopeObject> getMystack() {
         return mystack;
     }      //get stack
+
+
+
+
 }
+

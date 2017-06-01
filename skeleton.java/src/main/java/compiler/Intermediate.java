@@ -185,7 +185,7 @@ public class Intermediate {
     public void print(){            //print stack
         //System.out.println("printing stack");
         for (int i=0; i<this.quadList.size();i++){
-            System.out.println(i + ": " + this.quadList.get(i).getOp() + ", " + this.quadList.get(i).getArg1().toString() + ", " + this.quadList.get(i).getArg2() + ", " + this.quadList.get(i).getArg3());
+            System.out.println(i + ": " + this.quadList.get(i).getOp() + ", " + this.quadList.get(i).getArg1() + ", " + this.quadList.get(i).getArg2() + ", " + this.quadList.get(i).getArg3());
         }
         //System.out.println("end of printing stack");
     }

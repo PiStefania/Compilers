@@ -1,5 +1,6 @@
 package compiler;
 
+import com.sun.deploy.util.StringUtils;
 import compiler.analysis.DepthFirstAdapter;
 import compiler.node.*;
 import java.util.ArrayList;
@@ -8,8 +9,10 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
 import compiler.SymbolTable;
 import compiler.ScopeObject;
+import jdk.nashorn.internal.runtime.ListAdapter;
 import sun.reflect.generics.scope.Scope;
 
 
@@ -166,15 +169,15 @@ public class PrinterAST extends DepthFirstAdapter{
 
        // table.printFuncStack();
 
-        //operator relop = new operator("relop","<");
+        operator relop= new operator("relop","<");
         //operator op1= new operator("op","+");
 
-        /*int x=0;
-        im.genQuad(":=",x,null,5);
+        int x=0;
+        //im.genQuad(":=",x,null,5);
         im.genQuad(relop,3,5,0);
-        im.genQuad(relop,5,3,1);
+        im.genQuad(relop,5,3,0);
         //im.genQuad(op1.,5,3,0);
-        im.genQuad("jump",null,null,1);
+       // im.genQuad("jump",null,null,1);
 
         System .out.println("NEXT LIST TAGS:" + im.nextList());
 
@@ -182,7 +185,7 @@ public class PrinterAST extends DepthFirstAdapter{
 
         System .out.println("FALSE LIST TAGS:" + im.falseList());
 
-        System .out.println("MERGED LIST :" + im.merge(im.falseList(),im.trueList(),im.nextList()));*/
+        System .out.println("MERGED LIST :" + im.merge(im.falseList(),im.trueList()));
 
         /*im.backpatch(3,10);
         im.print();*/
@@ -194,7 +197,6 @@ public class PrinterAST extends DepthFirstAdapter{
     public void outAProgram(AProgram node){
         //exit stoiva sunarthsewn
         table.deleteFuncStack();
-
 
         System.out.println("Successful compilation!");
 
@@ -394,10 +396,9 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
 
-        im.genQuad(im.getOpCode().getUnit(),myList.get(0).trim(),null,null);
+        im.genQuad("unit",myList.get(0).trim(),null,null);
 
     }
-
 
 
     @Override
@@ -406,11 +407,6 @@ public class PrinterAST extends DepthFirstAdapter{
        // System.out.println(")" );
         table.exit();
         Set list = table.getMap().entrySet();
-
-        List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
-
-        im.genQuad(im.getOpCode().getEndu(),myList.get(0).trim(),null,null);
-
     }
 
 
@@ -510,6 +506,8 @@ public class PrinterAST extends DepthFirstAdapter{
       //  System.out.println(node.getR().getClass().getSimpleName());
 
 
+
+
         List<String> leftList = new ArrayList<String>(Arrays.asList(node.getL().toString().trim().split(" ")));
         List<String> rightList = new ArrayList<String>(Arrays.asList(node.getR().toString().trim().split(" ")));
 
@@ -595,8 +593,6 @@ public class PrinterAST extends DepthFirstAdapter{
         }
 
 
-        im.genQuad(im.getOpCode().getAssignment(),node.getR().toString().trim(),null,name);
-
 
 
     }
@@ -625,11 +621,11 @@ public class PrinterAST extends DepthFirstAdapter{
     public void inAAddSubAllExpr(AAddSubAllExpr node)
     {
 
-        System.out.print("(ADD- SUB EXPRESSION left child: " + node.getL().toString() + "right child"+node.getR().toString()+"!");
+        //System.out.print("(ADD- SUB EXPRESSION left child: " + node.getL().toString() + "right child"+node.getR().toString()+"!");
         String ournode = node.getL().toString() + node.getR().toString();
 
         List<String> myList = new ArrayList<String>(Arrays.asList(ournode.split(" ")));
-        System.out.print("MYLIST "+ myList);
+        //System.out.print("MYLIST "+ myList);
         for(int i=0;i<myList.size();i++) {
 
             if (myList.get(i).equals("+") || myList.get(i).equals("-")) {
@@ -663,24 +659,10 @@ public class PrinterAST extends DepthFirstAdapter{
           //  else System.out.println("null type");
         }
 
-        System.out.println("OK");
-
-        Object w = im.newTemp(Integer.class);
-
-        operator op1= new operator("op",myList.get(1).trim());
-        //im.genQuad();
 
      //   System.out.print("MYLIST IS "+ myList);
 
 
-    }
-
-    @Override
-    public void outAAddSubAllExpr(AAddSubAllExpr node)
-    {
-        String ournode = node.getL().toString() + node.getR().toString();
-        List<String> myList = new ArrayList<String>(Arrays.asList(ournode.split(" ")));
-        System.out.print("OUT "+ myList);
     }
 
 
@@ -688,7 +670,7 @@ public class PrinterAST extends DepthFirstAdapter{
     public void inARestSignsAllExpr(ARestSignsAllExpr node)
     {
 
-        System.out.print("(Rest_signs expr: " + node.getL().toString() + " right child "+node.getR().toString());
+       // System.out.print("(Rest_signs expr: " + node.getL().toString() + " right child "+node.getR().toString());
 
 
 
@@ -736,8 +718,6 @@ public class PrinterAST extends DepthFirstAdapter{
         //System.out.print("MYLIST IS "+ myList);
 
     }
-
-
 
 
     @Override
@@ -864,6 +844,8 @@ public class PrinterAST extends DepthFirstAdapter{
         }catch (MyException e){
             throw new IllegalStateException("CANNOT CALL FUNCTION WITHOUT PREVIOUSLY STATED.CHECK NAME ACCORDINGLY.");
         }
+
+        im.genQuad(im.getOpCode().getCall(),null,null,funcName);
     }
 
     @Override
@@ -874,12 +856,14 @@ public class PrinterAST extends DepthFirstAdapter{
 
         String nodeRight = node.getR().toString().trim();
 
-        List<String> parameters = new ArrayList<String>();
-        Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(nodeRight);
 
-        while (m.find())
-            parameters.add(m.group(1)); // Add .replace("\"", "") to remove surrounding quotes.
+        List<String> parameters = new ArrayList<String>(Arrays.asList(nodeRight.split(" ")));
 
+       // Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(nodeRight);
+
+       // while (m.find())
+        //    parameters.add(m.group(1)); // Add .replace("\"", "") to remove surrounding quotes.
+       // System.err.println(parameters);
 
        // System.out.println(parameters + "!");
 
@@ -891,7 +875,44 @@ public class PrinterAST extends DepthFirstAdapter{
         }catch (MyException e){
             throw new IllegalStateException("CANNOT CALL FUNCTION WITHOUT PREVIOUSLY STATED.\nCHECK NAME AND NUMBER OF PARAMETERS ACCORDINGLY.");
         }
+
+
+
     }
+
+
+    @Override
+    public void outAFuncCallWithStmt(AFuncCallWithStmt node){
+        String funcName = node.getL().toString().trim();
+        im.genQuad(im.getOpCode().getCall(),null,null,funcName);
+    }
+
+    @Override
+    public void inAParametersAllExpr(AParametersAllExpr node){
+        //System.err.println("ALL PARAMETERS: left " + node.getL().toString() +" right " + node.getR().toString());
+
+        List <String> parameters = new ArrayList<String>();
+        parameters.add(node.getL().toString());
+
+        List<String> newl = (List) node.getR();
+
+
+
+
+        for (int i=0; i<newl.size();i++){
+            parameters.add(newl.get(i));
+        }
+
+
+
+        for (int i=0; i<parameters.size();i++) {
+
+            im.genQuad(im.getOpCode().getPar(), parameters.get(i),"V",null);
+        }
+
+
+    }
+
 
 
 
