@@ -187,23 +187,6 @@ public class PrinterAST extends DepthFirstAdapter{
 
         System .out.println("MERGED LIST :" + im.merge(im.falseList(),im.trueList()));
 
-        /*im.backpatch(3,10);
-        im.print();*/
-
-        //example of w
-
-        Object w = im.newTemp("Integer");
-
-        System.out.println("W= " + w.getClass().getSimpleName());
-
-        InterReg reg = new InterReg(w,1,"call");
-
-        im.insertReg(reg);
-
-        im.printReg();
-
-
-
 
     }
 
@@ -542,6 +525,9 @@ public class PrinterAST extends DepthFirstAdapter{
             //not sure about this one
             int length=str.length()-1;
             type = "char[" +length+"]";
+
+            im.genQuad(im.getOpCode().getAssignment(),str,null,name);
+
         }
         else if (node.getR().getClass().getSimpleName().equals("AFuncAllExpr")) {
          //   System.out.println("FUNCTION CALL");
@@ -556,14 +542,18 @@ public class PrinterAST extends DepthFirstAdapter{
                 throw new IllegalStateException("ERROR! A FUNCTION THAT WASN'T DECLARED");
             }
 
+            im.genQuad(im.getOpCode().getAssignment(),str,null,name);
+
         }
         else if (node.getR().getClass().getSimpleName().equals("ALetterAllExpr")) {
          //   System.out.println("CHAR");
             type= "char";
+            im.genQuad(im.getOpCode().getAssignment(),str,null,name);
         }
         else if (node.getR().getClass().getSimpleName().equals("AConstantAllExpr")){
          //   System.out.println("CONSTANT");
             type= "int";
+            im.genQuad(im.getOpCode().getAssignment(),str,null,name);
         }
         else if (node.getR().getClass().getSimpleName().equals("AAddSubAllExpr")){
          //   System.out.println("AAddSubAllExpr");
@@ -576,6 +566,7 @@ public class PrinterAST extends DepthFirstAdapter{
         else if (node.getR().getClass().getSimpleName().equals("AWithPlminAllExpr")){
           //  System.out.println("AWithPlminAllExpr");
             type= "int";
+            im.genQuad(im.getOpCode().getAssignment(),str,null,name);
         }
         else {
           //  System.out.println("VARIABLE");
@@ -590,6 +581,8 @@ public class PrinterAST extends DepthFirstAdapter{
                 throw new IllegalStateException("ERROR! A VARIABLE WITH NO TYPE");
             }
             //find second variable type
+
+            im.genQuad(im.getOpCode().getAssignment(),str,null,name);
         }
 
 
@@ -605,8 +598,6 @@ public class PrinterAST extends DepthFirstAdapter{
         catch (MyException e){
             throw new IllegalStateException("ERROR INCORECT TYPE OF VARIABLE");
         }
-
-
 
 
     }
@@ -929,6 +920,372 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
 
+    @Override
+    public void inAReturnStmt(AReturnStmt node){
+        im.genQuad(im.getOpCode().getRet(),null,null,null);
+    }
+
+    @Override
+    public void inAReturn2Stmt(AReturn2Stmt node){
+        im.genQuad(im.getOpCode().getRet(),null,null,null);
+    }
+
+
+    @Override
+    public void inAReturnWithStmt(AReturnWithStmt node) {
+
+        System.err.println("RETURN EXPR2: " + node.getAllExpr().toString() + node.getAllExpr().getClass().getSimpleName());
+
+        String type = node.getAllExpr().getClass().getSimpleName();
+        String ourType = null;
+
+        if (type.equals("AConstantAllExpr")){
+            ourType = "Integer";
+        }
+        else if (type.equals("ALetterAllExpr"))
+            ourType = "Char";
+        else if (type.equals("AFuncAllExpr")){
+            List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
+            ourType = table.getFuncType(nameList.get(0));
+            try{
+                if(ourType == null){
+                    throw new MyException("FUNC NOT FOUND");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("FUNC NOT FOUND");
+            }
+
+            if (ourType.contains("int"))
+                ourType = "Integer";
+            else if(ourType.contains("char"))
+                ourType = "Char";
+        }
+        else if (type.equals("ALValueAllExpr")){
+            //array
+            List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
+            ourType = table.FindVariableType(nameList.get(0));
+            System.err.println("ARRAYY " + nameList);
+
+            try{
+                if(ourType == null){
+                    throw new MyException("FUNC NOT FOUND");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("FUNC NOT FOUND");
+            }
+
+            if (ourType.contains("int"))
+                ourType = "Integer";
+            else if(ourType.contains("char"))
+                ourType = "Char";
+
+
+            List<String> tempList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
+            System.err.println(tempList);
+            tempList.remove(0);
+            tempList.remove("[");
+            tempList.remove("]");
+            System.err.println(tempList);
+            Object w = im.newTemp(ourType);
+            String name = "$" + im.getCount();
+            String prevName = name;
+            InterReg reg = new InterReg(w,im.getCount(),im.getOpCode().getArray(),w.getClass().getSimpleName(),name);
+            im.insertReg(reg);
+            im.genQuad(im.getOpCode().getArray(),nameList.get(0),tempList.get(0), name);
+
+            w = im.newTemp(ourType);
+            String name2 = "$" + im.getCount();
+
+            reg = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name2);
+            im.insertReg(reg);
+
+            im.genQuad(im.getOpCode().getAssignment(),prevName,null, name2);
+
+            im.genQuad(im.getOpCode().getRet(),null,null,null);
+            return;
+        }
+
+        //System.err.println("Type: " + ourType);
+
+        Object w = im.newTemp(ourType);
+        String name = "$" + im.getCount();
+
+        InterReg reg = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name);
+        im.insertReg(reg);
+
+        im.genQuad(im.getOpCode().getAssignment(),node.getAllExpr(),null, name);
+
+        im.genQuad(im.getOpCode().getRet(),null,null,null);
+
+    }
+
+    @Override
+    public void inAReturnWith2Stmt(AReturnWith2Stmt node) {
+
+        //System.err.println("RETURN WIITH PAR2: " + node.getAllExpr().toString());
+        System.err.println("RETURN EXPR2: " + node.getAllExpr().toString() + node.getAllExpr().getClass().getSimpleName());
+
+        String type = node.getAllExpr().getClass().getSimpleName();
+        String ourType = null;
+
+        if (type.equals("AConstantAllExpr")){
+            ourType = "Integer";
+        }
+        else if (type.equals("ALetterAllExpr"))
+            ourType = "Char";
+        else if (type.equals("AFuncAllExpr")){
+            List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
+            ourType = table.getFuncType(nameList.get(0));
+            try{
+                if(ourType == null){
+                    throw new MyException("FUNC NOT FOUND");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("FUNC NOT FOUND");
+            }
+
+            if (ourType.contains("int"))
+                ourType = "Integer";
+            else if(ourType.contains("char"))
+                ourType = "Char";
+        }
+        else if (type.equals("ALValueAllExpr")){
+            //array
+            List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
+            ourType = table.FindVariableType(nameList.get(0));
+            System.err.println("ARRAYY " + nameList);
+
+            try{
+                if(ourType == null){
+                    throw new MyException("FUNC NOT FOUND");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("FUNC NOT FOUND");
+            }
+
+            if (ourType.contains("int"))
+                ourType = "Integer";
+            else if(ourType.contains("char"))
+                ourType = "Char";
+
+
+            List<String> tempList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
+            System.err.println(tempList);
+            tempList.remove(0);
+            tempList.remove("[");
+            tempList.remove("]");
+            System.err.println(tempList);
+            Object w = im.newTemp(ourType);
+            String name = "$" + im.getCount();
+            String prevName = name;
+            InterReg reg = new InterReg(w,im.getCount(),im.getOpCode().getArray(),w.getClass().getSimpleName(),name);
+            im.insertReg(reg);
+            im.genQuad(im.getOpCode().getArray(),nameList.get(0),tempList.get(0), name);
+
+            w = im.newTemp(ourType);
+            String name2 = "$" + im.getCount();
+
+            reg = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name2);
+            im.insertReg(reg);
+
+            im.genQuad(im.getOpCode().getAssignment(),prevName,null, name2);
+
+            im.genQuad(im.getOpCode().getRet(),null,null,null);
+            return;
+        }
+
+        //System.err.println("Type: " + ourType);
+
+        Object w = im.newTemp(ourType);
+        String name = "$" + im.getCount();
+
+        InterReg reg = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name);
+        im.insertReg(reg);
+
+        im.genQuad(im.getOpCode().getAssignment(),node.getAllExpr(),null, name);
+
+        im.genQuad(im.getOpCode().getRet(),null,null,null);
+
+    }
+
+    @Override
+    public void inAReturnExprStmt(AReturnExprStmt node) {
+
+        //System.err.println("RETURN EXPR1: " + node.getAllExpr().toString());
+        System.err.println("RETURN EXPR2: " + node.getAllExpr().toString() + node.getAllExpr().getClass().getSimpleName());
+
+        String type = node.getAllExpr().getClass().getSimpleName();
+        String ourType = null;
+
+        if (type.equals("AConstantAllExpr")){
+            ourType = "Integer";
+        }
+        else if (type.equals("ALetterAllExpr"))
+            ourType = "Char";
+        else if (type.equals("AFuncAllExpr")){
+            List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
+            ourType = table.getFuncType(nameList.get(0));
+            try{
+                if(ourType == null){
+                    throw new MyException("FUNC NOT FOUND");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("FUNC NOT FOUND");
+            }
+
+            if (ourType.contains("int"))
+                ourType = "Integer";
+            else if(ourType.contains("char"))
+                ourType = "Char";
+        }
+        else if (type.equals("ALValueAllExpr")){
+            //array
+            List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
+            ourType = table.FindVariableType(nameList.get(0));
+            System.err.println("ARRAYY " + nameList);
+
+            try{
+                if(ourType == null){
+                    throw new MyException("FUNC NOT FOUND");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("FUNC NOT FOUND");
+            }
+
+            if (ourType.contains("int"))
+                ourType = "Integer";
+            else if(ourType.contains("char"))
+                ourType = "Char";
+
+
+            List<String> tempList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
+            System.err.println(tempList);
+            tempList.remove(0);
+            tempList.remove("[");
+            tempList.remove("]");
+            System.err.println(tempList);
+            Object w = im.newTemp(ourType);
+            String name = "$" + im.getCount();
+            String prevName = name;
+            InterReg reg = new InterReg(w,im.getCount(),im.getOpCode().getArray(),w.getClass().getSimpleName(),name);
+            im.insertReg(reg);
+            im.genQuad(im.getOpCode().getArray(),nameList.get(0),tempList.get(0), name);
+
+            w = im.newTemp(ourType);
+            String name2 = "$" + im.getCount();
+
+            reg = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name2);
+            im.insertReg(reg);
+
+            im.genQuad(im.getOpCode().getAssignment(),prevName,null, name2);
+
+            im.genQuad(im.getOpCode().getRet(),null,null,null);
+            return;
+        }
+
+        //System.err.println("Type: " + ourType);
+
+        Object w = im.newTemp(ourType);
+        String name = "$" + im.getCount();
+
+        InterReg reg = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name);
+        im.insertReg(reg);
+
+        im.genQuad(im.getOpCode().getAssignment(),node.getAllExpr(),null, name);
+
+        im.genQuad(im.getOpCode().getRet(),null,null,null);
+
+
+    }
+
+    @Override
+    public void inAReturnExpr2Stmt(AReturnExpr2Stmt node) {
+
+        System.err.println("RETURN EXPR2: " + node.getAllExpr().toString() + node.getAllExpr().getClass().getSimpleName());
+
+        String type = node.getAllExpr().getClass().getSimpleName();
+        String ourType = null;
+
+        if (type.equals("AConstantAllExpr")){
+            ourType = "Integer";
+        }
+        else if (type.equals("ALetterAllExpr"))
+            ourType = "Char";
+        else if (type.equals("AFuncAllExpr")){
+            List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
+            ourType = table.getFuncType(nameList.get(0));
+            try{
+                if(ourType == null){
+                    throw new MyException("FUNC NOT FOUND");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("FUNC NOT FOUND");
+            }
+
+            if (ourType.contains("int"))
+                ourType = "Integer";
+            else if(ourType.contains("char"))
+                ourType = "Char";
+        }
+        else if (type.equals("ALValueAllExpr")){
+            //array
+            List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
+            ourType = table.FindVariableType(nameList.get(0));
+            System.err.println("ARRAYY " + nameList);
+
+            try{
+                if(ourType == null){
+                    throw new MyException("FUNC NOT FOUND");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("FUNC NOT FOUND");
+            }
+
+            if (ourType.contains("int"))
+                ourType = "Integer";
+            else if(ourType.contains("char"))
+                ourType = "Char";
+
+
+            List<String> tempList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
+            System.err.println(tempList);
+            tempList.remove(0);
+            tempList.remove("[");
+            tempList.remove("]");
+            System.err.println(tempList);
+            Object w = im.newTemp(ourType);
+            String name = "$" + im.getCount();
+            String prevName = name;
+            InterReg reg = new InterReg(w,im.getCount(),im.getOpCode().getArray(),w.getClass().getSimpleName(),name);
+            im.insertReg(reg);
+            im.genQuad(im.getOpCode().getArray(),nameList.get(0),tempList.get(0), name);
+
+            w = im.newTemp(ourType);
+            String name2 = "$" + im.getCount();
+
+            reg = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name2);
+            im.insertReg(reg);
+
+            im.genQuad(im.getOpCode().getAssignment(),prevName,null, name2);
+
+            im.genQuad(im.getOpCode().getRet(),null,null,null);
+            return;
+        }
+
+        //System.err.println("Type: " + ourType);
+
+        Object w = im.newTemp(ourType);
+        String name = "$" + im.getCount();
+
+        InterReg reg = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name);
+        im.insertReg(reg);
+
+        im.genQuad(im.getOpCode().getAssignment(),node.getAllExpr(),null, name);
+
+        im.genQuad(im.getOpCode().getRet(),null,null,null);
+
+
+    }
 
 
 

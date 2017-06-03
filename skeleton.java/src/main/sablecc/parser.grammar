@@ -210,7 +210,7 @@ Productions
           | {while} while cond do_id stmt                          {->[New stmt.while(cond.cond, [stmt.stmt])]}
           | {return_with_expr} return parentheses_expr semicolon_id     {->[New stmt.return_with(parentheses_expr.all_expr)]}
           | {return_expr} return all_expr semicolon_id                {->[New stmt.return_expr(all_expr.all_expr)]}
-          | {return} return semicolon                            {->[]};
+          | {return} return semicolon                            {->[New stmt.return()]};
 
 
 
@@ -227,7 +227,7 @@ Productions
                      | {while} while cond do_id stmt_with_else                   {->[New stmt.while_else(cond.cond, [stmt_with_else.stmt])]}       //while?
                      | {return_with_expr} return parentheses_expr semicolon_id   {->[New stmt.return_with2(parentheses_expr.all_expr)]}
                      | {return_expr} return all_expr semicolon_id               {->[New stmt.return_expr2(all_expr.all_expr)]}
-                     | {return} return semicolon                          {->[]};
+                     | {return} return semicolon                          {->[New stmt.return2()]};
 
     if_else_stmt{->stmt} = if cond then_id [then_stmt]:stmt_with_else else_id [else_stmt]:stmt_with_else   {->New  stmt.with_else2(cond,New stmt_with_else2([then_stmt.stmt],[else_stmt.stmt]))};
 
@@ -249,7 +249,7 @@ Productions
 
     l_value{->stmt} = {var} var_name                {->New stmt.var(var_name)}
               | {constant_string} constant_string      {->New stmt.string(constant_string)}
-              | {l_value} l_value lbr_id all_expr rbr_id  {->New stmt.l_value([l_value.stmt],all_expr.all_expr)} ;
+              | {l_value} l_value l_br all_expr r_br  {->New stmt.l_value(New name_value([l_value.stmt],l_br),New expr_value(all_expr.all_expr,r_br))} ;
 
     lbr_id = l_br;
     rbr_id = r_br;
@@ -372,18 +372,23 @@ Abstract Syntax Tree
               | {func_call_without} var_name
               | {var} var_name
               | {string} constant_string
-              | {l_value}[l]: stmt* [r]:all_expr
+              | {l_value}[l]: name_value [r]:expr_value
               | {return_with} all_expr
               | {return_expr} all_expr
-              | {return} stmt*
+              | {return}
               | {return_with2} all_expr
               | {return_expr2} all_expr
-              | {return2} stmt*;
+              | {return2};
 
 
 
     stmt_with_else =  [l]: stmt* [r]:stmt*;
     stmt_with_else2 = [l]: stmt* [r]:stmt*;
+
+    name_value = [l]: stmt* [r]: l_br;
+    expr_value = [l]: all_expr [r]: r_br;
+
+
 
 
     all_expr =   {add_sub} [l]:add_sub_expr [r]:all_expr

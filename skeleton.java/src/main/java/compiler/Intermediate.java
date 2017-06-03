@@ -65,16 +65,21 @@ public class Intermediate {
 
     public Object newTemp(String nameType){
 
+        //Object w1 = new Object();
         if(nameType.equals("String")){
             String w = new String();
             return w;
         }
         else if(nameType.equals("Integer")){
-            int w = 0;
+            int w = -1;
             return w;
         }
         else if(nameType.equals("Boolean")){
-            boolean w = true;
+            boolean w = false;
+            return w;
+        }
+        else if(nameType.equals(("Char"))){
+            char w = '\u0000';
             return w;
         }
         return 1;
@@ -218,7 +223,7 @@ public class Intermediate {
     public void printReg(){            //print list
 
         for (int i=0; i<this.regList.size();i++){
-            System.out.println("W: " + regList.get(i).getW().getClass().getSimpleName() + " of tag: " + regList.get(i).getTag() + " of call: " + regList.get(i).getCall());
+            System.out.println("W: " + regList.get(i).getW() + " of tag: " + regList.get(i).getTag() + " of call: " + regList.get(i).getCall() + " of type: " + this.regList.get(i).getType());
         }
 
     }
