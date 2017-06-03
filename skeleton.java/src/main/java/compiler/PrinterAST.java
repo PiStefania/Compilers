@@ -1,6 +1,5 @@
 package compiler;
 
-import com.sun.deploy.util.StringUtils;
 import compiler.analysis.DepthFirstAdapter;
 import compiler.node.*;
 import java.util.ArrayList;
@@ -174,8 +173,9 @@ public class PrinterAST extends DepthFirstAdapter{
 
         int x=0;
         //im.genQuad(":=",x,null,5);
-        im.genQuad(relop,3,5,0);
-        im.genQuad(relop,5,3,0);
+        //im.genQuad(relop,3,5,0);
+
+        //im.genQuad(relop,5,3,0);
         //im.genQuad(op1.,5,3,0);
        // im.genQuad("jump",null,null,1);
 
@@ -189,6 +189,20 @@ public class PrinterAST extends DepthFirstAdapter{
 
         /*im.backpatch(3,10);
         im.print();*/
+
+        //example of w
+
+        Object w = im.newTemp("Integer");
+
+        System.out.println("W= " + w.getClass().getSimpleName());
+
+        InterReg reg = new InterReg(w,1,"call");
+
+        im.insertReg(reg);
+
+        im.printReg();
+
+
 
 
     }

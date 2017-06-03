@@ -11,6 +11,7 @@ public class Intermediate {
 
     private int count;
     List<Quad> quadList;
+    List<InterReg> regList;
 
     private OpCode opCode;
 
@@ -19,6 +20,7 @@ public class Intermediate {
         this.count=0;
         this.quadList = new ArrayList<Quad>();
         this.opCode = new OpCode();
+        this.regList = new ArrayList<InterReg>();
     }
 
     public int getCount() {return count;}
@@ -55,9 +57,28 @@ public class Intermediate {
         return count;
     }
 
+    /*
     public <t> t newTemp(Object t){
         Object myTemp = new Object();
         return (t) myTemp;
+    }*/
+
+    public Object newTemp(String nameType){
+
+        if(nameType.equals("String")){
+            String w = new String();
+            return w;
+        }
+        else if(nameType.equals("Integer")){
+            int w = 0;
+            return w;
+        }
+        else if(nameType.equals("Boolean")){
+            boolean w = true;
+            return w;
+        }
+        return 1;
+
     }
 
     public List <Integer> emptyList(){
@@ -182,12 +203,24 @@ public class Intermediate {
 
     }
 
-    public void print(){            //print stack
-        //System.out.println("printing stack");
+    public void print(){            //print list
+        //System.out.println("printing list");
         for (int i=0; i<this.quadList.size();i++){
             System.out.println(i + ": " + this.quadList.get(i).getOp() + ", " + this.quadList.get(i).getArg1() + ", " + this.quadList.get(i).getArg2() + ", " + this.quadList.get(i).getArg3());
         }
-        //System.out.println("end of printing stack");
+        //System.out.println("end of printing list");
+    }
+
+    public void insertReg(InterReg reg){
+        this.regList.add(reg);
+    }
+
+    public void printReg(){            //print list
+
+        for (int i=0; i<this.regList.size();i++){
+            System.out.println("W: " + regList.get(i).getW().getClass().getSimpleName() + " of tag: " + regList.get(i).getTag() + " of call: " + regList.get(i).getCall());
+        }
+
     }
 
 
