@@ -195,8 +195,8 @@ class SymbolTable {
     public boolean lookupVarAndType(ScopeObject obj){                   //search variable in order to find the same variable in stack with diff type(true)
 
 
-       // System.out.println("LOOKUP VAR AND TYPE:");
         int value = map.get(position);
+
 
         for(int i=value;i>=0;i--){
             //System.out.println(i);
@@ -210,11 +210,27 @@ class SymbolTable {
                         return false;
                     }
                 }
+                if(obj.getType().contains("char[") && obj.getType().contains("]")){
+                    if(obj2.getType().contains("char[") && obj2.getType().contains("]")){
+                        return false;
+                    }
+                    if(obj2.getType().equals("char")){
+                        return false;
+                    }
+                }
                 if(obj2.getType().contains("int[") && obj2.getType().contains("]")){
                     if(obj.getType().contains("int[") && obj.getType().contains("]")){
                         return false;
                     }
                     if(obj.getType().equals("int")){
+                        return false;
+                    }
+                }
+                if(obj.getType().contains("int[") && obj.getType().contains("]")){
+                    if(obj2.getType().contains("int[") && obj2.getType().contains("]")){
+                        return false;
+                    }
+                    if(obj2.getType().equals("int")){
                         return false;
                     }
                 }

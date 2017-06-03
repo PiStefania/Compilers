@@ -45,7 +45,7 @@ public class Intermediate {
         if (arg3 != null)
             forPrint += " " +arg3.toString();
 
-        System.out.println(count + ":" +forPrint);
+        //System.out.println(count + ":" +forPrint);
         count++;
         Quad myquad = new Quad(op,arg1,arg2,arg3);
         this.quadList.add(myquad);
