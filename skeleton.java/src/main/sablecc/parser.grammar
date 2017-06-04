@@ -162,7 +162,7 @@ Productions
 
     header_helper2 = r_par colon;
 
-    fpar_def{->func_def} = {with_ref} ref var_name var_def_helper* colon_id fpar_type{->New func_def.fpar_def(New fpar(var_name, [var_def_helper.func_def]),fpar_type.func_def)}        /*ref var_name fpar_type */
+    fpar_def{->func_def} = {with_ref} ref var_name var_def_helper* colon_id fpar_type{->New func_def.fpar_def(New fpar(ref,var_name),New fpar_right([var_def_helper.func_def],fpar_type.func_def))}        /*ref var_name fpar_type */
                |{no_ref} var_name var_def_helper* colon_id fpar_type {->New func_def.fpar_def_no_ref(New no_ref(var_name, [var_def_helper.func_def]),fpar_type.func_def)};
 
     data_type{->func_def} = {int} int {->New func_def.int(int)}
@@ -332,7 +332,7 @@ Abstract Syntax Tree
     func_def = {all} [l]: func_def [r]: func_definition                         //done
                | {header_with} [l]:head [r]:func_def                            //done
                | {header} [l]:var_name [r]:func_def
-               | {fpar_def} [l]:fpar [r]:func_def                          //done
+               | {fpar_def} [l]:fpar [r]:fpar_right                          //done
                | {fpar_def_no_ref} [l]:no_ref [r]:func_def
                | {header_big} [l]:func_def [r]:func_def*
                | {int} int                                                 //done
@@ -355,7 +355,8 @@ Abstract Syntax Tree
 
     func_definition = [l]:func_def* [r]:stmt*;
     head = [l]:var_name [r]:func_def;
-    fpar = [l]:var_name [r]:func_def*;
+    fpar = [l]:ref [r]:var_name;
+    fpar_right = [l]: func_def* [r]: func_def;
     no_ref = [l]:var_name [r]:func_def*;
     var1 = [l]:var_name [r]:func_def*;
 

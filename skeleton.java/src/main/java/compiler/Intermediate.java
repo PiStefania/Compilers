@@ -211,8 +211,15 @@ public class Intermediate {
     public void print(){            //print list
         //System.out.println("printing list");
         for (int i=0; i<this.quadList.size();i++){
-            System.out.println(i + ": " + this.quadList.get(i).getOp() + ", " + this.quadList.get(i).getArg1() + ", " + this.quadList.get(i).getArg2() + ", " + this.quadList.get(i).getArg3());
+            if(this.quadList.get(i).getOp().getClass().getSimpleName().equals("operator")){
+                operator myOp = (operator) this.quadList.get(i).getOp();
+                System.out.println(i + ": " +myOp.getValue() + ", " + this.quadList.get(i).getArg1() + ", " + this.quadList.get(i).getArg2() + ", " + this.quadList.get(i).getArg3());
+
+            }
+            else
+                System.out.println(i + ": " + this.quadList.get(i).getOp() + ", " + this.quadList.get(i).getArg1() + ", " + this.quadList.get(i).getArg2() + ", " + this.quadList.get(i).getArg3());
         }
+
         //System.out.println("end of printing list");
     }
 
@@ -226,6 +233,24 @@ public class Intermediate {
             System.out.println("W: " + regList.get(i).getW() + " of tag: " + regList.get(i).getTag() + " of call: " + regList.get(i).getCall() + " of type: " + this.regList.get(i).getType());
         }
 
+    }
+
+    public void insertRet(){
+        //System.err.println("WE ARE INSIDE insertRet");
+        int counter = getCount()-2;
+
+        if (this.quadList.get(getCount()-1).getOp().equals(this.getOpCode().getCall())){
+            //System.err.println("WE ARE INSIDE CALL");
+            while(counter>=0){
+                if (this.quadList.get(counter).getOp().equals(this.getOpCode().getPar())){
+                    //System.err.println("WE ARE INSIDE PAR");
+                    this.quadList.get(counter).setArg2("RET");
+                }
+                else
+                    break;
+                counter--;
+            }
+        }
     }
 
 
