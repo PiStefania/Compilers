@@ -12,7 +12,7 @@ public class Main
 {
 	public static void main(String[] arguments) throws FileNotFoundException
 	{
-		File file = new File("C:/Users/stefa/Desktop/test.grace");
+		File file = new File("D:/σχολη/6o εξαμηνο/Μεταγλωττιστες/εργασια/examples/test.grace");
 		try
 		{
 			Parser p =

@@ -312,7 +312,7 @@ Productions
                  | {and} term_cond2 logical_and term_cond1 {->New cond.and(term_cond2.cond,term_cond1.cond)};
 
     term_cond1{->cond} = {factor_c} factor_cond {->factor_cond.cond}
-                | {not} logical_not* factor_cond    {->New cond.not([logical_not],factor_cond.cond)} ;
+                | {not} [l]:logical_not [r]:logical_not*  factor_cond    {->New cond.not(New nots(l ,[r]),factor_cond.cond)} ;
 
     logical_and = and;
     logical_or = or;
@@ -410,9 +410,9 @@ Abstract Syntax Tree
     cond = {or} [l]:cond [r]:cond
             | {and} [l]:cond [r]:cond
             | {exprsigns} [l]:ass_signs_cond [r]:all_expr
-            | {not} [l]:logical_not* [r]:cond;
+            | {not} [l]:nots [r]:cond;
 
-
+    nots = [l]:logical_not [r]:logical_not*;
     logical_not = not;
 
     ass_signs_cond = [l]:all_expr [r]:ass_signs;

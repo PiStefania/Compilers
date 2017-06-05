@@ -936,6 +936,10 @@ public class PrinterAST extends DepthFirstAdapter{
         InterReg reg = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name2);
         im.insertReg(reg);
 
+        String regRight = im.Place(node.getR().toString().trim());
+
+        String regLeft = im.Place(left);
+
 
 
         if (myList.size()==2){
@@ -943,14 +947,36 @@ public class PrinterAST extends DepthFirstAdapter{
                 im.genQuad(myOp,myList.get(0),rightNumb,name2);
             }
             else {
-                im.genQuad(myOp, myList.get(0), im.Place(node.getR().toString().trim()), name2);
+                try{
+                    if(regRight == null){
+                        throw new MyException("EXPRESSION NOT FOUND");
+                    }
+                }catch (MyException e){
+                    throw new IllegalStateException("EXPRESSION NOT FOUND");
+                }
+
+                im.genQuad(myOp, myList.get(0),regRight , name2);
             }
         }
         else {
+            try{
+                if(regLeft == null){
+                    throw new MyException("EXPRESSION NOT FOUND");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("EXPRESSION NOT FOUND");
+            }
             if (rightNumlist.size() == 1) {
-                im.genQuad(myOp, im.Place(left), rightNumb, name2);
+                im.genQuad(myOp, regLeft, rightNumb, name2);
             } else {
-                im.genQuad(myOp, im.Place(left), im.Place(node.getR().toString().trim()), name2);
+                try{
+                    if(regRight == null){
+                        throw new MyException("EXPRESSION NOT FOUND");
+                    }
+                }catch (MyException e){
+                    throw new IllegalStateException("EXPRESSION NOT FOUND");
+                }
+                im.genQuad(myOp, regLeft, regRight, name2);
             }
         }
     }
@@ -983,20 +1009,48 @@ public class PrinterAST extends DepthFirstAdapter{
         InterReg reg = new InterReg(w, im.getCount(), im.getOpCode().getAssignment(), w.getClass().getSimpleName(), name2);
         im.insertReg(reg);
 
+        String regRight = im.Place(node.getR().toString().trim());
+
+
+        String regLeft = im.Place(left);
+
+
         if (myList.size()==2){
 
             if(rightNumlist.size()==1){
                 im.genQuad(myOp,myList.get(0),rightNumb,name2);
             }
             else {
-                im.genQuad(myOp, myList.get(0), im.Place(node.getR().toString().trim()), name2);
+                try{
+                    if(regRight == null){
+                        throw new MyException("EXPRESSION NOT FOUND");
+                    }
+                }catch (MyException e){
+                    throw new IllegalStateException("EXPRESSION NOT FOUND");
+                }
+                im.genQuad(myOp, myList.get(0), regRight, name2);
             }
         }
         else {
+            try{
+                if(regLeft == null){
+                    throw new MyException("EXPRESSION NOT FOUND");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("EXPRESSION NOT FOUND");
+            }
+
             if (rightNumlist.size() == 1) {
-                im.genQuad(myOp, im.Place(left), rightNumb, name2);
+                im.genQuad(myOp, regLeft, rightNumb, name2);
             } else {
-                im.genQuad(myOp, im.Place(left), im.Place(node.getR().toString().trim()), name2);
+                try{
+                    if(regRight == null){
+                        throw new MyException("EXPRESSION NOT FOUND");
+                    }
+                }catch (MyException e){
+                    throw new IllegalStateException("EXPRESSION NOT FOUND");
+                }
+                im.genQuad(myOp, regLeft, regRight, name2);
             }
         }
     }
@@ -1174,7 +1228,7 @@ public class PrinterAST extends DepthFirstAdapter{
         System.out.println("(EXPRESSION CONDITION: left child " + node.getL().toString() + " right child "+node.getR().toString() + "!");
 
         List<String> myList = new ArrayList(Arrays.asList(node.getL().toString().trim().split("\\s+")));
-      //  System.err.println("addsub myList "+myList);
+        System.err.println("type "+node.getL().toString() + " " +node.getL().getClass().getSimpleName());
         String op = myList.get(myList.size()-1);
       //  System.err.println("op "+op);
         String rightNumb = node.getR().toString().trim();
@@ -1193,7 +1247,7 @@ public class PrinterAST extends DepthFirstAdapter{
         String name2 = "$" + im.getCount();
 
         String wholeExpr = node.getL().toString() + node.getR().toString().trim();
-       // System.err.println("wholeExpr "+wholeExpr);
+        System.err.println("wholeExpr "+wholeExpr);
 
 
 
@@ -1202,6 +1256,20 @@ public class PrinterAST extends DepthFirstAdapter{
         InterReg reg = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name2);
         im.insertReg(reg);
 
+        String regRight = im.Place(node.getR().toString().trim());
+       /* try{
+            if(regRight == null){
+                throw new MyException("EXPRESSION NOT FOUND");
+            }
+        }catch (MyException e){
+            throw new IllegalStateException("EXPRESSION NOT FOUND");
+        }*/
+
+
+
+        String regLeft = im.Place(left);
+       /* */
+
 
 
         if (myList.size()==2){
@@ -1209,14 +1277,38 @@ public class PrinterAST extends DepthFirstAdapter{
                 im.genQuad(myOp,myList.get(0),rightNumb,name2);
             }
             else {
-                im.genQuad(myOp, myList.get(0), im.Place(node.getR().toString().trim()), name2);
+                try{
+                    if(regRight == null){
+
+                        throw new MyException("EXPRESSION NOT FOUND");
+                    }
+                }catch (MyException e){
+                    throw new IllegalStateException("EXPRESSION NOT FOUND");
+                }
+                im.genQuad(myOp, myList.get(0), regRight, name2);
             }
         }
         else {
+            try{
+                if(regLeft == null){
+                    System.out.println("ERRRORRR: "+left);
+                    throw new MyException("EXPRESSION NOT FOUND");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("EXPRESSION NOT FOUND");
+            }
             if (rightNumlist.size() == 1) {
-                im.genQuad(myOp, im.Place(left), rightNumb, name2);
+                im.genQuad(myOp, regLeft, rightNumb, name2);
             } else {
-                im.genQuad(myOp, im.Place(left), im.Place(node.getR().toString().trim()), name2);
+
+                try{
+                    if(regRight == null){
+                        throw new MyException("EXPRESSION NOT FOUND");
+                    }
+                }catch (MyException e){
+                    throw new IllegalStateException("EXPRESSION NOT FOUND");
+                }
+                im.genQuad(myOp, regLeft, regRight, name2);
             }
         }
     }
@@ -1240,7 +1332,7 @@ public class PrinterAST extends DepthFirstAdapter{
 
     @Override
     public void inAFuncCallWithStmt(AFuncCallWithStmt node){
-       // System.err.println("FUNC CALL WITH PAR: " + node.getL().toString() + "!" + node.getR().toString() + "!");
+       // System.out.println("FUNC CALL WITH PAR: " + node.getL().toString() + "!" + node.getR().toString() + "!");
 
         String funcName = node.getL().toString().trim();
 
@@ -1715,6 +1807,142 @@ public class PrinterAST extends DepthFirstAdapter{
 
         }
     }
+
+
+    @Override
+    public void outAOrCond(AOrCond node) {
+        System.out.println("AOrCond Left "+node.getL().toString() + " right " +node.getR().toString());
+
+        String left = node.getL().toString().trim();
+        String right = node.getR().toString().trim();
+        String wholeString = node.getL().toString() +node.getR().toString().trim();
+
+        im.insertPlaceHelper(wholeString,"$" + im.getCount());
+       // System.err.println(wholeString);
+
+        String regLeft = im.Place(left);
+        try{
+            if(regLeft == null){
+                throw new MyException("EXPRESSION NOT FOUND");
+            }
+        }catch (MyException e){
+            throw new IllegalStateException("EXPRESSION NOT FOUND");
+        }
+        String regRight = im.Place(right);
+        try{
+            if(regRight == null){
+                throw new MyException("EXPRESSION NOT FOUND");
+            }
+        }catch (MyException e){
+            throw new IllegalStateException("EXPRESSION NOT FOUND");
+        }
+
+        im.genQuad(im.getOpCode().getIfb(),regLeft, null,"*");
+        im.genQuad(im.getOpCode().getIfb(),regRight, null,"*");
+        im.genQuad(im.getOpCode().getJump(),null, null,"#");
+    }
+
+
+    @Override
+    public void outAAndCond(AAndCond node) {
+        System.out.println("AAndCond Left "+node.getL().toString() + " right " +node.getR().toString());
+
+        String left = node.getL().toString().trim();
+        String right = node.getR().toString().trim();
+        String wholeString = node.getL().toString() +node.getR().toString().trim();
+
+        im.insertPlaceHelper(wholeString,"$" + im.getCount());
+        // System.err.println(wholeString);
+
+        String regLeft = im.Place(left);
+        try{
+            if(regLeft == null){
+                throw new MyException("EXPRESSION NOT FOUND");
+            }
+        }catch (MyException e){
+            throw new IllegalStateException("EXPRESSION NOT FOUND");
+        }
+        String regRight = im.Place(right);
+        try{
+            if(regRight == null){
+                throw new MyException("EXPRESSION NOT FOUND");
+            }
+        }catch (MyException e){
+            throw new IllegalStateException("EXPRESSION NOT FOUND");
+        }
+
+        im.genQuad(im.getOpCode().getIfb(),regLeft, null,"*");
+        im.genQuad(im.getOpCode().getIfb(),regRight, null,"*");
+        im.genQuad(im.getOpCode().getJump(),null, null,"#");
+    }
+
+
+    @Override
+    public void outANotCond(ANotCond node) {
+        System.out.println("ANotCond Left "+node.getL().toString() + " right " +node.getR().toString());
+
+        String left = node.getL().toString().trim();
+        String right = node.getR().toString().trim();
+        String wholeString = node.getL().toString() +node.getR().toString().trim();
+
+        im.insertPlaceHelper(wholeString,"$" + im.getCount());
+        System.err.println(wholeString);
+
+        /*String regLeft = im.Place(left);
+        try{
+            if(regLeft == null){
+                throw new MyException("EXPRESSION NOT FOUND");
+            }
+        }catch (MyException e){
+            throw new IllegalStateException("EXPRESSION NOT FOUND");
+        }*/
+        /*String regRight = im.Place(right);
+        try{
+            if(regRight == null){
+                throw new MyException("EXPRESSION NOT FOUND");
+            }
+        }catch (MyException e){
+            throw new IllegalStateException("EXPRESSION NOT FOUND");
+        }
+
+
+        im.genQuad(im.getOpCode().getIfb(),regRight, null,"*");
+        im.genQuad(im.getOpCode().getJump(),null, null,"#");
+
+        not not i>0*/
+    }
+
+
+
+    @Override
+    public void outAWhileStmt(AWhileStmt node) {
+        System.out.println("while Left "+node.getL().toString() + " right " +node.getR().toString());
+
+        String cond = node.getL().toString().trim();
+
+        String reg = im.Place(cond);
+
+        try{
+            if(reg == null){
+                throw new MyException("EXPRESSION NOT FOUND");
+            }
+        }catch (MyException e){
+            throw new IllegalStateException("EXPRESSION NOT FOUND");
+        }
+
+        String regtemp = reg.replace("$","");
+        int regNum = Integer.parseInt(regtemp);
+
+        im.genQuad(im.getOpCode().getJump(),null,null,regNum);
+        im.genQuad(im.getOpCode().getJump(),null,null,"#");
+
+    }
+
+    @Override
+    public void outAWhileElseStmt(AWhileElseStmt node) {
+        System.out.println("while else Left "+node.getL().toString() + " right " +node.getR().toString());
+    }
+
 
 
 
