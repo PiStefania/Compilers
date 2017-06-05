@@ -182,6 +182,8 @@ public class PrinterAST extends DepthFirstAdapter{
 
         im.print();
 
+        //im.printPlace();
+
     }
 
 
@@ -242,7 +244,7 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
        //
-        System.out.println("ALL PARAMETERS ALL: " + listParamHelp + "ONLY PAR: " +firstList);
+        //System.out.println("ALL PARAMETERS ALL: " + listParamHelp + "ONLY PAR: " +firstList);
 
 
 
@@ -359,7 +361,7 @@ public class PrinterAST extends DepthFirstAdapter{
             }
         }
 
-        System.out.println("FULL DICTIONARY: " + parType.entrySet());
+        //System.out.println("FULL DICTIONARY: " + parType.entrySet());
 
 
         ScopeObject obj =   new ScopeObject(myList.get(0).trim(),myList.get(myList.size()-1).trim(),"func") ;
@@ -537,8 +539,8 @@ public class PrinterAST extends DepthFirstAdapter{
             }
             finalS=finalS.trim();
             numb=numb.trim();
-            System.err.println("finalS "+finalS);
-            System.err.println("numb "+numb);
+            //System.err.println("finalS "+finalS);
+            //System.err.println("numb "+numb);
 
             String type = table.FindVariableType(finalS);
             try{
@@ -614,11 +616,11 @@ public class PrinterAST extends DepthFirstAdapter{
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
         }
         else if (node.getR().getClass().getSimpleName().equals("AAddSubAllExpr")){
-             System.out.println("AAddSubAllExpr");
+             //System.out.println("AAddSubAllExpr");
             type= "int";
         }
         else if (node.getR().getClass().getSimpleName().equals("ARestSignsAllExpr")){
-            System.out.println("ARestSignsAllExpr");
+            //System.out.println("ARestSignsAllExpr");
             type= "int";
         }
         else if (node.getR().getClass().getSimpleName().equals("AWithPlminAllExpr")){
@@ -630,7 +632,7 @@ public class PrinterAST extends DepthFirstAdapter{
         }
         else if (node.getR().toString().contains("[")){
 
-            System.err.println("right "+node.getR().toString() + " "+ str);
+            //System.err.println("right "+node.getR().toString() + " "+ str);
 
             int i=0;
             String finalS="";
@@ -654,8 +656,8 @@ public class PrinterAST extends DepthFirstAdapter{
             }
             finalS=finalS.trim();
             numb=numb.trim();
-            System.err.println("finalS "+finalS);
-            System.err.println("numb "+numb);
+            //System.err.println("finalS "+finalS);
+            //System.err.println("numb "+numb);
 
             type = table.FindVariableType(finalS);
             try{
@@ -861,7 +863,7 @@ public class PrinterAST extends DepthFirstAdapter{
     public void inAAddSubAllExpr(AAddSubAllExpr node)
     {
 
-        //System.out.println("(ADD- SUB EXPRESSION left child: " + node.getL().toString() + "right child"+node.getR().toString()+"!");
+        //System.err.println("(ADD- SUB EXPRESSION left child: " + node.getL().toString() + "right child"+node.getR().toString()+"!");
         String ournode = node.getL().toString() + node.getR().toString();
 
         List<String> myList = new ArrayList<String>(Arrays.asList(ournode.split(" ")));
@@ -908,49 +910,94 @@ public class PrinterAST extends DepthFirstAdapter{
     @Override
     public void outAAddSubAllExpr(AAddSubAllExpr node)
     {
-        System.out.println("(ADD- SUB EXPRESSION left child: " + node.getL().toString() + "right child"+node.getR().toString()+"!");
+        //System.out.println("(ADD- SUB EXPRESSION left child: " + node.getL().toString() + "right child "+node.getR().toString()+"!");
         List<String> myList = new ArrayList(Arrays.asList(node.getL().toString().trim().split("\\s+")));
-        System.err.println("myList "+myList);
+      //  System.err.println("addsub myList "+myList);
         String op = myList.get(myList.size()-1);
        // System.err.println("op "+op);
         String rightNumb = node.getR().toString().trim();
-        //System.err.println("rightNumb "+rightNumb);
+        List<String> rightNumlist = new ArrayList(Arrays.asList(node.getR().toString().trim().split("\\s+")));
+
+        String left = "";
+
+        for(int i=0;i<myList.size()-1;i++){
+            left += myList.get(i);
+        }
+        left = left.trim();
+
         operator myOp = new operator("op",op);
         Object w = im.newTemp("Integer");
         String name2 = "$" + im.getCount();
 
+        String wholeExpr = node.getL().toString() + node.getR().toString().trim();
+
+        im.insertPlaceHelper(wholeExpr,name2);
+
         InterReg reg = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name2);
         im.insertReg(reg);
 
+
+
         if (myList.size()==2){
-            im.genQuad(myOp,myList.get(0),rightNumb,name2);
+            if(rightNumlist.size()==1){
+                im.genQuad(myOp,myList.get(0),rightNumb,name2);
+            }
+            else {
+                im.genQuad(myOp, myList.get(0), im.Place(node.getR().toString().trim()), name2);
+            }
         }
-        else{
-            im.genQuad(myOp,"$"+(im.getCount()-1),rightNumb,name2);
+        else {
+            if (rightNumlist.size() == 1) {
+                im.genQuad(myOp, im.Place(left), rightNumb, name2);
+            } else {
+                im.genQuad(myOp, im.Place(left), im.Place(node.getR().toString().trim()), name2);
+            }
         }
     }
     @Override
-    public void outARestSignsAllExpr(ARestSignsAllExpr node)
-    {
-        System.out.println("(Rest_signs expr: " + node.getL().toString() + " right child "+node.getR().toString());
+    public void outARestSignsAllExpr(ARestSignsAllExpr node) {
+        //System.out.println("(Rest_signs expr: " + node.getL().toString() + " right child " + node.getR().toString());
         List<String> myList = new ArrayList(Arrays.asList(node.getL().toString().trim().split("\\s+")));
-        System.err.println("Rest myList "+myList);
-        String op = myList.get(myList.size()-1);
+       // System.err.println("Rest myList " + myList);
+        String op = myList.get(myList.size() - 1);
         //System.err.println("op "+op);
         String rightNumb = node.getR().toString().trim();
-       // System.err.println("rightNumb "+rightNumb);
-        operator myOp = new operator("op",op);
+        List<String> rightNumlist = new ArrayList(Arrays.asList(node.getR().toString().trim().split("\\s+")));
+
+       // System.err.println("rightNumb " + rightNumb);
+        operator myOp = new operator("op", op);
         Object w = im.newTemp("Integer");
         String name2 = "$" + im.getCount();
 
-        InterReg reg = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name2);
+        String left = "";
+
+        for(int i=0;i<myList.size()-1;i++){
+            left += myList.get(i);
+        }
+        left = left.trim();
+
+        String wholeExpr = node.getL().toString() + node.getR().toString().trim();
+
+        im.insertPlaceHelper(wholeExpr, name2);
+
+        InterReg reg = new InterReg(w, im.getCount(), im.getOpCode().getAssignment(), w.getClass().getSimpleName(), name2);
         im.insertReg(reg);
 
         if (myList.size()==2){
-            im.genQuad(myOp,myList.get(0),rightNumb,name2);
+
+            if(rightNumlist.size()==1){
+                im.genQuad(myOp,myList.get(0),rightNumb,name2);
+            }
+            else {
+                im.genQuad(myOp, myList.get(0), im.Place(node.getR().toString().trim()), name2);
+            }
         }
-        else{
-            im.genQuad(myOp,"$"+(im.getCount()-1),rightNumb,name2);
+        else {
+            if (rightNumlist.size() == 1) {
+                im.genQuad(myOp, im.Place(left), rightNumb, name2);
+            } else {
+                im.genQuad(myOp, im.Place(left), im.Place(node.getR().toString().trim()), name2);
+            }
         }
     }
 
@@ -1045,7 +1092,7 @@ public class PrinterAST extends DepthFirstAdapter{
     public void inAExprsignsCond(AExprsignsCond node)
     {
 
-        //System.out.print("(EXPRESSION CONDITION: left child " + node.getL().toString() + " right child "+node.getR().toString() + "!");
+       // System.err.println("(EXPRESSION CONDITION: left child " + node.getL().toString() + " right child "+node.getR().toString() + "!");
 
 
 
@@ -1120,6 +1167,60 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
     }
+
+    @Override
+    public void outAExprsignsCond(AExprsignsCond node)
+    {
+        System.out.println("(EXPRESSION CONDITION: left child " + node.getL().toString() + " right child "+node.getR().toString() + "!");
+
+        List<String> myList = new ArrayList(Arrays.asList(node.getL().toString().trim().split("\\s+")));
+      //  System.err.println("addsub myList "+myList);
+        String op = myList.get(myList.size()-1);
+      //  System.err.println("op "+op);
+        String rightNumb = node.getR().toString().trim();
+        List<String> rightNumlist = new ArrayList(Arrays.asList(node.getR().toString().trim().split("\\s+")));
+
+        String left = "";
+
+        for(int i=0;i<myList.size()-1;i++){
+            left += myList.get(i);
+        }
+        left = left.trim();
+      //  System.err.println("Left "+left);
+
+        operator myOp = new operator("op",op);
+        Object w = im.newTemp("Integer");
+        String name2 = "$" + im.getCount();
+
+        String wholeExpr = node.getL().toString() + node.getR().toString().trim();
+       // System.err.println("wholeExpr "+wholeExpr);
+
+
+
+        im.insertPlaceHelper(wholeExpr,name2);
+
+        InterReg reg = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name2);
+        im.insertReg(reg);
+
+
+
+        if (myList.size()==2){
+            if(rightNumlist.size()==1){
+                im.genQuad(myOp,myList.get(0),rightNumb,name2);
+            }
+            else {
+                im.genQuad(myOp, myList.get(0), im.Place(node.getR().toString().trim()), name2);
+            }
+        }
+        else {
+            if (rightNumlist.size() == 1) {
+                im.genQuad(myOp, im.Place(left), rightNumb, name2);
+            } else {
+                im.genQuad(myOp, im.Place(left), im.Place(node.getR().toString().trim()), name2);
+            }
+        }
+    }
+
 
     @Override
     public void inAFuncCallWithoutStmt(AFuncCallWithoutStmt node){
@@ -1244,7 +1345,7 @@ public class PrinterAST extends DepthFirstAdapter{
             //array
             List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
             ourType = table.FindVariableType(nameList.get(0));
-            System.err.println("ARRAYY " + nameList);
+            //System.err.println("ARRAYY " + nameList);
 
             try{
                 if(ourType == null){
@@ -1333,7 +1434,7 @@ public class PrinterAST extends DepthFirstAdapter{
             //array
             List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
             ourType = table.FindVariableType(nameList.get(0));
-            System.err.println("ARRAYY " + nameList);
+            //System.err.println("ARRAYY " + nameList);
 
             try{
                 if(ourType == null){
@@ -1422,7 +1523,7 @@ public class PrinterAST extends DepthFirstAdapter{
             //array
             List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
             ourType = table.FindVariableType(nameList.get(0));
-            System.err.println("ARRAYY " + nameList);
+            //System.err.println("ARRAYY " + nameList);
 
             try{
                 if(ourType == null){
@@ -1512,7 +1613,7 @@ public class PrinterAST extends DepthFirstAdapter{
             //array
             List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
             ourType = table.FindVariableType(nameList.get(0));
-            System.err.println("ARRAYY " + nameList);
+            //System.err.println("ARRAYY " + nameList);
 
             try{
                 if(ourType == null){

@@ -12,6 +12,7 @@ public class Intermediate {
     private int count;
     List<Quad> quadList;
     List<InterReg> regList;
+    List<placeHelper> helpList;
 
     private OpCode opCode;
 
@@ -21,6 +22,7 @@ public class Intermediate {
         this.quadList = new ArrayList<Quad>();
         this.opCode = new OpCode();
         this.regList = new ArrayList<InterReg>();
+        this.helpList = new ArrayList<placeHelper>();
     }
 
     public int getCount() {return count;}
@@ -57,11 +59,6 @@ public class Intermediate {
         return count;
     }
 
-    /*
-    public <t> t newTemp(Object t){
-        Object myTemp = new Object();
-        return (t) myTemp;
-    }*/
 
     public Object newTemp(String nameType){
 
@@ -100,8 +97,14 @@ public class Intermediate {
         return oneElementList;
     }
 
-    public int Place(String name,SymbolTable table){
-        return table.FindVariablePosition(name);
+    public String Place(String expr){
+
+        for(int i=0;i<helpList.size();i++){
+            if(helpList.get(i).getExpr().replaceAll("\\s+","").equals(expr.replaceAll("\\s+",""))){
+                return helpList.get(i).getPosition();
+            }
+        }
+        return null;
     }
 
     public String Type(String name, SymbolTable table){
@@ -250,6 +253,17 @@ public class Intermediate {
                     break;
                 counter--;
             }
+        }
+    }
+
+    public void insertPlaceHelper(String expr,String position){
+        placeHelper obj = new placeHelper(expr,position);
+        this.helpList.add(obj);
+    }
+
+    public void printPlace(){
+        for (int i=0; i<this.helpList.size();i++){
+            System.out.println("EXPR:" + helpList.get(i).getExpr() + " of position: " + helpList.get(i).getPosition());
         }
     }
 
