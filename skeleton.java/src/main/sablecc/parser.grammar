@@ -207,7 +207,7 @@ Productions
           | {block} block                                          {->[block.stmt]}
           | {funcall} func_call semicolon_id                       {->[func_call.stmt]}
           | {if} if_stmt                                           {->[if_stmt.stmt]}
-          | {while} while cond do_id stmt                          {->[New stmt.while(cond.cond, [stmt.stmt])]}
+          | {while} while cond do_id stmt                          {->[New stmt.while(cond.cond,[stmt.stmt])]}
           | {return_with_expr} return parentheses_expr semicolon_id     {->[New stmt.return_with(parentheses_expr.all_expr)]}
           | {return_expr} return all_expr semicolon_id                {->[New stmt.return_expr(all_expr.all_expr)]}
           | {return} return semicolon                            {->[New stmt.return()]};
@@ -215,8 +215,8 @@ Productions
 
 
 
-    if_stmt{->stmt}  = {no_else} if cond then_id [then_stmt]:stmt     {->New stmt.no_else(cond.cond, [then_stmt.stmt])}
-              | {with_else} if cond then_id stmt_with_else else_id [else_stmt]:stmt   {->New stmt.with_else(cond.cond,New stmt_with_else([stmt_with_else.stmt],[else_stmt.stmt]))};
+    if_stmt{->stmt}  = {no_else} if cond then_id [then_stmt]:stmt     {->New stmt.no_else(cond.cond, New ifstmt([then_stmt.stmt]))}
+              | {with_else} if cond then_id stmt_with_else else_id [else_stmt]:stmt   {->New stmt.with_else(cond.cond,New stmt_with_else([stmt_with_else.stmt],New my_stmtelse([else_stmt.stmt])))};
 
 
     stmt_with_else{->stmt*} = {semicolon} semicolon {->[]}
@@ -229,7 +229,7 @@ Productions
                      | {return_expr} return all_expr semicolon_id               {->[New stmt.return_expr2(all_expr.all_expr)]}
                      | {return} return semicolon                          {->[New stmt.return2()]};
 
-    if_else_stmt{->stmt} = if cond then_id [then_stmt]:stmt_with_else else_id [else_stmt]:stmt_with_else   {->New  stmt.with_else2(cond,New stmt_with_else2([then_stmt.stmt],[else_stmt.stmt]))};
+    if_else_stmt{->stmt} = if cond then_id [then_stmt]:stmt_with_else else_id [else_stmt]:stmt_with_else   {->New  stmt.with_else2(cond,New stmt_with_else2(New ifthenstmt([then_stmt.stmt]),[else_stmt.stmt]))};
 
     semicolon_id = semicolon;
     do_id = do;
@@ -245,7 +245,7 @@ Productions
                 | {without_par} var_name l_par r_par   {->New stmt.func_call_without(var_name)}  ;
 
     parameters{->all_expr} = {parameters} all_expr parameter* {->New all_expr.parameters(all_expr.all_expr,[parameter.all_expr])};
-    parameter{->all_expr} = {parameter} comma all_expr    {->all_expr.all_expr}  ;
+    parameter{->all_expr} = {parameter} comma all_expr    {->New all_expr.parameter(comma,all_expr.all_expr)}  ;
 
     l_value{->stmt} = {var} var_name                {->New stmt.var(var_name)}
               | {constant_string} constant_string      {->New stmt.string(constant_string)}
@@ -364,7 +364,7 @@ Abstract Syntax Tree
 
     stmt =    {expression} [l]: stmt* [r]: all_expr
               | {while} [l]:cond [r]: stmt*
-              | {no_else} [l]: cond  [r]:stmt*
+              | {no_else} [l]: cond  [r]:ifstmt
               | {with_else}  [l]:cond  [r]: stmt_with_else
               | {expression_else} [l]:stmt*  [r]:all_expr
               | {while_else} [l]:cond  [r]:stmt*
@@ -382,9 +382,14 @@ Abstract Syntax Tree
               | {return2};
 
 
+    ifstmt = stmt*;
 
-    stmt_with_else =  [l]: stmt* [r]:stmt*;
-    stmt_with_else2 = [l]: stmt* [r]:stmt*;
+    stmt_with_else =  [l]: stmt* [r]:my_stmtelse;
+    stmt_with_else2 = [l]: ifthenstmt [r]:stmt*;
+
+    ifthenstmt = stmt*;
+
+    my_stmtelse = stmt*;
 
     name_value = [l]: stmt* [r]: l_br;
     expr_value = [l]: all_expr [r]: r_br;
@@ -399,7 +404,8 @@ Abstract Syntax Tree
                  | {constant} constant
                  | {parameters} [l]: all_expr [r]:all_expr*
                  | {l_value} stmt
-                 | {func} stmt;
+                 | {func} stmt
+                 | {parameter} [l]:comma [r]: all_expr;
 
 
     rest_signs_expr = [l]:all_expr [r]:rest_signs;

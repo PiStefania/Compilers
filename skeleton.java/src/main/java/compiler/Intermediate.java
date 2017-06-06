@@ -1,7 +1,9 @@
 package compiler;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by anton_000 on 30/5/2017.
@@ -62,7 +64,6 @@ public class Intermediate {
 
     public Object newTemp(String nameType){
 
-        //Object w1 = new Object();
         if(nameType.equals("String")){
             String w = new String();
             return w;
@@ -100,7 +101,6 @@ public class Intermediate {
     public String Place(String expr){
 
         for(int i=0;i<helpList.size();i++){
-           // System.err.println( "PLACE: " + "help: "+ helpList.get(i).getExpr());
             if(helpList.get(i).getExpr().replaceAll("\\s+","").equals(expr.replaceAll("\\s+",""))){
                 return helpList.get(i).getPosition();
             }
@@ -118,8 +118,6 @@ public class Intermediate {
         List<Integer> tags = new ArrayList<Integer>();
         List<String> ops = new ArrayList<String>();
 
-        //ops.add(opCode.getRelop());
-        //ops.add(opCode.getIfb());
         ops.add(opCode.getJump());
         ops.add(opCode.getJumpl());
 
@@ -202,14 +200,14 @@ public class Intermediate {
         return mergedList;
     }
 
-    public void backpatch(int l,int z){
+    public void backpatch(String tag,int z){
 
-        for(int i=0; i<quadList.size();i++){
-            if(quadList.get(i).getArg3().equals(l)){
+        for(int i=0; i<quadList.size() ;i++){
+            String str =String.valueOf(quadList.get(i).getArg3());
+            if(str.equals(tag)){
                 quadList.get(i).setArg3(z);
             }
         }
-
     }
 
     public void print(){            //print list
@@ -256,6 +254,62 @@ public class Intermediate {
             }
         }
     }
+
+    public boolean insertRef(String funcName,SymbolTable table){
+        //System.err.println("WE ARE INSIDE insertRef");
+        int counter = getCount()-1;
+        //System.err.println("counter " +counter);
+        Map<String,List> refs = new HashMap<String, List>(table.getRefPar());
+        List<String> keys = new ArrayList<String>(refs.keySet());
+
+        if(refs.containsKey(funcName))
+        {
+            List<String> values =  refs.get(funcName);
+            //System.err.println("aaaaaaaaa "+ values);
+
+            while(counter>=0){
+                if (this.quadList.get(counter).getOp().equals(this.getOpCode().getPar())){
+                    //System.err.println("MUST CHECK PARAMETER");
+                    if(values.contains(this.quadList.get(counter).getArg1())){
+                        this.quadList.get(counter).setArg2("R");
+                    }
+                }
+                else
+                    break;
+                counter--;
+            }
+            return true;
+        }
+        else{
+            return false;
+        }
+
+
+    }
+
+    public int whileJump(){
+        //System.err.println("WE ARE INSIDE insertRet");
+
+        int counter = getCount()-1;
+
+        if (this.quadList.get(getCount()-1).getOp().equals(this.getOpCode().getJump())){
+            System.err.println("WE ARE INSIDE jump");
+            while(counter>=0){
+                if (this.quadList.get(counter).getOp().equals(this.getOpCode().getJump())){
+                    System.err.println("WE ARE INSIDE set jump");
+                    //this.quadList.get(counter).setArg2("RET");
+                }
+                else
+                    break;
+                counter--;
+            }
+            return counter;
+        }
+        return -1;
+    }
+
+
+
 
     public void insertPlaceHelper(String expr,String position){
         placeHelper obj = new placeHelper(expr,position);

@@ -7,7 +7,6 @@ class ScopeObject {
     private String name;
     private String type;
     private String genre;
-    private int noOfParams;
 
     public ScopeObject(String name, String type,String genre ){
         this.name = name;

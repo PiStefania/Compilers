@@ -14,17 +14,19 @@ class SymbolTable {
     private Map<Integer,Integer> map;           //hashmap
     private Stack<ScopeObject> mystack;         //stack of obj:ScopeObject
     private Stack<FuncScope> funcStack;         //stack of obj:FuncScope
+    private Map<String,List> refPar;
     private int position;                       //position of map
 
     public SymbolTable(){   //constructor
         map = new HashMap<Integer,Integer>();
         mystack = new Stack<ScopeObject>();
         funcStack = new Stack<FuncScope>();
+        refPar = new HashMap<String, List>();
         position = -1;
     }
 
     public void print(){            //print stack
-        //System.out.println("printing stack");
+        System.out.println("printing stack");
         for (int i=0; i<this.mystack.size();i++){
             System.out.println(this.mystack.get(i).getName());
         }
@@ -401,13 +403,12 @@ class SymbolTable {
 
             if(name.equals(funcName)){
                 //System.out.println("FOUND");
-                return true;
 
-                /*if(numParams==par.size())
+                if(numParams==par.size())
                 {
                     return true;
                 }
-                return false;*/
+                return false;
             }
         }
         //System.out.println("END OF CHECKING FOR FUNC WITH PAR");
@@ -459,7 +460,12 @@ class SymbolTable {
     }      //get stack
 
 
+    public void insertRefList(String funcName,List<String> refList){
+        refPar.put(funcName,refList);
+    }
 
-
+    public Map<String, List> getRefPar() {
+        return refPar;
+    }
 }
 
