@@ -178,11 +178,11 @@ public class PrinterAST extends DepthFirstAdapter{
         //exit stoiva sunarthsewn
         table.deleteFuncStack();
 
-        System.out.println("Successful compilation!");
+        System.out.println("\nSuccessful compilation!");
 
         im.print();
 
-        //im.printPlace();
+        im.printPlace();
 
     }
 
@@ -1228,7 +1228,7 @@ public class PrinterAST extends DepthFirstAdapter{
         System.out.println("(EXPRESSION CONDITION: left child " + node.getL().toString() + " right child "+node.getR().toString() + "!");
 
         List<String> myList = new ArrayList(Arrays.asList(node.getL().toString().trim().split("\\s+")));
-        System.err.println("type "+node.getL().toString() + " " +node.getL().getClass().getSimpleName());
+        //System.err.println("type "+node.getL().toString() + " " +node.getL().getClass().getSimpleName());
         String op = myList.get(myList.size()-1);
       //  System.err.println("op "+op);
         String rightNumb = node.getR().toString().trim();
@@ -1247,7 +1247,7 @@ public class PrinterAST extends DepthFirstAdapter{
         String name2 = "$" + im.getCount();
 
         String wholeExpr = node.getL().toString() + node.getR().toString().trim();
-        System.err.println("wholeExpr "+wholeExpr);
+       // System.err.println("wholeExpr "+wholeExpr);
 
 
 
@@ -1311,6 +1311,16 @@ public class PrinterAST extends DepthFirstAdapter{
                 im.genQuad(myOp, regLeft, regRight, name2);
             }
         }
+        String regWhole = im.Place(wholeExpr);
+        try{
+            if(wholeExpr == null){
+                throw new MyException("EXPRESSION NOT FOUND");
+            }
+        }catch (MyException e){
+            throw new IllegalStateException("EXPRESSION NOT FOUND");
+        }
+        im.genQuad(im.getOpCode().getIfb(), regWhole, null, "then");
+        im.genQuad(im.getOpCode().getJump(), null, null, "else");
     }
 
 
@@ -1348,21 +1358,28 @@ public class PrinterAST extends DepthFirstAdapter{
         }catch (MyException e){
             throw new IllegalStateException("CANNOT CALL FUNCTION WITHOUT PREVIOUSLY STATED.\nCHECK NAME AND NUMBER OF PARAMETERS ACCORDINGLY.");
         }
+    }
 
-
+    @Override
+    public void outAFuncCallWithoutStmt(AFuncCallWithoutStmt node){
+        String funcName = node.toString().trim();
+        im.insertPlaceHelper(funcName,"$" + im.getCount());
+        im.genQuad(im.getOpCode().getCall(),null,null,funcName);
 
     }
 
-
     @Override
     public void outAFuncCallWithStmt(AFuncCallWithStmt node){
+        System.err.println("left "+node.getL().toString() + " right "+ node.getR().toString());
+        String wholeStr = node.getL().toString() + node.getR().toString().trim();
+        im.insertPlaceHelper(wholeStr,"$" + im.getCount());
         String funcName = node.getL().toString().trim();
         im.genQuad(im.getOpCode().getCall(),null,null,funcName);
     }
 
     @Override
-    public void inAParametersAllExpr(AParametersAllExpr node){
-       // System.err.println("ALL PARAMETERS: left " + node.getL().toString() +" right " + node.getR().toString());
+    public void outAParametersAllExpr(AParametersAllExpr node){
+        System.err.println("ALL PARAMETERS: left " + node.getL().toString() +" right " + node.getR().toString());
 
         List <String> parameters = new ArrayList<String>();
         parameters.add(node.getL().toString());
@@ -1378,9 +1395,27 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
 
-        for (int i=0; i<parameters.size();i++) {
 
-            im.genQuad(im.getOpCode().getPar(), parameters.get(i),"V",null);
+        for (int i=0; i<parameters.size();i++) {
+            String par = String.valueOf( parameters.get(i));
+            List parList = new ArrayList(Arrays.asList(par.split(" ")));
+
+
+            if(parList.size() > 2){
+                String reg = im.Place(par);
+                try {
+                    if (reg == null) {
+                        throw new MyException("EXPRESSION NOT FOUND");
+                    }
+                } catch (MyException e) {
+                    throw new IllegalStateException("EXPRESSION NOT FOUND");
+                }
+                im.genQuad(im.getOpCode().getPar(), reg,"V",null);
+            }
+            else
+                im.genQuad(im.getOpCode().getPar(), parameters.get(i),"V",null);
+
+
         }
 
 
@@ -1837,9 +1872,9 @@ public class PrinterAST extends DepthFirstAdapter{
             throw new IllegalStateException("EXPRESSION NOT FOUND");
         }
 
-        im.genQuad(im.getOpCode().getIfb(),regLeft, null,"*");
-        im.genQuad(im.getOpCode().getIfb(),regRight, null,"*");
-        im.genQuad(im.getOpCode().getJump(),null, null,"#");
+        im.genQuad(im.getOpCode().getIfb(),regLeft, null,"then");
+        im.genQuad(im.getOpCode().getIfb(),regRight, null,"then");
+        im.genQuad(im.getOpCode().getJump(),null, null,"else");
     }
 
 
@@ -1871,15 +1906,16 @@ public class PrinterAST extends DepthFirstAdapter{
             throw new IllegalStateException("EXPRESSION NOT FOUND");
         }
 
-        im.genQuad(im.getOpCode().getIfb(),regLeft, null,"*");
-        im.genQuad(im.getOpCode().getIfb(),regRight, null,"*");
-        im.genQuad(im.getOpCode().getJump(),null, null,"#");
+        im.genQuad(im.getOpCode().getIfb(),regLeft, null,im.getCount()+1);
+        im.genQuad(im.getOpCode().getIfb(),regRight, null,"then");
+        im.genQuad(im.getOpCode().getJump(),null, null,"else");
+
     }
 
 
     @Override
     public void outANotCond(ANotCond node) {
-        System.out.println("ANotCond Left "+node.getL().toString() + " right " +node.getR().toString());
+        System.err.println("ANotCond Left "+node.getL().toString() + " right " +node.getR().toString());
 
         String left = node.getL().toString().trim();
         String right = node.getR().toString().trim();
@@ -1888,15 +1924,7 @@ public class PrinterAST extends DepthFirstAdapter{
         im.insertPlaceHelper(wholeString,"$" + im.getCount());
         System.err.println(wholeString);
 
-        /*String regLeft = im.Place(left);
-        try{
-            if(regLeft == null){
-                throw new MyException("EXPRESSION NOT FOUND");
-            }
-        }catch (MyException e){
-            throw new IllegalStateException("EXPRESSION NOT FOUND");
-        }*/
-        /*String regRight = im.Place(right);
+        String regRight = im.Place(right);
         try{
             if(regRight == null){
                 throw new MyException("EXPRESSION NOT FOUND");
@@ -1905,12 +1933,24 @@ public class PrinterAST extends DepthFirstAdapter{
             throw new IllegalStateException("EXPRESSION NOT FOUND");
         }
 
+        List notList = new ArrayList(Arrays.asList(left.split(" ")));
+        int noOfNot = notList.size();
 
-        im.genQuad(im.getOpCode().getIfb(),regRight, null,"*");
-        im.genQuad(im.getOpCode().getJump(),null, null,"#");
 
-        not not i>0*/
+
+
+        if (noOfNot % 2 ==1) {
+            im.genQuad(im.getOpCode().getIfb(), regRight, null, "else");
+            im.genQuad(im.getOpCode().getJump(), null, null, "then");
+        }
+        else {
+            im.genQuad(im.getOpCode().getIfb(), regRight, null, "then");
+            im.genQuad(im.getOpCode().getJump(), null, null, "else");
+        }
+
+
     }
+
 
 
 
@@ -1933,8 +1973,8 @@ public class PrinterAST extends DepthFirstAdapter{
         String regtemp = reg.replace("$","");
         int regNum = Integer.parseInt(regtemp);
 
-        im.genQuad(im.getOpCode().getJump(),null,null,regNum);
-        im.genQuad(im.getOpCode().getJump(),null,null,"#");
+        im.genQuad(im.getOpCode().getJump(),null,null,regNum);  //do
+
 
     }
 

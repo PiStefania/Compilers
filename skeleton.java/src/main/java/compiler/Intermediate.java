@@ -100,7 +100,7 @@ public class Intermediate {
     public String Place(String expr){
 
         for(int i=0;i<helpList.size();i++){
-            System.err.println( "PLACE: " + "help: "+ helpList.get(i).getExpr());
+           // System.err.println( "PLACE: " + "help: "+ helpList.get(i).getExpr());
             if(helpList.get(i).getExpr().replaceAll("\\s+","").equals(expr.replaceAll("\\s+",""))){
                 return helpList.get(i).getPosition();
             }
@@ -213,7 +213,7 @@ public class Intermediate {
     }
 
     public void print(){            //print list
-        //System.out.println("printing list");
+        System.out.println();
         for (int i=0; i<this.quadList.size();i++){
             if(this.quadList.get(i).getOp().getClass().getSimpleName().equals("operator")){
                 operator myOp = (operator) this.quadList.get(i).getOp();
@@ -263,8 +263,9 @@ public class Intermediate {
     }
 
     public void printPlace(){
+        System.out.println();
         for (int i=0; i<this.helpList.size();i++){
-            System.out.println("EXPR:" + helpList.get(i).getExpr() + " of position: " + helpList.get(i).getPosition());
+            System.out.println("EXPR: \"" + helpList.get(i).getExpr() + "\" is in variable: \"" + helpList.get(i).getPosition() +"\"");
         }
     }
 
