@@ -26,31 +26,9 @@ public class PrinterAST extends DepthFirstAdapter{
     boolean globalFlagNot = false;
 
 
-    int indentation = 0;
-    private void addIndentationLevel() {
-        indentation++;
-    }
-
-    private void removeIndentationLevel() {
-        indentation--;
-    }
-
-    private void printIndentation() {
-        // create a list with n copies
-        List list = Collections.nCopies(indentation, " ");
-
-        // create an iterator
-        Iterator itr = list.iterator();
-
-        while (itr.hasNext()){
-            //  System.out.print(itr.next());
-        }
-    }
-
-
     @Override
     public void inAProgram(AProgram node){
-        //insert sunarthseis vivliothikhs
+        //insert library functions
 
         //fun puti (n: int):nothing;
         Map<String,List> parType = new HashMap<String,List>();
@@ -170,21 +148,16 @@ public class PrinterAST extends DepthFirstAdapter{
         funcObj = new FuncScope("strcat",parType,"nothing",par.size());
         table.insertFuncStack(funcObj);
 
-
-
-
     }
 
     @Override
     public void outAProgram(AProgram node){
-        //exit stoiva sunarthsewn
+        //exit function stack
         table.deleteFuncStack();
 
         System.out.println("\nSuccessful compilation!");
 
         im.print();
-
-        table.printFuncStack();
 
         im.printPlace();
 
@@ -196,10 +169,7 @@ public class PrinterAST extends DepthFirstAdapter{
     public void inAAllFuncDef(AAllFuncDef node)
     {
 
-        // System.out.println("(Function Definition:");
-
         List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
-
 
         List<String> listParam = new ArrayList<String>(myList);
 
@@ -210,9 +180,6 @@ public class PrinterAST extends DepthFirstAdapter{
 
         while(listParam.contains("ref"))
             listParam.remove("ref");
-
-
-
 
         List<String> listParamHelp = new ArrayList<String>(listParam);
 
@@ -250,7 +217,6 @@ public class PrinterAST extends DepthFirstAdapter{
         List<String> refVars = new ArrayList<String>();
         int y=0;
         while(y<refList.size()){
-            //System.out.println(y);
             if(refList.get(y).equals("ref")){
                 y++;
                 while(!refList.get(y).equals("char") && !refList.get(y).equals("int") && !refList.get(y).contains("int[") && !refList.get(y).contains("char["))
@@ -268,8 +234,6 @@ public class PrinterAST extends DepthFirstAdapter{
         String function = myList.get(0).trim();
         table.insertRefList(function,refVars);
 
-        System.err.println("REFFFFFFFFFFFFFF" + table.getRefPar().entrySet());
-
 
         List<String> parList = new ArrayList<String>();
         Map<String,List> parType = new HashMap<String,List>();
@@ -278,7 +242,6 @@ public class PrinterAST extends DepthFirstAdapter{
         while(i<listParamHelp.size() && k<firstList.size()){
             if(k==firstList.size()-1){
                 if(k==0){
-                    //teleutaio par
                     parList.add(listParamHelp.get(i));
                     i++;
                     List previousList ;
@@ -322,7 +285,6 @@ public class PrinterAST extends DepthFirstAdapter{
                     parList = new ArrayList<String>();
                     i++;
                 }
-                //teleutaio par
                 List previousList ;
                 int key = i+1;
 
@@ -383,8 +345,6 @@ public class PrinterAST extends DepthFirstAdapter{
             }
         }
 
-        System.out.println("FULL DICTIONARY: " + parType.entrySet() + myList.get(0).trim());
-
 
         ScopeObject obj =   new ScopeObject(myList.get(0).trim(),myList.get(myList.size()-1).trim(),"func", false) ;
         table.enter(obj);
@@ -396,16 +356,12 @@ public class PrinterAST extends DepthFirstAdapter{
         table.insertFuncStack(funcObj);
 
 
-
-        //System.err.println("hash size "+ parType.size());
         List<String> keys = new ArrayList<String>(parType.keySet());
 
         for(int n= 0; n<keys.size();n++){
             String key = keys.get(n);
-            //System.err.println("KEY: " + key);
             for(int v=0;v<parType.get(key).size();v++){
                 String var = parType.get(key).get(v).toString();
-                //System.err.println("VAR: " + var);
                 ScopeObject vars =   new ScopeObject(var,key,"par",false) ;
                 table.insert(vars);
             }
@@ -415,26 +371,12 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
         for (int a=0; a<firstList.size(); a++){     //gia kathe parametro
-            if (refVars.contains(firstList.get(a))){    //an anhksei sta refParameters
-                int position = table.FindVarPosition(firstList.get(a));      //set Ref
-                //System.out.println("PARAMETER####3 "+ table.getMystack().get(position).getName());
-                table.getMystack().get(position).setRef(true);
+            if (refVars.contains(firstList.get(a))){    //an anhkei sta refParameters
+                int position = table.FindVarPosition(firstList.get(a));
+                table.getMystack().get(position).setRef(true);              //set Ref
             }
 
         }
-        //System.out.println("AAAAAAAAAAAAAAAADDDDDDDDDDD");
-
-        table.print();
-        System.err.println("first list "+ listParamHelp);
-
-        List<String> sortedPars = new ArrayList<String>();
-
-
-
-
-
-
-
 
         im.genQuad(im.getOpCode().getUnit(),myList.get(0).trim(),null,null);
 
@@ -445,7 +387,6 @@ public class PrinterAST extends DepthFirstAdapter{
     public void outAAllFuncDef(AAllFuncDef node)            //exit functions
     {
         List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
-        // System.out.println(")" );
         table.exit();
         Set list = table.getMap().entrySet();
         im.genQuad(im.getOpCode().getEndu(),myList.get(0).trim(),null,null);
@@ -453,124 +394,40 @@ public class PrinterAST extends DepthFirstAdapter{
     }
 
 
-    /*@Override
-    public void inAFparDefFuncDef(AFparDefFuncDef node)
-    {
-
-        //System.out.println("(FPar Definition With Ref ");
-
-        String type = node.getR().toString();
-        List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
-
-        while(myList.contains("ref"))
-            myList.remove("ref");
-       // System.out.print("Printing List "+ myList);
-        for(int i=0;i<myList.size();i++){
-            ScopeObject obj =   new ScopeObject(myList.get(i).trim(),type.trim(),"par") ;
-            table.insert(obj);
-            Set list = table.getMap().entrySet();
-          //  System.out.println("MAPPINGS " + list+ obj.getName());
-        }
-
-       table.print();
-
-
-    }*/
-
-
-
-    /*@Override
-    public void inAFparDefNoRefFuncDef(AFparDefNoRefFuncDef node)
-    {
-       // addIndentationLevel();
-       // printIndentation();
-        //System.out.println("(FPar Definition No Ref ");
-
-        String type = node.getR().toString();
-        List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
-      //  System.out.print("List "+ myList);
-        for(int i=0;i<myList.size();i++){
-            ScopeObject obj =   new ScopeObject(myList.get(i).trim(),type.trim(),"par") ;
-            table.insert(obj);
-            Set list = table.getMap().entrySet();
-        //    System.out.println("MAPPINGS" + list+ obj.getName());
-        }
-
-       // table.print();
-
-
-
-
-    }*/
-
-
-
     @Override
     public void inAVarDefFuncDef(AVarDefFuncDef node)
     {
-        //System.err.println("VARDEF "+ node.getL().toString() + " right "+ node.getR().toString());
-        //addIndentationLevel();
-        // printIndentation();
 
         String type = node.getR().toString();
         List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
-        //System.err.println("myList "+ myList);
         for(int i=0;i<myList.size();i++){
             ScopeObject obj =   new ScopeObject(myList.get(i).trim(),type.trim(),"var",false) ;
-            System.out.println("List "+ myList.get(i));
             table.insert(obj);
             Set list = table.getMap().entrySet();
-              //System.out.println("MAPPINGS" + list+ obj.getName());
-            // System.err.println(myList.get(i).trim() + " "+  table.FindVariablePosition(myList.get(i).trim()) + " "+ table.FindVariableType(myList.get(i).trim()) );
         }
-        // table.print();
-
-
-
-
     }
 
     @Override
     public void inAFuncDeclFuncDef(AFuncDeclFuncDef node)
     {
-
-        //  System.out.println("FUNCTION DECLARATION" + node.getFuncDef().toString() );
         List<String> myList = new ArrayList<String>(Arrays.asList(node.getFuncDef().toString().split(" ")));
-        // System.out.println("LISTA DECL"+myList);
 
         ScopeObject obj = new ScopeObject(myList.get(0).toString().trim(),myList.get(myList.size()-1).toString().trim(),"decl", false);
         table.insert(obj);
 
         Set list = table.getMap().entrySet();
-        //  System.out.println("MAPPINGS" + list+ obj.getName());
     }
 
 
     @Override
     public void inAExpressionStmt(AExpressionStmt node)
     {
-
-        //System.err.println("(STMT: Left child " + node.getL().toString() + " Right child " +node.getR().toString() +"!");
-        //  System.out.println(node.getR().getClass().getSimpleName());
         List<?> newl = (List) node.getL();
-        //List<?> newr = (List) node.getL();
-
-
-        //List<String> leftList = new ArrayList<String>(Arrays.asList(node.getL().toString().trim().split(" ")));
-        //List<String> rightList = new ArrayList<String>(Arrays.asList(node.getR().toString().trim().split(" ")));
-
-
-
-        //String name=leftList.get(0).trim();
-        //name = name.replace("[","");
-        //name = name.replace("]","");
         String name = newl.get(0).toString();
 
         String initialName=name;
 
-
         if (name.contains("[")){
-
 
             int i=0;
             String finalS="";
@@ -594,8 +451,6 @@ public class PrinterAST extends DepthFirstAdapter{
             }
             finalS=finalS.trim();
             numb=numb.trim();
-            //System.err.println("finalS "+finalS);
-            //System.err.println("numb "+numb);
 
             String type = table.FindVariableType(finalS);
             try{
@@ -611,20 +466,11 @@ public class PrinterAST extends DepthFirstAdapter{
 
             InterReg reg = new InterReg(w,im.getCount(),im.getOpCode().getArray(),w.getClass().getSimpleName(),name2);
             im.insertReg(reg);
-
-            System.out.println("Arrat%%% " +finalS + " "+ numb);
-
-           // im.genQuad(im.getOpCode().getArray(),finalS,numb, "$" + im.getCount());
             name=finalS;
         }
 
         String type;
         String str=node.getR().toString().trim();
-        //str = str.replace("[","");
-        //str = str.replace("]","");
-
-
-        //checking for value
 
         String reg=name;
         if (initialName.contains("[")){
@@ -633,7 +479,6 @@ public class PrinterAST extends DepthFirstAdapter{
 
         if (node.getR().getClass().getSimpleName().equals("AFuncAllExpr")) {
 
-            //.println("FUNCTION CALL");
             List<String> myList = new ArrayList<String>(Arrays.asList(node.getR().toString().split(" ")));
             String funcName = myList.get(0);
             type= table.getFuncType(funcName);
@@ -644,16 +489,11 @@ public class PrinterAST extends DepthFirstAdapter{
             }catch (MyException e){
                 throw new IllegalStateException("ERROR! A FUNCTION THAT WASN'T DECLARED");
             }
-
-
-            //im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
-
         }
 
 
         else if (str.contains("\"")){
 
-            //not sure about this one
             int length=str.length()-1;
             type = "char[" +length+"]";
 
@@ -662,34 +502,25 @@ public class PrinterAST extends DepthFirstAdapter{
         }
         else if (node.getR().getClass().getSimpleName().equals("ALetterAllExpr")) {
 
-            //   System.out.println("CHAR");
             type= "char";
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
         }
         else if (node.getR().getClass().getSimpleName().equals("AConstantAllExpr")){
 
-            //   System.out.println("CONSTANT");
             type= "int";
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
         }
         else if (node.getR().getClass().getSimpleName().equals("AAddSubAllExpr")){
-            //System.out.println("AAddSubAllExpr");
             type= "int";
         }
         else if (node.getR().getClass().getSimpleName().equals("ARestSignsAllExpr")){
-            //System.out.println("ARestSignsAllExpr");
             type= "int";
         }
         else if (node.getR().getClass().getSimpleName().equals("AWithPlminAllExpr")){
-
-
-            //  System.out.println("AWithPlminAllExpr");
             type= "int";
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
         }
         else if (node.getR().toString().contains("[")){
-
-            //System.err.println("right "+node.getR().toString() + " "+ str);
 
             int i=0;
             String finalS="";
@@ -713,8 +544,6 @@ public class PrinterAST extends DepthFirstAdapter{
             }
             finalS=finalS.trim();
             numb=numb.trim();
-            //System.err.println("finalS "+finalS);
-            //System.err.println("numb "+numb);
 
             type = table.FindVariableType(finalS);
             try{
@@ -724,41 +553,24 @@ public class PrinterAST extends DepthFirstAdapter{
             }catch (MyException e){
                 throw new IllegalStateException("ERROR! VARIABLE DOESN'T EXIST");
             }
-
-           /* Object w = im.newTemp(type);
-            String name2 = "$" + im.getCount();
-
-            InterReg reg2 = new InterReg(w,im.getCount(),im.getOpCode().getArray(),w.getClass().getSimpleName(),name2);
-            im.insertReg(reg2);
-
-            im.genQuad(im.getOpCode().getArray(),finalS,numb, "$" + im.getCount());
-
-            im.genQuad(im.getOpCode().getAssignment(),"$" + (im.getCount()-1),null,name);
-*/
         }
         else {
-            // System.err.println("VARIABLE");
-
 
             //find variables type
             type = table.FindVariableType(str);
             try{
                 if(type==null){
-                    //        System.err.println("name "+str);
                     throw new MyException("ERROR! A VARIABLE WITH NO TYPE");
                 }
             }catch (MyException e){
                 throw new IllegalStateException("ERROR! A VARIABLE WITH NO TYPE");
             }
-            //find second variable type
-
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
         }
 
 
 
         ScopeObject obj = new ScopeObject(name,type,"var", false);
-        //System.err.println("EEEEEEEEERRRRRRRR " +name + " "+ type );
         try{
             if (table.lookupVarAndType(obj)){
                 throw new MyException("ERROR INCORECT TYPE OF VARIABLE");
@@ -775,16 +587,11 @@ public class PrinterAST extends DepthFirstAdapter{
     public void outAExpressionStmt(AExpressionStmt node)
     {
 
-        //System.err.println("LEFTRRTTRRRRRRRR: " + node.getL().toString() + "RIGHTSSSSSSSSSS: "+ node.getL().toString());
-
         List<?> newl = (List) node.getL();
 
         String name = newl.get(0).toString();
 
         String initialName=name;
-
-
-
 
         if (name.contains("[")){
 
@@ -838,11 +645,6 @@ public class PrinterAST extends DepthFirstAdapter{
         String str=node.getR().toString();
         List myString = new ArrayList(Arrays.asList(str.split(" ")));
 
-        //System.err.println(myString);
-
-
-        //checking for value
-
         String reg=name;
         if (initialName.contains("[")){
             reg="$" + (im.getCount()-1);
@@ -850,7 +652,6 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
         if (node.getR().getClass().getSimpleName().equals("AFuncAllExpr")) {
-            //System.err.println("(STMT: Left child " + node.getL().toString() + " Right child " +node.getR().toString() +"!");
 
             im.genQuad(im.getOpCode().getAssignment(),myString.get(0),null,reg);
         }
@@ -894,13 +695,6 @@ public class PrinterAST extends DepthFirstAdapter{
             finalS=finalS.trim();
             numb=numb.trim();
 
-
-
-            //System.err.println("tempstring "+ tempString);
-            //System.err.println("finalS "+ finalS);
-            //System.err.println("numb "+ numb);
-
-
             if (numb.contains("+")|| numb.contains("-") || numb.contains("*") || numb.contains("/") || numb.contains("mod")){
                 Object w = im.newTemp("Integer");
                 String name2 = "$" + im.getCount();
@@ -940,9 +734,7 @@ public class PrinterAST extends DepthFirstAdapter{
                 im.genQuad(im.getOpCode().getArray(),tempList.get(0),tempList2.get(tempList2.size()-1),name2);
                 im.genQuad(im.getOpCode().getAssignment(),"$" + (im.getCount()-1),null,name);
             }
-
         }
-
     }
 
 
@@ -950,8 +742,6 @@ public class PrinterAST extends DepthFirstAdapter{
     @Override
     public void inAVarStmt(AVarStmt node)
     {
-
-        //System.out.print("(Variable name : " + node.getVarName().toString());
 
         try{
             if(table.FindVariableType(node.getVarName().toString().trim())==null){
@@ -970,11 +760,9 @@ public class PrinterAST extends DepthFirstAdapter{
     public void inAAddSubAllExpr(AAddSubAllExpr node)
     {
 
-        //System.err.println("(ADD- SUB EXPRESSION left child: " + node.getL().toString() + "right child"+node.getR().toString()+"!");
         String ournode = node.getL().toString() + node.getR().toString();
 
         List<String> myList = new ArrayList<String>(Arrays.asList(ournode.split(" ")));
-        //System.out.print("MYLIST "+ myList);
         for(int i=0;i<myList.size();i++) {
 
             if (myList.get(i).equals("+") || myList.get(i).equals("-")) {
@@ -994,7 +782,6 @@ public class PrinterAST extends DepthFirstAdapter{
         for(int i=0;i<myList.size();i++) {
 
             String type = table.FindVariableType(myList.get(i).trim());
-            // System.out.println("Type is " + type);
             if (type != null) {
                 try{
                     if (!type.equals("int")){
@@ -1005,23 +792,15 @@ public class PrinterAST extends DepthFirstAdapter{
                     throw new IllegalStateException("ERROR WRONG EXPR TYPE");
                 }
             }
-            //  else System.out.println("null type");
         }
-
-
-        //   System.out.print("MYLIST IS "+ myList);
-
 
     }
 
     @Override
     public void outAAddSubAllExpr(AAddSubAllExpr node)
     {
-        //System.out.println("(ADD- SUB EXPRESSION left child: " + node.getL().toString() + "right child "+node.getR().toString()+"!");
         List<String> myList = new ArrayList(Arrays.asList(node.getL().toString().trim().split("\\s+")));
-        //  System.err.println("addsub myList "+myList);
         String op = myList.get(myList.size()-1);
-        // System.err.println("op "+op);
         String rightNumb = node.getR().toString().trim();
         List<String> rightNumlist = new ArrayList(Arrays.asList(node.getR().toString().trim().split("\\s+")));
 
@@ -1046,9 +825,6 @@ public class PrinterAST extends DepthFirstAdapter{
         String regRight = im.Place(node.getR().toString().trim());
 
         String regLeft = im.Place(left);
-
-
-
         if (myList.size()==2){
             if(rightNumlist.size()==1){
                 im.genQuad(myOp,myList.get(0),rightNumb,name2);
@@ -1089,15 +865,11 @@ public class PrinterAST extends DepthFirstAdapter{
     }
     @Override
     public void outARestSignsAllExpr(ARestSignsAllExpr node) {
-        //System.out.println("(Rest_signs expr: " + node.getL().toString() + " right child " + node.getR().toString());
         List<String> myList = new ArrayList(Arrays.asList(node.getL().toString().trim().split("\\s+")));
-        // System.err.println("Rest myList " + myList);
         String op = myList.get(myList.size() - 1);
-        //System.err.println("op "+op);
         String rightNumb = node.getR().toString().trim();
         List<String> rightNumlist = new ArrayList(Arrays.asList(node.getR().toString().trim().split("\\s+")));
 
-        // System.err.println("rightNumb " + rightNumb);
         operator myOp = new operator("op", op);
         Object w = im.newTemp("Integer");
         String name2 = "$" + im.getCount();
@@ -1117,7 +889,6 @@ public class PrinterAST extends DepthFirstAdapter{
         im.insertReg(reg);
 
         String regRight = im.Place(node.getR().toString().trim());
-
 
         String regLeft = im.Place(left);
 
@@ -1167,14 +938,10 @@ public class PrinterAST extends DepthFirstAdapter{
     public void inARestSignsAllExpr(ARestSignsAllExpr node)
     {
 
-        //System.out.println("(Rest_signs expr: " + node.getL().toString() + " right child "+node.getR().toString());
-
-
 
         String ournode = node.getL().toString() + node.getR().toString();
 
         List<String> myList = new ArrayList<String>(Arrays.asList(ournode.split(" ")));
-        // System.out.print("MYLIST "+ myList);
         for(int i=0;i<myList.size();i++) {
 
             if (myList.get(i).equals("*")  || myList.get(i).equals("mod") || myList.get(i).equals("div")) {
@@ -1195,7 +962,6 @@ public class PrinterAST extends DepthFirstAdapter{
         for(int i=0;i<myList.size();i++) {
 
             String type = table.FindVariableType(myList.get(i).trim());
-            //   System.out.println("Type is " + type);
             if (type != null) {
                 try{
                     if (!type.equals("int")){
@@ -1206,13 +972,7 @@ public class PrinterAST extends DepthFirstAdapter{
                     throw new IllegalStateException("ERROR WRONG EXPR TYPE");
                 }
             }
-            //  else System.out.println("null type");
         }
-
-
-
-
-        //System.out.print("MYLIST IS "+ myList);
 
     }
 
@@ -1221,7 +981,6 @@ public class PrinterAST extends DepthFirstAdapter{
     public void inAWithPlminAllExpr(AWithPlminAllExpr node)
     {
 
-        // System.out.print("(PROSIMO expr: Left child " + node.getL().toString() + " right child "+ node.getR().toString()+"!");
         try{
             if(node.getR().toString().contains("\"") || node.getR().toString().contains("'")){
                 throw new MyException("GIVEN STRING IN NUMERICAL EXPRESSION");
@@ -1244,19 +1003,13 @@ public class PrinterAST extends DepthFirstAdapter{
                 throw new IllegalStateException("ERROR WRONG EXPR TYPE");
             }
         }
-        // else
-        //  System.out.println("null");
+
     }
 
 
     @Override
     public void inAExprsignsCond(AExprsignsCond node)
     {
-
-         //System.err.println("(EXPRESSION CONDITION: left child " + node.getL().toString() + " right child "+node.getR().toString() + "!");
-
-
-
         String ournode = node.getL().toString() + node.getR().toString();
 
         List<String> myListLeft = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
@@ -1268,11 +1021,9 @@ public class PrinterAST extends DepthFirstAdapter{
             }
 
         }
-
         if (myListLeft.size()==1){
             String name = myListLeft.get(0).trim();
             String type = table.FindVariableType(name);
-            //  System.out.println("Type is " + type);
             if (type != null) {
                 try{
                     if (!type.equals("int")){
@@ -1283,12 +1034,10 @@ public class PrinterAST extends DepthFirstAdapter{
                     throw new IllegalStateException("ERROR WRONG EXPR TYPE");
                 }
             }
-            //  else System.out.println("null type");
         }
         if (myListRight.size()==1){
             String name = myListRight.get(0).trim();
             String type = table.FindVariableType(name);
-            //  System.out.println("Type is " + type);
             if (type != null) {
                 try{
                     if (!type.equals("int")){
@@ -1299,19 +1048,12 @@ public class PrinterAST extends DepthFirstAdapter{
                     throw new IllegalStateException("ERROR WRONG EXPR TYPE");
                 }
             }
-            //  else{
-            //      System.out.println("null type");
-
-            // }
         }
 
 
         List<String> listFinal = new ArrayList<String>();
         listFinal.addAll(myListLeft);
         listFinal.addAll(myListRight);
-
-
-        // System.out.print("MY LIST final IS "+ listFinal);
 
         for(int i=0;i<listFinal.size();i++) {
 
@@ -1323,21 +1065,16 @@ public class PrinterAST extends DepthFirstAdapter{
             catch (MyException e){
                 throw new IllegalStateException("GIVEN STRING IN NUMERICAL EXPRESSION");
             }
-
         }
-
 
     }
 
     @Override
     public void outAExprsignsCond(AExprsignsCond node)
     {
-        System.out.println("(EXPRESSION CONDITION: left child " + node.getL().toString() + " right child "+node.getR().toString() + "!");
 
         List<String> myList = new ArrayList(Arrays.asList(node.getL().toString().trim().split("\\s+")));
-        //System.err.println("type "+node.getL().toString() + " " +node.getL().getClass().getSimpleName());
         String op = myList.get(myList.size()-1);
-        //  System.err.println("op "+op);
         String rightNumb = node.getR().toString().trim();
         List<String> rightNumlist = new ArrayList(Arrays.asList(node.getR().toString().trim().split("\\s+")));
 
@@ -1347,14 +1084,12 @@ public class PrinterAST extends DepthFirstAdapter{
             left += myList.get(i);
         }
         left = left.trim();
-          System.out.println("Left "+left);
 
         operator myOp = new operator("op",op);
         Object w = im.newTemp("Integer");
         String name2 = "$" + im.getCount();
 
         String wholeExpr = node.getL().toString() + node.getR().toString().trim();
-        // System.err.println("wholeExpr "+wholeExpr);
 
         int myCounter=1;
 
@@ -1362,15 +1097,6 @@ public class PrinterAST extends DepthFirstAdapter{
 
         InterReg reg = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name2);
         im.insertReg(reg);
-
-
-       /* try{
-            if(regRight == null){
-                throw new MyException("EXPRESSION NOT FOUND");
-            }
-        }catch (MyException e){
-            throw new IllegalStateException("EXPRESSION NOT FOUND");
-        }*/
 
        if (left.contains("[")){             //array
 
@@ -1410,10 +1136,6 @@ public class PrinterAST extends DepthFirstAdapter{
 
            }
 
-           //System.err.println("finalS "+finalS);
-           //System.err.println("numb "+numb);
-
-
            im.insertPlaceHelper(left,"$" + im.getCount());
 
            im.genQuad(im.getOpCode().getArray(),finalS,numb,"$" + im.getCount());
@@ -1426,8 +1148,6 @@ public class PrinterAST extends DepthFirstAdapter{
             right += rightNumlist.get(i);
         }
         right = right.trim();
-        System.out.println("Right "+right);
-
 
         if (right.contains("[")) {             //array
 
@@ -1465,18 +1185,9 @@ public class PrinterAST extends DepthFirstAdapter{
                 }
 
             }
-
-            //System.err.println("finalSR " + finalS);
-            //System.err.println("numbR " + numb);
-
-
-
-
-
             im.insertPlaceHelper(right, "$" + im.getCount());
             im.genQuad(im.getOpCode().getArray(), finalS, numb, "$" + im.getCount());
 
-            im.printPlace();
         }
 
         String regRight = im.Place(node.getR().toString().trim());
@@ -1484,10 +1195,6 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
         String regLeft = im.Place(left);
-
-
-       //System.err.println("MYLIST "+myList);
-
 
         if (myList.size()==2){
             if(rightNumlist.size()==1){
@@ -1506,16 +1213,9 @@ public class PrinterAST extends DepthFirstAdapter{
             }
         }
         else {
-            //System.out.println("node.getL().toString() "+node.getL().toString());
-            //String sub = node.getL().toString().trim().substring(0, node.getL().toString().trim().length()-1);
-            //System.out.println("sub "+sub);
-
-
-
 
             try{
                 if(regLeft == null){
-                    System.out.println("ERRRORRR: "+left);
                     throw new MyException("EXPRESSION NOT FOUND");
                 }
             }catch (MyException e){
@@ -1554,67 +1254,41 @@ public class PrinterAST extends DepthFirstAdapter{
 
     @Override
     public void inANoElseStmt(ANoElseStmt node){
-        System.out.println("INno else stmt "+ node.getL().toString() + " right "+ node.getR().toString() );
         table.setIfWhileScope(table.getIfWhileScope()+1);
     }
 
     @Override
     public void outANoElseStmt(ANoElseStmt node){
-        System.out.println("no else stmt "+ node.getL().toString() + " right "+ node.getR().toString() );
-        //System.out.println(im.getCount());
         im.backpatch("endOfIf" + table.getIfWhileScope(),im.getCount());
         table.setIfWhileScope(table.getIfWhileScope() -1);
     }
 
     @Override
     public void inAIfstmt(AIfstmt node){
-        //System.out.println("if  stmt "+ node.toString() );
-        //System.out.println(im.getCount());
         im.backpatch("then",im.getCount());
     }
 
     @Override
     public void inAMyStmtelse(AMyStmtelse node){
-        System.out.println("inAMyStmtelse111111111 "+ node.toString() );
-        //im.backpatch("endOfIf",im.getCount());
         im.genQuad(im.getOpCode().getJump(),null,null,"END");
-
-
-
-
         im.backpatch("endOfIf" + table.getIfWhileScope(),im.getCount());
 
 
     }
 
     @Override
-    public void outAMyStmtelse(AMyStmtelse node){
-        //System.out.println("ENDDD inAMyStmtelse111111111 "+ node.toString() );
-        //im.backpatch("endOfIf",im.getCount());
-        //im.genQuad(im.getOpCode().getJump(),null,null,"END");
-        //im.backpatch("endOfIf",im.getCount());
-        //table.setIfWhileScope(table.getIfWhileScope()+1);
-    }
-
-    @Override
     public void inAWithElseStmt(AWithElseStmt node){
-        System.out.println("MY IN stmttt with else 2222 "+ node.getL().toString() + " right "+ node.getR().toString() );
         table.setIfWhileScope(table.getIfWhileScope()+1);
     }
 
     @Override
     public void outAWithElseStmt(AWithElseStmt node){
-        System.out.println("ENDD stmttt with else 2222 "+ node.getL().toString() + " right "+ node.getR().toString() );
         im.backpatch("END",im.getCount());
-        //im.backpatch("endOfIf"+table.getIfWhileScope(),im.getCount());
         table.setIfWhileScope(table.getIfWhileScope()-1);
     }
 
-
-
     @Override
     public void inAFuncCallWithoutStmt(AFuncCallWithoutStmt node){
-        //System.err.println("FUNC CALL WITHOUT PAR: " + node.getVarName().toString().trim() + "!");
         String funcName = node.getVarName().toString().trim();
 
         try{
@@ -1630,7 +1304,6 @@ public class PrinterAST extends DepthFirstAdapter{
 
     @Override
     public void inAFuncCallWithStmt(AFuncCallWithStmt node){
-        System.out.println("FUNC CALL WITH PAR: " + node.getL().toString() + "!" + node.getR().toString() + "!");
 
         String funcName = node.getL().toString().trim();
 
@@ -1638,17 +1311,9 @@ public class PrinterAST extends DepthFirstAdapter{
 
         List <String> parameters = new ArrayList<String>(Arrays.asList(nodeRight.replaceAll("\\s+","").split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1)));
 
-        //List<?> params = new ArrayList(Arrays.asList(node.getR().replaceAll("\\s+","").split(",")));
-        //System.err.println("pnode "+node.getR() + node.getR().getClass().getSimpleName());
-
-      //  List  parameters = new ArrayList (Arrays.asList(node.getR()));
-
-        //System.err.println("sizeee "+ parameters.size());
-
         List paramType = new ArrayList();
 
         for (int i=0; i<parameters.size(); i++){
-            System.err.println("AAAA " +parameters.get(i) + " "+ parameters.get(i).getClass().getSimpleName());
 
             if (parameters.get(i).contains("\"")){
                 paramType.add("char[]");
@@ -1697,10 +1362,6 @@ public class PrinterAST extends DepthFirstAdapter{
 
                     }
 
-                    //System.err.println("finalS "+finalS);
-                    //System.err.println("numb "+numb);
-
-
                     im.insertPlaceHelper(left,"$" + im.getCount());
 
                     im.genQuad(im.getOpCode().getArray(),finalS,numb,"$" + im.getCount());
@@ -1731,13 +1392,6 @@ public class PrinterAST extends DepthFirstAdapter{
             }
 
         }
-
-        System.err.println("PARAMTYPE "+ paramType);
-
-
-
-        System.err.println("parameters func call "+ parameters + " "+ funcName);
-
         try{
             if(!table.checkScopeWith(funcName,paramType)){
 
@@ -1752,16 +1406,13 @@ public class PrinterAST extends DepthFirstAdapter{
 
     @Override
     public void outAFuncCallWithoutStmt(AFuncCallWithoutStmt node){
-
         String funcName = node.toString().trim();
         im.insertPlaceHelper(funcName,"$" + im.getCount());
         im.genQuad(im.getOpCode().getCall(),null,null,funcName);
-
     }
 
     @Override
     public void outAFuncCallWithStmt(AFuncCallWithStmt node){
-        //System.err.println("left "+node.getL().toString() + " right "+ node.getR().toString());
         String wholeStr = node.getL().toString() + node.getR().toString().trim();
 
         String left = node.getL().toString().trim();
@@ -1773,24 +1424,15 @@ public class PrinterAST extends DepthFirstAdapter{
     }
 
 
-
-
-
     @Override
     public void outAParametersAllExpr(AParametersAllExpr node){
-        //System.err.println("ALL PARAMETERS: left " + node.getL().toString() +" right " + node.getR().toString());
-        //System.err.println("ALL PARAMETERS: whole " + node.toString() );
-
         List <String> parameters = new ArrayList<String>(Arrays.asList(node.toString().trim().replaceAll("\\s+","").split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1)));
-        System.err.println("parameters "+ parameters);
 
         int noOfParam = parameters.size();
 
 
         for (int i=0; i<parameters.size();i++) {
             String par = String.valueOf( parameters.get(i));
-            //List parList = new ArrayList(Arrays.asList(par.split(" ")));
-           // System.err.println("PARLIST " + parList);
 
             String left = par;
 
@@ -1831,10 +1473,6 @@ public class PrinterAST extends DepthFirstAdapter{
                     }
 
                 }
-
-                System.err.println("finalS "+finalS);
-                System.err.println("numb "+numb);
-
 
                 im.insertPlaceHelper(left,"$" + im.getCount());
 
@@ -1883,7 +1521,6 @@ public class PrinterAST extends DepthFirstAdapter{
     @Override
     public void inAReturnWithStmt(AReturnWithStmt node) {
 
-        // System.err.println("RETURN EXPR2: " + node.getAllExpr().toString() + node.getAllExpr().getClass().getSimpleName());
 
         String type = node.getAllExpr().getClass().getSimpleName();
         String ourType = null;
@@ -1912,7 +1549,6 @@ public class PrinterAST extends DepthFirstAdapter{
             //array
             List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
             ourType = table.FindVariableType(nameList.get(0));
-            //System.err.println("ARRAYY " + nameList);
 
             try{
                 if(ourType == null){
@@ -1950,8 +1586,6 @@ public class PrinterAST extends DepthFirstAdapter{
             im.genQuad(im.getOpCode().getRet(),null,null,null);
             return;
         }
-
-        //System.err.println("Type: " + ourType);
 
         Object w = im.newTemp(ourType);
         String name = "$" + im.getCount();
@@ -1968,9 +1602,6 @@ public class PrinterAST extends DepthFirstAdapter{
     @Override
     public void inAReturnWith2Stmt(AReturnWith2Stmt node) {
 
-        //System.err.println("RETURN WIITH PAR2: " + node.getAllExpr().toString());
-        //  System.err.println("RETURN EXPR2: " + node.getAllExpr().toString() + node.getAllExpr().getClass().getSimpleName());
-
         String type = node.getAllExpr().getClass().getSimpleName();
         String ourType = null;
 
@@ -1990,18 +1621,12 @@ public class PrinterAST extends DepthFirstAdapter{
                 throw new IllegalStateException("FUNC NOT FOUND");
             }
 
-            /*if (ourType.contains("int"))
-                ourType = "Integer";
-            else if(ourType.contains("char"))
-                ourType = "Char";*/
-            // im.genQuad(im.getOpCode().getRet(),null,null,null);
             return;
         }
         else if (type.equals("ALValueAllExpr")){
             //array
             List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
             ourType = table.FindVariableType(nameList.get(0));
-            //System.err.println("ARRAYY " + nameList);
 
             try{
                 if(ourType == null){
@@ -2039,8 +1664,6 @@ public class PrinterAST extends DepthFirstAdapter{
             im.genQuad(im.getOpCode().getRet(),null,null,null);
             return;
         }
-
-        //System.err.println("Type: " + ourType);
 
         Object w = im.newTemp(ourType);
         String name = "$" + im.getCount();
@@ -2057,9 +1680,6 @@ public class PrinterAST extends DepthFirstAdapter{
     @Override
     public void inAReturnExprStmt(AReturnExprStmt node) {
 
-        //System.err.println("RETURN EXPR1: " + node.getAllExpr().toString());
-        //System.err.println("RETURN EXPR2: " + node.getAllExpr().toString() + node.getAllExpr().getClass().getSimpleName());
-
         String type = node.getAllExpr().getClass().getSimpleName();
         String ourType = null;
 
@@ -2079,18 +1699,12 @@ public class PrinterAST extends DepthFirstAdapter{
                 throw new IllegalStateException("FUNC NOT FOUND");
             }
 
-            /*if (ourType.contains("int"))
-                ourType = "Integer";
-            else if(ourType.contains("char"))
-                ourType = "Char";*/
-            //im.genQuad(im.getOpCode().getRet(),null,null,null);
             return;
         }
         else if (type.equals("ALValueAllExpr")){
             //array
             List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
             ourType = table.FindVariableType(nameList.get(0));
-            //System.err.println("ARRAYY " + nameList);
 
             try{
                 if(ourType == null){
@@ -2128,8 +1742,6 @@ public class PrinterAST extends DepthFirstAdapter{
             im.genQuad(im.getOpCode().getRet(),null,null,null);
             return;
         }
-
-        //System.err.println("Type: " + ourType);
 
         Object w = im.newTemp(ourType);
         String name = "$" + im.getCount();
@@ -2147,8 +1759,6 @@ public class PrinterAST extends DepthFirstAdapter{
     @Override
     public void inAReturnExpr2Stmt(AReturnExpr2Stmt node) {
 
-        //System.err.println("RETURN EXPR2: " + node.getAllExpr().toString() + node.getAllExpr().getClass().getSimpleName());
-
         String type = node.getAllExpr().getClass().getSimpleName();
         String ourType = null;
 
@@ -2159,7 +1769,6 @@ public class PrinterAST extends DepthFirstAdapter{
             ourType = "Char";
         else if (type.equals("AFuncAllExpr")){
             List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
-            //System.err.println(nameList);
             ourType = table.getFuncType(nameList.get(0));
             try{
                 if(ourType == null){
@@ -2168,19 +1777,12 @@ public class PrinterAST extends DepthFirstAdapter{
             }catch (MyException e){
                 throw new IllegalStateException("FUNC NOT FOUND");
             }
-
-            /*if (ourType.contains("int"))
-                ourType = "Integer";
-            else if(ourType.contains("char"))
-                ourType = "Char";*/
-            // im.genQuad(im.getOpCode().getRet(),null,null,null);
             return;
         }
         else if (type.equals("ALValueAllExpr")){
             //array
             List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
             ourType = table.FindVariableType(nameList.get(0));
-            //System.err.println("ARRAYY " + nameList);
 
             try{
                 if(ourType == null){
@@ -2218,8 +1820,6 @@ public class PrinterAST extends DepthFirstAdapter{
             im.genQuad(im.getOpCode().getRet(),null,null,null);
             return;
         }
-
-        //System.err.println("Type: " + ourType);
 
         Object w = im.newTemp(ourType);
         String name = "$" + im.getCount();
@@ -2286,14 +1886,12 @@ public class PrinterAST extends DepthFirstAdapter{
 
     @Override
     public void outAOrCond(AOrCond node) {
-        //System.out.println("AOrCond Left "+node.getL().toString() + " right " +node.getR().toString());
 
         String left = node.getL().toString().trim();
         String right = node.getR().toString().trim();
         String wholeString = node.getL().toString() +node.getR().toString().trim();
 
         im.insertPlaceHelper(wholeString,"$" + im.getCount());
-        // System.err.println(wholeString);
 
         String regLeft = im.Place(left);
         try{
@@ -2320,14 +1918,12 @@ public class PrinterAST extends DepthFirstAdapter{
 
     @Override
     public void outAAndCond(AAndCond node) {
-        //System.out.println("AAndCond Left "+node.getL().toString() + " right " +node.getR().toString());
 
         String left = node.getL().toString().trim();
         String right = node.getR().toString().trim();
         String wholeString = node.getL().toString() +node.getR().toString().trim();
 
         im.insertPlaceHelper(wholeString,"$" + im.getCount());
-        // System.err.println(wholeString);
 
         String regLeft = im.Place(left);
         try{
@@ -2360,14 +1956,12 @@ public class PrinterAST extends DepthFirstAdapter{
 
     @Override
     public void outANotCond(ANotCond node) {
-        System.err.println("ANotCond Left "+node.getL().toString() + " right " +node.getR().toString());
 
         String left = node.getL().toString().trim();
         String right = node.getR().toString().trim();
         String wholeString = node.getL().toString() +node.getR().toString().trim();
 
         im.insertPlaceHelper(wholeString,"$" + im.getCount());
-        System.err.println(wholeString);
 
         String regRight = im.Place(right);
         try{
@@ -2391,38 +1985,27 @@ public class PrinterAST extends DepthFirstAdapter{
             throw new IllegalStateException("EXPRESSION NOT FOUND");
         }
 
-
-        System.err.println("regright "+ regRight);
-        System.err.println("wholeString "+ wholeString);
         im.genQuad(im.getOpCode().getIfb(), regWhole, null,im.getCount()+2 );
         im.genQuad(im.getOpCode().getJump(), null, null, "endOfIf"+table.getIfWhileScope());
 
-
         globalFlagNot= false;
-
-
 
     }
 
     @Override
     public void inAWhileStmt(AWhileStmt node) {
-        //System.out.println("AWHILE "+node.getL().toString() + " right " +node.getR().toString());
         table.setIfWhileScope(table.getIfWhileScope()+1);
     }
 
     @Override
     public void inAWhileElseStmt(AWhileElseStmt node) {
-        //System.out.println("AWHILE "+node.getL().toString() + " right " +node.getR().toString());
         table.setIfWhileScope(table.getIfWhileScope()+1);
     }
-
-
 
 
     @Override
     public void outAWhileStmt(AWhileStmt node) {
 
-        // System.out.println("ENDIIIINGAWHILE "+node.getL().toString() + " right " +node.getR().toString());
         String cond = node.getL().toString().trim();
 
         String reg = im.Place(cond);
@@ -2440,13 +2023,8 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
         im.backpatch("endOfIf"+table.getIfWhileScope(),im.getCount()+1);
-        im.genQuad(im.getOpCode().getJump(),null,null,regNum);  //do
-        System.err.println(node.getL().toString() + im.getCount());
-
+        im.genQuad(im.getOpCode().getJump(),null,null,regNum);
         table.setIfWhileScope(table.getIfWhileScope()-1);
-
-        // im.whileJump();
-
 
 
     }
@@ -2455,27 +2033,12 @@ public class PrinterAST extends DepthFirstAdapter{
     public void inAExpressionElseStmt(AExpressionElseStmt node)
     {
 
-        //System.err.println("(STMT: Left child " + node.getL().toString() + " Right child " +node.getR().toString() +"!");
-        //  System.out.println(node.getR().getClass().getSimpleName());
         List<?> newl = (List) node.getL();
-        //List<?> newr = (List) node.getL();
-
-
-        //List<String> leftList = new ArrayList<String>(Arrays.asList(node.getL().toString().trim().split(" ")));
-        //List<String> rightList = new ArrayList<String>(Arrays.asList(node.getR().toString().trim().split(" ")));
-
-
-
-        //String name=leftList.get(0).trim();
-        //name = name.replace("[","");
-        //name = name.replace("]","");
         String name = newl.get(0).toString();
 
         String initialName=name;
 
-
         if (name.contains("[")){
-
 
             int i=0;
             String finalS="";
@@ -2499,8 +2062,6 @@ public class PrinterAST extends DepthFirstAdapter{
             }
             finalS=finalS.trim();
             numb=numb.trim();
-            //System.err.println("finalS "+finalS);
-            //System.err.println("numb "+numb);
 
             String type = table.FindVariableType(finalS);
             try{
@@ -2516,18 +2077,11 @@ public class PrinterAST extends DepthFirstAdapter{
 
             InterReg reg = new InterReg(w,im.getCount(),im.getOpCode().getArray(),w.getClass().getSimpleName(),name2);
             im.insertReg(reg);
-
-            im.genQuad(im.getOpCode().getArray(),finalS,numb, "$" + im.getCount());
             name=finalS;
         }
 
         String type;
         String str=node.getR().toString().trim();
-        //str = str.replace("[","");
-        //str = str.replace("]","");
-
-
-        //checking for value
 
         String reg=name;
         if (initialName.contains("[")){
@@ -2536,7 +2090,6 @@ public class PrinterAST extends DepthFirstAdapter{
 
         if (node.getR().getClass().getSimpleName().equals("AFuncAllExpr")) {
 
-            System.err.println("FUNCTION CALL");
             List<String> myList = new ArrayList<String>(Arrays.asList(node.getR().toString().split(" ")));
             String funcName = myList.get(0);
             type= table.getFuncType(funcName);
@@ -2547,16 +2100,11 @@ public class PrinterAST extends DepthFirstAdapter{
             }catch (MyException e){
                 throw new IllegalStateException("ERROR! A FUNCTION THAT WASN'T DECLARED");
             }
-
-
-            //im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
-
         }
 
 
         else if (str.contains("\"")){
 
-            //not sure about this one
             int length=str.length()-1;
             type = "char[" +length+"]";
 
@@ -2565,34 +2113,25 @@ public class PrinterAST extends DepthFirstAdapter{
         }
         else if (node.getR().getClass().getSimpleName().equals("ALetterAllExpr")) {
 
-            //   System.out.println("CHAR");
             type= "char";
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
         }
         else if (node.getR().getClass().getSimpleName().equals("AConstantAllExpr")){
 
-            //   System.out.println("CONSTANT");
             type= "int";
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
         }
         else if (node.getR().getClass().getSimpleName().equals("AAddSubAllExpr")){
-            //System.out.println("AAddSubAllExpr");
             type= "int";
         }
         else if (node.getR().getClass().getSimpleName().equals("ARestSignsAllExpr")){
-            //System.out.println("ARestSignsAllExpr");
             type= "int";
         }
         else if (node.getR().getClass().getSimpleName().equals("AWithPlminAllExpr")){
-
-
-            //  System.out.println("AWithPlminAllExpr");
             type= "int";
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
         }
         else if (node.getR().toString().contains("[")){
-
-            //System.err.println("right "+node.getR().toString() + " "+ str);
 
             int i=0;
             String finalS="";
@@ -2616,8 +2155,6 @@ public class PrinterAST extends DepthFirstAdapter{
             }
             finalS=finalS.trim();
             numb=numb.trim();
-            //System.err.println("finalS "+finalS);
-            //System.err.println("numb "+numb);
 
             type = table.FindVariableType(finalS);
             try{
@@ -2627,41 +2164,24 @@ public class PrinterAST extends DepthFirstAdapter{
             }catch (MyException e){
                 throw new IllegalStateException("ERROR! VARIABLE DOESN'T EXIST");
             }
-
-           /* Object w = im.newTemp(type);
-            String name2 = "$" + im.getCount();
-
-            InterReg reg2 = new InterReg(w,im.getCount(),im.getOpCode().getArray(),w.getClass().getSimpleName(),name2);
-            im.insertReg(reg2);
-
-            im.genQuad(im.getOpCode().getArray(),finalS,numb, "$" + im.getCount());
-
-            im.genQuad(im.getOpCode().getAssignment(),"$" + (im.getCount()-1),null,name);
-*/
         }
         else {
-            // System.err.println("VARIABLE");
-
 
             //find variables type
             type = table.FindVariableType(str);
             try{
                 if(type==null){
-                    //        System.err.println("name "+str);
                     throw new MyException("ERROR! A VARIABLE WITH NO TYPE");
                 }
             }catch (MyException e){
                 throw new IllegalStateException("ERROR! A VARIABLE WITH NO TYPE");
             }
-            //find second variable type
-
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
         }
 
 
 
         ScopeObject obj = new ScopeObject(name,type,"var", false);
-        System.err.println("EEEEEEEEERRRRRRRR " +name + " "+ type );
         try{
             if (table.lookupVarAndType(obj)){
                 throw new MyException("ERROR INCORECT TYPE OF VARIABLE");
@@ -2675,34 +2195,30 @@ public class PrinterAST extends DepthFirstAdapter{
     }
 
     @Override
-    public void outAExpressionElseStmt(AExpressionElseStmt node)
-    {
+    public void outAExpressionElseStmt(AExpressionElseStmt node) {
 
         List<?> newl = (List) node.getL();
 
         String name = newl.get(0).toString();
 
-        String initialName=name;
+        String initialName = name;
 
+        if (name.contains("[")) {
 
+            String numb = "";
+            int i = 0;
+            String finalS = "";
 
-
-        if (name.contains("[")){
-
-            String numb="";
-            int i=0;
-            String finalS="";
-
-            while(i<name.length()){
+            while (i < name.length()) {
                 char c = name.charAt(i);
-                if(c == '['){
-                    while(i<name.length()){
+                if (c == '[') {
+                    while (i < name.length()) {
                         i++;
                         c = name.charAt(i);
                         if (c == ']')
                             break;
 
-                        numb+=c;
+                        numb += c;
 
                     }
                     break;
@@ -2710,99 +2226,118 @@ public class PrinterAST extends DepthFirstAdapter{
                 finalS += c;
                 i++;
             }
-            finalS=finalS.trim();
-            numb=numb.trim();
+            finalS = finalS.trim();
+            numb = numb.trim();
 
             String type = table.FindVariableType(finalS);
-            try{
-                if(type==null){
+            try {
+                if (type == null) {
                     throw new MyException("ERROR! VARIABLE DOESN'T EXIST");
                 }
-            }catch (MyException e){
+            } catch (MyException e) {
                 throw new IllegalStateException("ERROR! VARIABLE DOESN'T EXIST");
             }
 
             Object w = im.newTemp(type);
             String name2 = "$" + im.getCount();
 
-            InterReg reg = new InterReg(w,im.getCount(),im.getOpCode().getArray(),w.getClass().getSimpleName(),name2);
+            InterReg reg = new InterReg(w, im.getCount(), im.getOpCode().getArray(), w.getClass().getSimpleName(), name2);
             im.insertReg(reg);
 
-            im.genQuad(im.getOpCode().getArray(),finalS,numb, "$" + im.getCount());
-            name=finalS;
+
+            im.genQuad(im.getOpCode().getArray(), finalS, numb, "$" + im.getCount());
+            im.insertPlaceHelper((finalS + numb), "$" + im.getCount());
+            name = finalS;
         }
 
         String type;
-        String str=node.getR().toString();
+        String str = node.getR().toString();
         List myString = new ArrayList(Arrays.asList(str.split(" ")));
 
-        //System.err.println(myString);
-
-
-        //checking for value
-
-        String reg=name;
-        if (initialName.contains("[")){
-            reg="$" + (im.getCount()-1);
+        String reg = name;
+        if (initialName.contains("[")) {
+            reg = "$" + (im.getCount() - 1);
         }
 
 
         if (node.getR().getClass().getSimpleName().equals("AFuncAllExpr")) {
-            //System.err.println("(STMT: Left child " + node.getL().toString() + " Right child " +node.getR().toString() +"!");
 
-            im.genQuad(im.getOpCode().getAssignment(),myString.get(0),null,reg);
-        }
-        else if (node.getR().getClass().getSimpleName().equals("AAddSubAllExpr")){
+            im.genQuad(im.getOpCode().getAssignment(), myString.get(0), null, reg);
+        } else if (node.getR().getClass().getSimpleName().equals("AAddSubAllExpr")) {
 
-            im.genQuad(im.getOpCode().getAssignment(),"$" + (im.getCount()-1),null,reg);
+            im.genQuad(im.getOpCode().getAssignment(), "$" + (im.getCount() - 1), null, reg);
 
-        }
+        } else if (node.getR().getClass().getSimpleName().equals("ARestSignsAllExpr")) {
 
-        else if (node.getR().getClass().getSimpleName().equals("ARestSignsAllExpr")){
+            im.genQuad(im.getOpCode().getAssignment(), "$" + (im.getCount() - 1), null, reg);
 
-            im.genQuad(im.getOpCode().getAssignment(),"$" + (im.getCount()-1),null,reg);
-
-        }
-        else if (node.getR().toString().contains("[")) {
+        } else if (node.getR().toString().contains("[")) {
             String tempString = node.getR().toString().trim();
 
             List tempList = new ArrayList(Arrays.asList(tempString.split(" ")));
 
+            String numb = "";
+            int i = 0;
+            String finalS = "";
 
-            if (tempString.contains("+")|| tempString.contains("-") || tempString.contains("*") || tempString.contains("/") || tempString.contains("mod")){
+            while (i < tempString.length()) {
+                char c = tempString.charAt(i);
+                if (c == '[') {
+                    while (i < tempString.length()) {
+                        i++;
+                        c = tempString.charAt(i);
+                        if (c == ']')
+                            break;
+
+                        numb += c;
+
+                    }
+                    break;
+                }
+                finalS += c;
+                i++;
+            }
+            finalS = finalS.trim();
+            numb = numb.trim();
+
+            if (numb.contains("+") || numb.contains("-") || numb.contains("*") || numb.contains("/") || numb.contains("mod")) {
                 Object w = im.newTemp("Integer");
                 String name2 = "$" + im.getCount();
 
-                InterReg reg2 = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name2);
+                InterReg reg2 = new InterReg(w, im.getCount(), im.getOpCode().getAssignment(), w.getClass().getSimpleName(), name2);
                 im.insertReg(reg2);
-                im.genQuad(im.getOpCode().getArray(),tempList.get(0),"$" + (im.getCount()-1),name2);
-                im.genQuad(im.getOpCode().getAssignment(),"$" + (im.getCount()-1),null,name);
-            }
-            else{
+                String myReg = im.Place(numb);
+                try {
+                    if (myReg == null) {
+                        throw new MyException("FOUND VARIABLE NOT DECLARED");
+                    }
+                } catch (MyException e) {
+                    throw new IllegalStateException("FOUND VARIABLE NOT DECLARED");
+                }
+
+                im.insertPlaceHelper(tempString, "$" + im.getCount());
+
+
+                im.genQuad(im.getOpCode().getArray(), tempList.get(0), myReg, name2);
+                im.genQuad(im.getOpCode().getAssignment(), "$" + (im.getCount() - 1), null, name);
+            } else {
                 String tempString2 = tempString;
-                while (tempString2.contains("[") || tempString2.contains("]")){
-                    tempString2 = tempString2.replace("[","");
-                    tempString2 = tempString2.replace("]","");
+                while (tempString2.contains("[") || tempString2.contains("]")) {
+                    tempString2 = tempString2.replace("[", "");
+                    tempString2 = tempString2.replace("]", "");
                 }
                 List tempList2 = new ArrayList(Arrays.asList(tempString2.split("\\s+")));
 
+
                 Object w = im.newTemp("Integer");
                 String name2 = "$" + im.getCount();
 
-                InterReg reg2 = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name2);
+                InterReg reg2 = new InterReg(w, im.getCount(), im.getOpCode().getAssignment(), w.getClass().getSimpleName(), name2);
                 im.insertReg(reg2);
-                im.genQuad(im.getOpCode().getArray(),tempList.get(0),tempList2.get(tempList2.size()-1),name2);
-                im.genQuad(im.getOpCode().getAssignment(),"$" + (im.getCount()-1),null,name);
+                im.genQuad(im.getOpCode().getArray(), tempList.get(0), tempList2.get(tempList2.size() - 1), name2);
+                im.genQuad(im.getOpCode().getAssignment(), "$" + (im.getCount() - 1), null, name);
             }
-
         }
-
     }
-
-
-
-
-
-
 
 }

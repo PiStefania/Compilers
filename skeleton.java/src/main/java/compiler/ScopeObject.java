@@ -1,8 +1,6 @@
 package compiler;
 
-/**
- * Created by stefa on 24/5/2017.
- */
+
 class ScopeObject {
     private String name;
     private String type;

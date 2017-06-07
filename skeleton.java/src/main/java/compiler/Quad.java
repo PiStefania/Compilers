@@ -1,8 +1,6 @@
 package compiler;
 
-/**
- * Created by anton_000 on 30/5/2017.
- */
+
 public class Quad {
 
     private Object op;

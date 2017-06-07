@@ -5,16 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by anton_000 on 30/5/2017.
- */
+
 import compiler.Quad;
 public class Intermediate {
 
     private int count;
     List<Quad> quadList;
-    List<InterReg> regList;
-    List<placeHelper> helpList;
+    List<InterReg> regList;         //list of registers
+    List<placeHelper> helpList;      //list for extracting place
 
     private OpCode opCode;
 
@@ -37,33 +35,15 @@ public class Intermediate {
     public OpCode getOpCode() {return opCode;}
 
     public void genQuad(Object op, Object arg1, Object arg2, Object arg3) {
-        String forPrint ="";
-        if (op != null)
-            if(op.getClass().getSimpleName().equals("operator")){
-                forPrint += " " + ((operator) op).getValue().toString();
-            }
-            else{
-                forPrint += " " + op.toString();
-            }
-        if (arg1 != null)
-            forPrint += " " +arg1.toString();
-        if (arg2 != null)
-            forPrint += " " +arg2.toString();
-        if (arg3 != null)
-            forPrint += " " +arg3.toString();
-
-        System.out.println(count + ":" +forPrint);
         count++;
         Quad myquad = new Quad(op,arg1,arg2,arg3);
         this.quadList.add(myquad);
-
 
     }
 
     public int nextQuad() {
         return count;
     }
-
 
     public Object newTemp(String nameType){
 
@@ -101,7 +81,7 @@ public class Intermediate {
         return oneElementList;
     }
 
-    public String Place(String expr){
+    public String Place(String expr){       //returns register/variable of expression
 
         for(int i=0;i<helpList.size();i++){
             if(helpList.get(i).getExpr().replaceAll("\\s+","").equals(expr.replaceAll("\\s+",""))){
@@ -224,31 +204,19 @@ public class Intermediate {
             else
                 System.out.println(i + ": " + this.quadList.get(i).getOp() + ", " + this.quadList.get(i).getArg1() + ", " + this.quadList.get(i).getArg2() + ", " + this.quadList.get(i).getArg3());
         }
-
-        //System.out.println("end of printing list");
     }
 
     public void insertReg(InterReg reg){
         this.regList.add(reg);
     }
 
-    public void printReg(){            //print list
 
-        for (int i=0; i<this.regList.size();i++){
-            System.out.println("W: " + regList.get(i).getW() + " of tag: " + regList.get(i).getTag() + " of call: " + regList.get(i).getCall() + " of type: " + this.regList.get(i).getType());
-        }
-
-    }
-
-    public void insertRet(){
-        //System.err.println("WE ARE INSIDE insertRet");
+    public void insertRet(){            //sets parameter attribute as "return"
         int counter = getCount()-2;
 
         if (this.quadList.get(getCount()-1).getOp().equals(this.getOpCode().getCall())){
-            //System.err.println("WE ARE INSIDE CALL");
             while(counter>=0){
                 if (this.quadList.get(counter).getOp().equals(this.getOpCode().getPar())){
-                    //System.err.println("WE ARE INSIDE PAR");
                     this.quadList.get(counter).setArg2("RET");
                 }
                 else
@@ -258,10 +226,8 @@ public class Intermediate {
         }
     }
 
-    public boolean insertRef(String funcName,SymbolTable table){
-        //System.err.println("WE ARE INSIDE insertRef");
+    public boolean insertRef(String funcName,SymbolTable table){ //sets parameter attribute as "ref"
         int counter = getCount()-1;
-        //System.err.println("counter " +counter);
         Map<String,List> refs = new HashMap<String, List>(table.getRefPar());
         List<String> keys = new ArrayList<String>(refs.keySet());
 
@@ -290,7 +256,6 @@ public class Intermediate {
 
                     if (table.getMystack().get(c).getName().equals(this.quadList.get(counter).getArg1())){
 
-                        table.print();
                         if (table.getMystack().get(c).getRef()) {
                             this.quadList.get(counter).setArg2("R");
                             break;
@@ -307,8 +272,6 @@ public class Intermediate {
 
 
 
-
-
     public void insertPlaceHelper(String expr,String position){
         placeHelper obj = new placeHelper(expr,position);
         this.helpList.add(obj);
@@ -316,8 +279,9 @@ public class Intermediate {
 
     public void printPlace(){
         System.out.println();
+        System.out.println("Printing Expressions in Variables");
         for (int i=0; i<this.helpList.size();i++){
-            System.out.println("EXPR: \"" + helpList.get(i).getExpr() + "\" is in variable: \"" + helpList.get(i).getPosition() +"\"");
+            System.out.println("EXPRESSION: \"" + helpList.get(i).getExpr() + "\" is in variable: \"" + helpList.get(i).getPosition() +"\"");
         }
     }
 

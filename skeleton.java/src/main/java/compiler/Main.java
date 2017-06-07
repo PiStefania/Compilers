@@ -12,7 +12,7 @@ public class Main
 {
 	public static void main(String[] arguments) throws FileNotFoundException
 	{
-		File file = new File("D:/σχολη/6o εξαμηνο/Μεταγλωττιστες/εργασια/examples/bsort.grace"/*"C:/Users/stefa/Desktop/test.grace"*/);
+		File file = new File("Insert pathname");
 		try
 		{
 			Parser p =
@@ -20,7 +20,6 @@ public class Main
 							new Lexer(
 									new PushbackReader(
 											new InputStreamReader(new FileInputStream(file)), 1024)));
-		// Parse the input.
 		Start tree = p.parse();
 		tree.apply(new PrinterAST());
 		}

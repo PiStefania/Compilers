@@ -4,15 +4,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by stefa on 28/5/2017.
- */
 public class FuncScope {
 
     private String funcName;                //name of function
     private Map<String,List> parameters;    //parameters of function(in map formation)
     private String type;                    //type of function
-    private int numOfParams;
+    private int numOfParams;                //number of parameters
 
     public FuncScope(String funcName,Map parameters,String type,int numOfParams){     //constructor
         this.funcName = funcName;

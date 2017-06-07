@@ -1,8 +1,5 @@
 package compiler;
 
-/**
- * Created by anton_000 on 31/5/2017.
- */
 
 class operator{
     private String name;
@@ -39,10 +36,8 @@ public class OpCode {
     public OpCode(){
         this.unit="unit";
         this.endu="endu";
-        //this.op="op";
         this.assignment=":=";
         this.array="array";
-        //this.relop="relop";
         this.ifb="ifb";
         this.jump="jump";
         this.label="label";

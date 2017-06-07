@@ -148,12 +148,12 @@ Ignored Tokens
 
 Productions
 
-    program = {func_def} func_def{->New program(func_def)};      /* func_def */
+    program = {func_def} func_def{->New program(func_def)};
 
-    func_def = {func_def} header local_def* block{->New func_def.all(header.func_def,New func_definition( [local_def.func_def],[block.stmt]))};     /*header local_def* block*/
+    func_def = {func_def} header local_def* block{->New func_def.all(header.func_def,New func_definition( [local_def.func_def],[block.stmt]))};
 
     header{->func_def} = {with_header_helper_bigger} fun var_name l_par header_helper_bigger header_helper2 ret_type{->New func_def.header_with(New head(var_name, header_helper_bigger.func_def),ret_type.func_def)}
-                | {without_header_helper_bigger} fun var_name l_par header_helper2 ret_type {->New func_def.header(var_name,ret_type.func_def)};    /* fun var_name ret_type*/
+                | {without_header_helper_bigger} fun var_name l_par header_helper2 ret_type {->New func_def.header(var_name,ret_type.func_def)};
 
     header_helper{->func_def} =  semicolon fpar_def{->fpar_def.func_def};
 
@@ -162,14 +162,14 @@ Productions
 
     header_helper2 = r_par colon;
 
-    fpar_def{->func_def} = {with_ref} ref var_name var_def_helper* colon_id fpar_type{->New func_def.fpar_def(New fpar(ref,var_name),New fpar_right([var_def_helper.func_def],fpar_type.func_def))}        /*ref var_name fpar_type */
+    fpar_def{->func_def} = {with_ref} ref var_name var_def_helper* colon_id fpar_type{->New func_def.fpar_def(New fpar(ref,var_name),New fpar_right([var_def_helper.func_def],fpar_type.func_def))}
                |{no_ref} var_name var_def_helper* colon_id fpar_type {->New func_def.fpar_def_no_ref(New no_ref(var_name, [var_def_helper.func_def]),fpar_type.func_def)};
 
     data_type{->func_def} = {int} int {->New func_def.int(int)}
     | {char} char {->New func_def.char(char)};
 
-    type{->func_def} = {dt} data_type type_helper*{-> New func_def.type(data_type.func_def,[type_helper.func_def])}  /*constant*/
-            | {ar} array   {->New func_def.array(array)} ;          /* array */
+    type{->func_def} = {dt} data_type type_helper*{-> New func_def.type(data_type.func_def,[type_helper.func_def])}
+            | {ar} array   {->New func_def.array(array)} ;
     type_helper{->func_def} = l_br constant r_br {->New func_def.constant(constant)};
 
     ret_type{->func_def} = {dt} data_type {->data_type.func_def}
@@ -220,7 +220,7 @@ Productions
                      | {block} block                                          {->[block.stmt]}
                      | {funcall} func_call semicolon_id                       {->[func_call.stmt]}
                      | {if_else} if_else_stmt                                   {->[if_else_stmt.stmt]}
-                     | {while} while cond do_id stmt_with_else                   {->[New stmt.while_else(cond.cond, [stmt_with_else.stmt])]}       //while?
+                     | {while} while cond do_id stmt_with_else                   {->[New stmt.while_else(cond.cond, [stmt_with_else.stmt])]}
                      | {return_with_expr} return parentheses_expr semicolon_id   {->[New stmt.return_with2(parentheses_expr.all_expr)]}
                      | {return_expr} return all_expr semicolon_id               {->[New stmt.return_expr2(all_expr.all_expr)]}
                      | {return} return semicolon                          {->[New stmt.return2()]};
@@ -325,22 +325,22 @@ Abstract Syntax Tree
 
     program = func_def;
 
-    func_def = {all} [l]: func_def [r]: func_definition                         //done
-               | {header_with} [l]:head [r]:func_def                            //done
+    func_def = {all} [l]: func_def [r]: func_definition
+               | {header_with} [l]:head [r]:func_def
                | {header} [l]:var_name [r]:func_def
-               | {fpar_def} [l]:fpar [r]:fpar_right                          //done
+               | {fpar_def} [l]:fpar [r]:fpar_right
                | {fpar_def_no_ref} [l]:no_ref [r]:func_def
                | {header_big} [l]:func_def [r]:func_def*
-               | {int} int                                                 //done
-               | {char} char                                               //done
+               | {int} int
+               | {char} char
                | {type} [l]:func_def [r]:func_def*
-               | {constant} constant                                       //done
-               | {nothing} nothing                                         //done
-               | {array} array                                             //done
+               | {constant} constant
+               | {nothing} nothing
+               | {array} array
                | {array2} array
                | {fpar_type} [l]:func_def [r]:func_def
-               | {var_def} [l]: var1 [r]: func_def                         //done
-               | {var_help} var_name                                     //done
+               | {var_def} [l]: var1 [r]: func_def
+               | {var_help} var_name
                | {fpar_type_helper} constant
                | {with_brs} func_def*
                | {without_brs} func_def*

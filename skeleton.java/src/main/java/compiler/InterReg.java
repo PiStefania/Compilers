@@ -1,8 +1,6 @@
 package compiler;
 
-/**
- * Created by stefa on 3/6/2017.
- */
+
 public class InterReg {
 
     private Object w;

@@ -1,11 +1,9 @@
 package compiler;
 
-/**
- * Created by stefa on 5/6/2017.
- */
+
 public class placeHelper {
     private String expr;
-    private String position;
+    private String position;            //register/variable
 
     public placeHelper(String expr,String position){
         this.expr = expr;
