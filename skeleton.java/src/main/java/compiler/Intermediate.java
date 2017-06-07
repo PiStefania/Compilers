@@ -18,6 +18,9 @@ public class Intermediate {
 
     private OpCode opCode;
 
+    public int getHelpListSize() {
+        return helpList.size();
+    }
 
     public Intermediate(){
         this.count=0;
@@ -37,7 +40,7 @@ public class Intermediate {
         String forPrint ="";
         if (op != null)
             if(op.getClass().getSimpleName().equals("operator")){
-                forPrint += " " + ((operator) op).getName().toString();
+                forPrint += " " + ((operator) op).getValue().toString();
             }
             else{
                 forPrint += " " + op.toString();
@@ -265,11 +268,9 @@ public class Intermediate {
         if(refs.containsKey(funcName))
         {
             List<String> values =  refs.get(funcName);
-            //System.err.println("aaaaaaaaa "+ values);
 
             while(counter>=0){
                 if (this.quadList.get(counter).getOp().equals(this.getOpCode().getPar())){
-                    //System.err.println("MUST CHECK PARAMETER");
                     if(values.contains(this.quadList.get(counter).getArg1())){
                         this.quadList.get(counter).setArg2("R");
                     }
@@ -280,33 +281,30 @@ public class Intermediate {
             }
             return true;
         }
-        else{
-            return false;
-        }
 
+        counter = getCount()-1;
 
-    }
+        while(counter>=0){
+            if (this.quadList.get(counter).getOp().equals(this.getOpCode().getPar())){
+                for(int c=0; c<table.getMystack().size(); c++) {
 
-    public int whileJump(){
-        //System.err.println("WE ARE INSIDE insertRet");
+                    if (table.getMystack().get(c).getName().equals(this.quadList.get(counter).getArg1())){
 
-        int counter = getCount()-1;
-
-        if (this.quadList.get(getCount()-1).getOp().equals(this.getOpCode().getJump())){
-            System.err.println("WE ARE INSIDE jump");
-            while(counter>=0){
-                if (this.quadList.get(counter).getOp().equals(this.getOpCode().getJump())){
-                    System.err.println("WE ARE INSIDE set jump");
-                    //this.quadList.get(counter).setArg2("RET");
+                        table.print();
+                        if (table.getMystack().get(c).getRef()) {
+                            this.quadList.get(counter).setArg2("R");
+                            break;
+                        }
+                    }
                 }
-                else
-                    break;
-                counter--;
             }
-            return counter;
+            else
+                break;
+            counter--;
         }
-        return -1;
+        return true;
     }
+
 
 
 

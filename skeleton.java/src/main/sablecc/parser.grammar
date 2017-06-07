@@ -197,10 +197,6 @@ Productions
     func_decl{->func_def} = header semicolon{->New func_def.func_decl(header.func_def)};
 
 
-    //block{->func_def} = {block} curly_l_br curly_r_br{->New func_def.block(curly_l_br,curly_r_br)};
-
-
-
 
     stmt{->stmt*} = {semicolon} semicolon {->[]}
           | {expression} l_value assign_id all_expr semicolon_id   {->[New stmt.expression([l_value.stmt], all_expr.all_expr)]}

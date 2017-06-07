@@ -7,11 +7,13 @@ class ScopeObject {
     private String name;
     private String type;
     private String genre;
+    private boolean ref;
 
-    public ScopeObject(String name, String type,String genre ){
+    public ScopeObject(String name, String type,String genre, boolean ref ){
         this.name = name;
         this.type = type;
         this.genre = genre;
+        this.ref = ref;
     }
 
     public String getName() {
@@ -26,7 +28,9 @@ class ScopeObject {
         return genre;
     }
 
-
+    public boolean getRef() {
+        return ref;
+    }
 
     public boolean sameObject(String name, String genre){    //an to name twn objects einai idio kai to ena object den einai function declaration return true
 
@@ -61,5 +65,9 @@ class ScopeObject {
     public void setGenre(String genre)
     {
         this.genre = genre;
+    }
+
+    public void setRef(boolean ref) {
+        this.ref = ref;
     }
 }
