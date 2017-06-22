@@ -12,14 +12,15 @@ public class Main
 {
 	public static void main(String[] arguments) throws FileNotFoundException
 	{
-		File file = new File("Insert pathname");
+		//File file = new File(arguments[0]);
+		//File file = new File("insert pathname");
 		try
 		{
 			Parser p =
 					new Parser(
 							new Lexer(
 									new PushbackReader(
-											new InputStreamReader(new FileInputStream(file)), 1024)));
+											new InputStreamReader(new FileInputStream(arguments[0])), 1024)));
 		Start tree = p.parse();
 		tree.apply(new PrinterAST());
 		}

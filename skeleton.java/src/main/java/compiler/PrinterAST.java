@@ -351,6 +351,29 @@ public class PrinterAST extends DepthFirstAdapter{
 
         //insert to funcStack
 
+        if (myList.get(0).trim().equals("main")){
+            try{
+                if (!myList.get(myList.size()-1).trim().equals("nothing")){
+                    throw new MyException("ERROR! MAIN NOT VOID");
+                }
+            }
+            catch (MyException e){
+                throw new IllegalStateException("ERROR! MAIN NOT VOID");
+            }
+
+            try{
+                if (!parType.isEmpty()){
+                    throw new MyException("ERROR! MAIN HAS PARAMETERS");
+                }
+            }
+            catch (MyException e){
+                throw new IllegalStateException("ERROR! MAIN HAS PARAMETERS");
+            }
+
+
+
+        }
+
         FuncScope funcObj = new FuncScope(myList.get(0).trim(),parType,myList.get(myList.size()-1).trim(),firstList.size());
 
         table.insertFuncStack(funcObj);
@@ -1510,26 +1533,49 @@ public class PrinterAST extends DepthFirstAdapter{
     @Override
     public void inAReturnStmt(AReturnStmt node){
         im.genQuad(im.getOpCode().getRet(),null,null,null);
+        boolean returnFlag = table.findReturnType("nothing");
+
+        try{
+            if(returnFlag == false){
+                throw new MyException("WRONG RETURN TYPE");
+            }
+        }catch (MyException e){
+            throw new IllegalStateException("WRONG RETURN TYPE");
+        }
     }
 
     @Override
     public void inAReturn2Stmt(AReturn2Stmt node){
+
         im.genQuad(im.getOpCode().getRet(),null,null,null);
+        boolean returnFlag = table.findReturnType("nothing");
+
+        try{
+            if(returnFlag == false){
+                throw new MyException("WRONG RETURN TYPE");
+            }
+        }catch (MyException e){
+            throw new IllegalStateException("WRONG RETURN TYPE");
+        }
     }
 
 
     @Override
     public void inAReturnWithStmt(AReturnWithStmt node) {
 
-
+        System.out.println("Return stmt" + node.getAllExpr().toString());
         String type = node.getAllExpr().getClass().getSimpleName();
         String ourType = null;
+        String retType = null;
 
         if (type.equals("AConstantAllExpr")){
             ourType = "Integer";
+            retType = "int";
         }
-        else if (type.equals("ALetterAllExpr"))
+        else if (type.equals("ALetterAllExpr")) {
             ourType = "Char";
+            retType = "char";
+        }
         else if (type.equals("AFuncAllExpr")){
             List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
             ourType = table.getFuncType(nameList.get(0));
@@ -1540,15 +1586,62 @@ public class PrinterAST extends DepthFirstAdapter{
             }catch (MyException e){
                 throw new IllegalStateException("FUNC NOT FOUND");
             }
+            retType=ourType;
 
             return;
 
 
         }
-        else if (type.equals("ALValueAllExpr")){
+        else if (node.getAllExpr().toString().contains("[")){
             //array
             List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
             ourType = table.FindVariableType(nameList.get(0));
+
+            retType = ourType;
+
+            System.err.println("1");
+            System.err.println(retType);
+            System.err.println("RET:"+node.getAllExpr().toString());
+            String retExpr =node.getAllExpr().toString();
+            int i=0;
+            char c;
+            int counterRet = 0;
+            while(i<retType.length()){
+                c = retType.charAt(i);
+                if(c=='['){
+                    while(c!=']'){
+                        i++;
+                        c = retType.charAt(i);
+
+                    }
+                    counterRet++;
+                }
+                i++;
+            }
+            System.err.println("DIMENS:" + counterRet);
+            i=0;
+            int retCounter=0;
+
+            while(i<retExpr.length()){
+                c = retExpr.charAt(i);
+                if(c=='['){
+                    while(c!=']'){
+                        i++;
+                        c = retExpr.charAt(i);
+
+                    }
+                    retCounter++;
+                }
+                i++;
+            }
+
+            try{
+                if(retCounter != counterRet){
+                    throw new MyException("WRONG RETURN TYPE (DIMENSION ERROR)");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("WRONG RETURN TYPE (DIMENSION ERROR)");
+            }
 
             try{
                 if(ourType == null){
@@ -1558,10 +1651,25 @@ public class PrinterAST extends DepthFirstAdapter{
                 throw new IllegalStateException("FUNC NOT FOUND");
             }
 
-            if (ourType.contains("int"))
+            if (ourType.contains("int")) {
                 ourType = "Integer";
-            else if(ourType.contains("char"))
+                retType = "int";
+            }
+            else if(ourType.contains("char")) {
                 ourType = "Char";
+                retType = "char";
+            }
+
+            boolean returnFlag = table.findReturnType(retType);
+
+            try{
+                if(returnFlag == false){
+                    throw new MyException("WRONG RETURN TYPE");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("WRONG RETURN TYPE");
+            }
+
 
 
             List<String> tempList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
@@ -1585,6 +1693,47 @@ public class PrinterAST extends DepthFirstAdapter{
 
             im.genQuad(im.getOpCode().getRet(),null,null,null);
             return;
+        }
+        else if(type.equals("ALValueAllExpr")){
+            List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
+            ourType = table.FindVariableType(nameList.get(0));
+
+            retType = ourType;
+
+            try{
+                if(ourType == null){
+                    throw new MyException("FUNC NOT FOUND");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("FUNC NOT FOUND");
+            }
+
+            if (ourType.contains("int")) {
+                ourType = "Integer";
+            }
+            else if(ourType.contains("char")) {
+                ourType = "Char";
+            }
+
+
+            List<String> tempList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
+            tempList.remove(0);
+            tempList.remove("[");
+            tempList.remove("]");
+            Object w = im.newTemp(ourType);
+            String name = "$" + im.getCount();
+            String prevName = name;
+
+        }
+
+        boolean returnFlag = table.findReturnType(retType);
+
+        try{
+            if(returnFlag == false){
+                throw new MyException("WRONG RETURN TYPE");
+            }
+        }catch (MyException e){
+            throw new IllegalStateException("WRONG RETURN TYPE");
         }
 
         Object w = im.newTemp(ourType);
@@ -1602,14 +1751,19 @@ public class PrinterAST extends DepthFirstAdapter{
     @Override
     public void inAReturnWith2Stmt(AReturnWith2Stmt node) {
 
+        System.out.println("Return stmt" + node.getAllExpr().toString());
         String type = node.getAllExpr().getClass().getSimpleName();
         String ourType = null;
+        String retType = null;
 
         if (type.equals("AConstantAllExpr")){
             ourType = "Integer";
+            retType = "int";
         }
-        else if (type.equals("ALetterAllExpr"))
+        else if (type.equals("ALetterAllExpr")) {
             ourType = "Char";
+            retType = "char";
+        }
         else if (type.equals("AFuncAllExpr")){
             List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
             ourType = table.getFuncType(nameList.get(0));
@@ -1620,13 +1774,62 @@ public class PrinterAST extends DepthFirstAdapter{
             }catch (MyException e){
                 throw new IllegalStateException("FUNC NOT FOUND");
             }
+            retType=ourType;
 
             return;
+
+
         }
-        else if (type.equals("ALValueAllExpr")){
+        else if (node.getAllExpr().toString().contains("[")){
             //array
             List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
             ourType = table.FindVariableType(nameList.get(0));
+
+            retType = ourType;
+
+            System.err.println("2");
+            System.err.println(retType);
+            System.err.println("RET:"+node.getAllExpr().toString());
+            String retExpr =node.getAllExpr().toString();
+            int i=0;
+            char c;
+            int counterRet = 0;
+            while(i<retType.length()){
+                c = retType.charAt(i);
+                if(c=='['){
+                    while(c!=']'){
+                        i++;
+                        c = retType.charAt(i);
+
+                    }
+                    counterRet++;
+                }
+                i++;
+            }
+            System.err.println("DIMENS:" + counterRet);
+            i=0;
+            int retCounter=0;
+
+            while(i<retExpr.length()){
+                c = retExpr.charAt(i);
+                if(c=='['){
+                    while(c!=']'){
+                        i++;
+                        c = retExpr.charAt(i);
+
+                    }
+                    retCounter++;
+                }
+                i++;
+            }
+
+            try{
+                if(retCounter != counterRet){
+                    throw new MyException("WRONG RETURN TYPE (DIMENSION ERROR)");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("WRONG RETURN TYPE (DIMENSION ERROR)");
+            }
 
             try{
                 if(ourType == null){
@@ -1636,10 +1839,25 @@ public class PrinterAST extends DepthFirstAdapter{
                 throw new IllegalStateException("FUNC NOT FOUND");
             }
 
-            if (ourType.contains("int"))
+            if (ourType.contains("int")) {
                 ourType = "Integer";
-            else if(ourType.contains("char"))
+                retType = "int";
+            }
+            else if(ourType.contains("char")) {
                 ourType = "Char";
+                retType = "char";
+            }
+
+            boolean returnFlag = table.findReturnType(retType);
+
+            try{
+                if(returnFlag == false){
+                    throw new MyException("WRONG RETURN TYPE");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("WRONG RETURN TYPE");
+            }
+
 
 
             List<String> tempList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
@@ -1664,6 +1882,47 @@ public class PrinterAST extends DepthFirstAdapter{
             im.genQuad(im.getOpCode().getRet(),null,null,null);
             return;
         }
+        else if(type.equals("ALValueAllExpr")){
+            List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
+            ourType = table.FindVariableType(nameList.get(0));
+
+            retType = ourType;
+
+            try{
+                if(ourType == null){
+                    throw new MyException("FUNC NOT FOUND");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("FUNC NOT FOUND");
+            }
+
+            if (ourType.contains("int")) {
+                ourType = "Integer";
+            }
+            else if(ourType.contains("char")) {
+                ourType = "Char";
+            }
+
+
+            List<String> tempList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
+            tempList.remove(0);
+            tempList.remove("[");
+            tempList.remove("]");
+            Object w = im.newTemp(ourType);
+            String name = "$" + im.getCount();
+            String prevName = name;
+
+        }
+
+        boolean returnFlag = table.findReturnType(retType);
+
+        try{
+            if(returnFlag == false){
+                throw new MyException("WRONG RETURN TYPE");
+            }
+        }catch (MyException e){
+            throw new IllegalStateException("WRONG RETURN TYPE");
+        }
 
         Object w = im.newTemp(ourType);
         String name = "$" + im.getCount();
@@ -1674,20 +1933,24 @@ public class PrinterAST extends DepthFirstAdapter{
         im.genQuad(im.getOpCode().getAssignment(),node.getAllExpr(),null, name);
 
         im.genQuad(im.getOpCode().getRet(),null,null,null);
-
     }
 
     @Override
     public void inAReturnExprStmt(AReturnExprStmt node) {
 
+        System.out.println("Return stmt" + node.getAllExpr().toString());
         String type = node.getAllExpr().getClass().getSimpleName();
         String ourType = null;
+        String retType = null;
 
         if (type.equals("AConstantAllExpr")){
             ourType = "Integer";
+            retType = "int";
         }
-        else if (type.equals("ALetterAllExpr"))
+        else if (type.equals("ALetterAllExpr")) {
             ourType = "Char";
+            retType = "char";
+        }
         else if (type.equals("AFuncAllExpr")){
             List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
             ourType = table.getFuncType(nameList.get(0));
@@ -1698,13 +1961,62 @@ public class PrinterAST extends DepthFirstAdapter{
             }catch (MyException e){
                 throw new IllegalStateException("FUNC NOT FOUND");
             }
+            retType=ourType;
 
             return;
+
+
         }
-        else if (type.equals("ALValueAllExpr")){
+        else if (node.getAllExpr().toString().contains("[")){
             //array
             List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
             ourType = table.FindVariableType(nameList.get(0));
+
+            retType = ourType;
+
+            System.err.println("3");
+            System.err.println(retType);
+            System.err.println("RET:"+node.getAllExpr().toString());
+            String retExpr =node.getAllExpr().toString();
+            int i=0;
+            char c;
+            int counterRet = 0;
+            while(i<retType.length()){
+                c = retType.charAt(i);
+                if(c=='['){
+                    while(c!=']'){
+                        i++;
+                        c = retType.charAt(i);
+
+                    }
+                    counterRet++;
+                }
+                i++;
+            }
+            System.err.println("DIMENS:" + counterRet);
+            i=0;
+            int retCounter=0;
+
+            while(i<retExpr.length()){
+                c = retExpr.charAt(i);
+                if(c=='['){
+                    while(c!=']'){
+                        i++;
+                        c = retExpr.charAt(i);
+
+                    }
+                    retCounter++;
+                }
+                i++;
+            }
+
+            try{
+                if(retCounter != counterRet){
+                    throw new MyException("WRONG RETURN TYPE (DIMENSION ERROR)");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("WRONG RETURN TYPE (DIMENSION ERROR)");
+            }
 
             try{
                 if(ourType == null){
@@ -1714,10 +2026,25 @@ public class PrinterAST extends DepthFirstAdapter{
                 throw new IllegalStateException("FUNC NOT FOUND");
             }
 
-            if (ourType.contains("int"))
+            if (ourType.contains("int")) {
                 ourType = "Integer";
-            else if(ourType.contains("char"))
+                retType = "int";
+            }
+            else if(ourType.contains("char")) {
                 ourType = "Char";
+                retType = "char";
+            }
+
+            boolean returnFlag = table.findReturnType(retType);
+
+            try{
+                if(returnFlag == false){
+                    throw new MyException("WRONG RETURN TYPE");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("WRONG RETURN TYPE");
+            }
+
 
 
             List<String> tempList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
@@ -1742,6 +2069,47 @@ public class PrinterAST extends DepthFirstAdapter{
             im.genQuad(im.getOpCode().getRet(),null,null,null);
             return;
         }
+        else if(type.equals("ALValueAllExpr")){
+            List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
+            ourType = table.FindVariableType(nameList.get(0));
+
+            retType = ourType;
+
+            try{
+                if(ourType == null){
+                    throw new MyException("FUNC NOT FOUND");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("FUNC NOT FOUND");
+            }
+
+            if (ourType.contains("int")) {
+                ourType = "Integer";
+            }
+            else if(ourType.contains("char")) {
+                ourType = "Char";
+            }
+
+
+            List<String> tempList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
+            tempList.remove(0);
+            tempList.remove("[");
+            tempList.remove("]");
+            Object w = im.newTemp(ourType);
+            String name = "$" + im.getCount();
+            String prevName = name;
+
+        }
+
+        boolean returnFlag = table.findReturnType(retType);
+
+        try{
+            if(returnFlag == false){
+                throw new MyException("WRONG RETURN TYPE");
+            }
+        }catch (MyException e){
+            throw new IllegalStateException("WRONG RETURN TYPE");
+        }
 
         Object w = im.newTemp(ourType);
         String name = "$" + im.getCount();
@@ -1752,21 +2120,23 @@ public class PrinterAST extends DepthFirstAdapter{
         im.genQuad(im.getOpCode().getAssignment(),node.getAllExpr(),null, name);
 
         im.genQuad(im.getOpCode().getRet(),null,null,null);
-
-
     }
 
     @Override
     public void inAReturnExpr2Stmt(AReturnExpr2Stmt node) {
-
+        System.out.println("Return stmt" + node.getAllExpr().toString());
         String type = node.getAllExpr().getClass().getSimpleName();
         String ourType = null;
+        String retType = null;
 
         if (type.equals("AConstantAllExpr")){
             ourType = "Integer";
+            retType = "int";
         }
-        else if (type.equals("ALetterAllExpr"))
+        else if (type.equals("ALetterAllExpr")) {
             ourType = "Char";
+            retType = "char";
+        }
         else if (type.equals("AFuncAllExpr")){
             List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
             ourType = table.getFuncType(nameList.get(0));
@@ -1777,12 +2147,62 @@ public class PrinterAST extends DepthFirstAdapter{
             }catch (MyException e){
                 throw new IllegalStateException("FUNC NOT FOUND");
             }
+            retType=ourType;
+
             return;
+
+
         }
-        else if (type.equals("ALValueAllExpr")){
+        else if (node.getAllExpr().toString().contains("[")){
             //array
             List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
             ourType = table.FindVariableType(nameList.get(0));
+
+            retType = ourType;
+
+            System.err.println("4");
+            System.err.println(retType);
+            System.err.println("RET:"+node.getAllExpr().toString());
+            String retExpr =node.getAllExpr().toString();
+            int i=0;
+            char c;
+            int counterRet = 0;
+            while(i<retType.length()){
+                c = retType.charAt(i);
+                if(c=='['){
+                    while(c!=']'){
+                        i++;
+                        c = retType.charAt(i);
+
+                    }
+                    counterRet++;
+                }
+                i++;
+            }
+            System.err.println("DIMENS:" + counterRet);
+            i=0;
+            int retCounter=0;
+
+            while(i<retExpr.length()){
+                c = retExpr.charAt(i);
+                if(c=='['){
+                    while(c!=']'){
+                        i++;
+                        c = retExpr.charAt(i);
+
+                    }
+                    retCounter++;
+                }
+                i++;
+            }
+
+            try{
+                if(retCounter != counterRet){
+                    throw new MyException("WRONG RETURN TYPE (DIMENSION ERROR)");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("WRONG RETURN TYPE (DIMENSION ERROR)");
+            }
 
             try{
                 if(ourType == null){
@@ -1792,10 +2212,25 @@ public class PrinterAST extends DepthFirstAdapter{
                 throw new IllegalStateException("FUNC NOT FOUND");
             }
 
-            if (ourType.contains("int"))
+            if (ourType.contains("int")) {
                 ourType = "Integer";
-            else if(ourType.contains("char"))
+                retType = "int";
+            }
+            else if(ourType.contains("char")) {
                 ourType = "Char";
+                retType = "char";
+            }
+
+            boolean returnFlag = table.findReturnType(retType);
+
+            try{
+                if(returnFlag == false){
+                    throw new MyException("WRONG RETURN TYPE");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("WRONG RETURN TYPE");
+            }
+
 
 
             List<String> tempList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
@@ -1820,6 +2255,47 @@ public class PrinterAST extends DepthFirstAdapter{
             im.genQuad(im.getOpCode().getRet(),null,null,null);
             return;
         }
+        else if(type.equals("ALValueAllExpr")){
+            List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
+            ourType = table.FindVariableType(nameList.get(0));
+
+            retType = ourType;
+
+            try{
+                if(ourType == null){
+                    throw new MyException("FUNC NOT FOUND");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("FUNC NOT FOUND");
+            }
+
+            if (ourType.contains("int")) {
+                ourType = "Integer";
+            }
+            else if(ourType.contains("char")) {
+                ourType = "Char";
+            }
+
+
+            List<String> tempList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
+            tempList.remove(0);
+            tempList.remove("[");
+            tempList.remove("]");
+            Object w = im.newTemp(ourType);
+            String name = "$" + im.getCount();
+            String prevName = name;
+
+        }
+
+        boolean returnFlag = table.findReturnType(retType);
+
+        try{
+            if(returnFlag == false){
+                throw new MyException("WRONG RETURN TYPE");
+            }
+        }catch (MyException e){
+            throw new IllegalStateException("WRONG RETURN TYPE");
+        }
 
         Object w = im.newTemp(ourType);
         String name = "$" + im.getCount();
@@ -1830,7 +2306,6 @@ public class PrinterAST extends DepthFirstAdapter{
         im.genQuad(im.getOpCode().getAssignment(),node.getAllExpr(),null, name);
 
         im.genQuad(im.getOpCode().getRet(),null,null,null);
-
 
     }
 

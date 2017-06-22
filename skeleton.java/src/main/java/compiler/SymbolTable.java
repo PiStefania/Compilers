@@ -8,15 +8,15 @@ import java.util.Scanner;
 
 class SymbolTable {
 
-    private Map<Integer,Integer> map;           //hashmap
+    private Map<Integer, Integer> map;           //hashmap
     private Stack<ScopeObject> mystack;         //stack of obj:ScopeObject
     private Stack<FuncScope> funcStack;         //stack of obj:FuncScope
-    private Map<String,List> refPar;
+    private Map<String, List> refPar;
     private int position;                       //position of map
     private int ifWhileScope;                   //scope of ifs and whiles
 
-    public SymbolTable(){   //constructor
-        map = new HashMap<Integer,Integer>();
+    public SymbolTable() {   //constructor
+        map = new HashMap<Integer, Integer>();
         mystack = new Stack<ScopeObject>();
         funcStack = new Stack<FuncScope>();
         refPar = new HashMap<String, List>();
@@ -32,18 +32,18 @@ class SymbolTable {
         this.ifWhileScope = ifWhileScope;
     }
 
-    public void print(){
+    public void print() {
         System.out.println("Printing Stack");
-        for (int i=0; i<this.mystack.size();i++){
+        for (int i = 0; i < this.mystack.size(); i++) {
             System.out.print(this.mystack.get(i).getName());
         }
     }
 
 
-    public void enter(ScopeObject obj){             //enter obj to new scope
+    public void enter(ScopeObject obj) {             //enter obj to new scope
 
-        try{
-            if(lookupFunc(obj)) {
+        try {
+            if (lookupFunc(obj)) {
                 throw new MyException("FUNCTION WAS NOT FOUND");
             } else if (lookupDecl(obj)) {
                 throw new MyException("FOUND DIFFERENT TYPE OF FUNCTIONS");
@@ -52,7 +52,7 @@ class SymbolTable {
                 map.put(position, mystack.size());
                 mystack.push(obj);
             }
-        }catch (MyException e){
+        } catch (MyException e) {
             throw new IllegalStateException("FUNCTION ERROR");
         }
 
@@ -64,52 +64,67 @@ class SymbolTable {
             obj = this.findDecl(obj);
         }
 
-        try{
-            if(lookupVar(obj)){
+        try {
+            if (lookupVar(obj)) {
                 throw new MyException("FOUND SAME VARIABLE");
-            }
-            else if (lookupVarAndFunc(obj)){
+            } else if (lookupVarAndFunc(obj)) {
                 throw new MyException("FOUND SAME VARIABLE AND FUNC");
-            }
-            else if(lookupPar(obj)){
+            } else if (lookupPar(obj)) {
                 throw new MyException("FOUND SAME PARAMETER AND FUNC");
-            }
-            else{
-                map.put(position,mystack.size());
+            } else {
+                map.put(position, mystack.size());
                 mystack.push(obj);
             }
-        }catch (MyException e){
+        } catch (MyException e) {
             throw new IllegalStateException("VARIABLE, PARAMETER OR FUNCTION WAS DECLARED MORE THAN ONCE");
         }
 
 
     }
 
-    public boolean lookupVar(ScopeObject obj){              //search for same vars in same scope
+    public boolean lookupVar(ScopeObject obj) {              //search for same vars in same scope
 
 
         int value = map.get(position);
         int value2 = 0;
-        if (position!=0){
-            value2  = map.get(position-1);
-            for(int i=value;i>value2;i--){
+        if (position != 0) {
+            value2 = map.get(position - 1);
+            for (int i = value; i > value2; i--) {
                 ScopeObject obj2 = (ScopeObject) mystack.get(i);
-                if (obj.sameObject(obj2.getName(),obj2.getGenre())){
+                if (obj.sameObject(obj2.getName(), obj2.getGenre())) {
                     return true;
                 }
             }
             return false;
-        }
-        else{
-            for(int i=value;i>=0;i--){
+        } else {
+            for (int i = value; i >= 0; i--) {
                 ScopeObject obj2 = (ScopeObject) mystack.get(i);
-                if (obj.sameObject(obj2.getName(),obj2.getGenre())){
+                if (obj.sameObject(obj2.getName(), obj2.getGenre())) {
                     return true;
                 }
             }
             return false;
         }
     }
+
+    public boolean findReturnType(String returnType) {
+        ScopeObject obj = null;
+        for (int i = mystack.size() - 1; i >= 0; i--) {
+            obj = (ScopeObject) mystack.get(i);
+            if (obj.getGenre().equals("func")) {
+                break;
+            }
+        }
+        if (obj != null){
+            String type = obj.getType();
+            if (returnType.equals(type))
+                return true;
+
+        }
+        return false;
+    }
+
+
 
 
     public boolean lookupPar(ScopeObject obj){      //search for same parameters inside function decl
