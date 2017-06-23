@@ -93,7 +93,6 @@ class SymbolTable {
 
     public boolean lookupVar(ScopeObject obj) {              //search for same vars in same scope
 
-
         int value = map.get(position);
         int value2 = 0;
         if (position != 0) {
@@ -169,6 +168,19 @@ class SymbolTable {
         return false;
     }
 
+    public boolean lookupDeclName(String name){             //search for same func and decl names
+
+        int i = mystack.size()-1;
+        while (i>=0) {
+            ScopeObject obj = (ScopeObject) mystack.get(i);
+            if(obj.getName().equals(name) && obj.getGenre().equals("decl")) {
+                return true;
+            }
+            i--;
+        }
+        return false;
+    }
+
 
 
 
@@ -213,6 +225,7 @@ class SymbolTable {
     public boolean lookupVarAndType(ScopeObject obj){                   //search variable in order to find the same variable in stack with diff type(true)
 
         int value = map.get(position);
+
 
 
         for(int i=value;i>=0;i--){
@@ -439,13 +452,28 @@ class SymbolTable {
         String funcName;
         int scopeFunc;
         int numParams;
+
+
+
+        boolean declFound = lookupDeclName(name);
+        if(declFound){
+
+        }
+
+
         for (int i=0; i<this.funcStack.size();i++){
 
             funcName = this.funcStack.get(i).getFuncName();
             numParams = this.funcStack.get(i).getNumOfParams();
 
+
+
+
+
+            System.out.println("BRE8HKE " + funcName + name);
             if(name.equals(funcName)){
-                if(this.funcStack.get(i).getScope() <= this.position)
+                System.out.println("prin t scopes " + this.funcStack.get(i).getScope() + " tora:" + this.position);
+                if(this.funcStack.get(i).getScope() - this.position <=1)
                 {
                     if(numParams == 0) {
                         return true;
@@ -473,7 +501,9 @@ class SymbolTable {
 
             if(name.equals(funcName)){
                 System.out.println("BRE8HKE " + funcName);
-                //if(this.funcStack.get(i).getScope() <= this.position) {
+                System.out.println("prin t scopes " + this.funcStack.get(i).getScope() + " tora:" + this.position);
+
+                if(this.funcStack.get(i).getScope() - this.position <=1) {
                     System.out.println("KOMPLE SCOPE");
 
                     if (numParams == par.size()) {
@@ -501,21 +531,28 @@ class SymbolTable {
 
 
                                 String fixedType = typeOfArray;
-                                for (int k = 0; k < counterDim; k++) {
-                                    typeOfArray += "[]";
-                                }
                                 par.set(j, fixedType);
                             }
                         }
 
                         System.out.println("PAR TYPES: " +  par);
-
-                        if (par.equals(typeOfParams)) {
+                        System.out.println("typeOfParams TYPES: " +  typeOfParams);
+                        int flag = 0;
+                        for (int j=0; j < par.size();j++) {
+                            if (par.get(j).contains("char[") && typeOfParams.get(j).contains("char["))
+                                flag ++;
+                            else if (par.get(j).contains("int[") && typeOfParams.get(j).contains("int["))
+                                flag++;
+                            else if (par.get(j).equals(typeOfParams.get(j))) {
+                                flag++;
+                            }
+                        }
+                        if(flag == par.size()){
                             return true;
                         }
-                        return false;
-                    //}
-                    //return false;
+
+                    }
+                    return false;
                 }
                 return false;
             }

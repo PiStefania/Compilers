@@ -220,7 +220,10 @@ public class PrinterAST extends DepthFirstAdapter{
     public void inAAllFuncDef(AAllFuncDef node)
     {
 
+
         List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
+
+        //System.out.println("FUNCTION: " + myList);
 
         List<String> listParam = new ArrayList<String>(myList);
 
@@ -296,7 +299,7 @@ public class PrinterAST extends DepthFirstAdapter{
             }
         }
 
-        System.out.println("POSITIONS: " + posRefs);
+        //System.out.println("POSITIONS: " + posRefs);
 
 
 
@@ -490,6 +493,7 @@ public class PrinterAST extends DepthFirstAdapter{
     @Override
     public void outAAllFuncDef(AAllFuncDef node)            //exit functions
     {
+        System.out.println("fd "+ node.getL().toString() + " " +node.getR().toString());
         List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
 
         List<String> rightList = new ArrayList<String>(Arrays.asList(node.getR().toString().split(" ")));
@@ -1543,12 +1547,22 @@ public class PrinterAST extends DepthFirstAdapter{
 
         System.out.println("PARAMETROI ME EPEKSERGASIA: " + parameters);
 
-        String[] insideFuncs = {"puti","puts","putc","geti","gets","getc","abs","ord","chr","strlen","strcmp","strcpy","strcat"};
-        List<String> primFuncs = Arrays.asList(insideFuncs);
 
 
 
         for (int i=0; i<parameters.size(); i++){
+
+            List<Integer> posRefs = table.getFuncRefs(funcName);
+            try{
+                if(posRefs.contains(i)){
+
+                    if(!parameters.get(i).contains("\"") && table.FindVariableType(parameters.get(i).trim())==null)
+                        throw new MyException("REF PARAMETER MUST BE VARIABLE OR STRING");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("REF PARAMETER MUST BE VARIABLE OR STRING");
+            }
+
 
             if (parameters.get(i).contains("\"")){
                 paramType.add("char[]");
@@ -1615,14 +1629,7 @@ public class PrinterAST extends DepthFirstAdapter{
                 paramType.add("int");
             }
             else if (table.isNumeric(parameters.get(i))){
-                List<Integer> posRefs = table.getFuncRefs(funcName);
-                try{
-                    if(posRefs.contains(i)){
-                        throw new MyException("PARAMETER MUST BE VARIABLE(ARITHMETIC GIVEN)");
-                    }
-                }catch (MyException e){
-                    throw new IllegalStateException("PARAMETER MUST BE VARIABLE(ARITHMETIC GIVEN)");
-                }
+
 
                 paramType.add("int");
             }
@@ -1635,21 +1642,10 @@ public class PrinterAST extends DepthFirstAdapter{
 
                 String type = table.FindVariableType(parameters.get(i));
 
-                if(type == null){
-                    System.out.println("PSAKSE GIA FUNC");
-                    for(int j=0;j < primFuncs.size();j++){
-                        if(parameters.get(i).contains(primFuncs.get(j)))
-                        {
-                            type = table.getFuncType(primFuncs.get(j));
-                            prim = true;
-                            break;
-                        }
-                    }
-                }
-
-                if(!prim && type==null){
+                if(type==null) {
                     type = table.getFuncType(parameters.get(i));
                 }
+
 
                 System.out.println(type);
                 try{
