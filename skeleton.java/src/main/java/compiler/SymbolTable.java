@@ -1,5 +1,7 @@
 package compiler;
 
+import sun.reflect.generics.scope.Scope;
+
 import java.util.*;
 import java.util.List;
 import java.util.LinkedList;
@@ -35,7 +37,14 @@ class SymbolTable {
     public void print() {
         System.out.println("Printing Stack");
         for (int i = 0; i < this.mystack.size(); i++) {
-            System.out.print(this.mystack.get(i).getName());
+            System.out.println(this.mystack.get(i).getName());
+        }
+    }
+
+    public void printFunc() {
+        System.out.println("Printing FuncStack");
+        for (int i = 0; i < this.funcStack.size(); i++) {
+            System.out.println(this.funcStack.get(i).getFuncName());
         }
     }
 
@@ -296,6 +305,39 @@ class SymbolTable {
         return false;
     }
 
+    public boolean checkFuncDeclExistance(){
+        List<ScopeObject> declarations = new ArrayList<ScopeObject>();
+        for(int i=0;i<mystack.size();i++){                              //get funcs and decls
+            if(mystack.get(i).getGenre().equals("decl")){
+                declarations.add(mystack.get(i));
+            }
+        }
+
+        ScopeObject objDecl;
+        FuncScope objFunc;
+        int counterDecl = 0;
+
+
+        for(int i=0;i<declarations.size();i++){                         //check for every decl if func exists
+            objDecl = declarations.get(i);
+            for(int j=0;j<funcStack.size();j++){
+                objFunc = funcStack.get(j);
+                if(objDecl.getName().equals(objFunc.getFuncName())){            //same name
+                    if(objDecl.getScope() <= objFunc.getScope()){
+                        counterDecl++;
+                    }
+                }
+            }
+        }
+
+
+        if(counterDecl ==  declarations.size())
+        {
+            return true;
+        }
+        return false;
+    }
+
 
 
 
@@ -310,6 +352,8 @@ class SymbolTable {
         }
         return null;  //not found
     }
+
+
 
     public int FindVariablePosition(String name){       //find variable position inside hashmap
 
@@ -401,10 +445,13 @@ class SymbolTable {
             numParams = this.funcStack.get(i).getNumOfParams();
 
             if(name.equals(funcName)){
-                if(numParams == 0){
-                    return true;
+                if(this.funcStack.get(i).getScope() <= this.position)
+                {
+                    if(numParams == 0) {
+                        return true;
+                    }
+                    else return false;
                 }
-                return false;
             }
         }
         return false;
@@ -416,24 +463,68 @@ class SymbolTable {
 
         String funcName;
         int numParams;
+        List<String> typeOfParams = new ArrayList<String>();
         for (int i=0; i<this.funcStack.size();i++){
 
             funcName = this.funcStack.get(i).getFuncName();
             numParams = this.funcStack.get(i).getNumOfParams();
+            typeOfParams = this.funcStack.get(i).getTypesOfPatameters();
+            //System.out.println(funcName);
 
             if(name.equals(funcName)){
+                System.out.println("BRE8HKE " + funcName);
+                //if(this.funcStack.get(i).getScope() <= this.position) {
+                    System.out.println("KOMPLE SCOPE");
 
-                if(numParams==par.size())
-                {
-                    return true;
+                    if (numParams == par.size()) {
+                        for (int j = 0; j < par.size(); j++) {
+                            if (par.get(j).contains("[")) {
+
+                                int counter = 0;
+                                char c;
+                                int counterDim = 0;
+                                String typeOfArray = "";
+                                while (counter < par.get(j).length()) {
+                                    c = par.get(j).charAt(counter);
+                                    typeOfArray += c;
+                                    if (c == '[') {
+                                        while (c != ']') {
+                                            counter++;
+                                            c = par.get(j).charAt(counter);
+
+                                        }
+                                        typeOfArray += "]";
+                                        counterDim++;
+                                    }
+                                    counter++;
+                                }
+
+
+                                String fixedType = typeOfArray;
+                                for (int k = 0; k < counterDim; k++) {
+                                    typeOfArray += "[]";
+                                }
+                                par.set(j, fixedType);
+                            }
+                        }
+
+                        System.out.println("PAR TYPES: " +  par);
+
+                        if (par.equals(typeOfParams)) {
+                            return true;
+                        }
+                        return false;
+                    //}
+                    //return false;
                 }
                 return false;
             }
         }
-
         return false;
-
     }
+
+
+
 
 
 
@@ -456,14 +547,31 @@ class SymbolTable {
 
             funcName = this.funcStack.get(i).getFuncName();
 
+            //System.out.println("FUNCNAMES: " + funcName);
 
             if(name.equals(funcName)){
                 return this.funcStack.get(i).getType();
             }
         }
         return null;
-
     }
+
+    public List<Integer> getFuncRefs(String name){
+
+        String funcName;
+        for (int i=0; i<this.funcStack.size();i++){
+
+            funcName = this.funcStack.get(i).getFuncName();
+
+            if(name.equals(funcName)){
+                return this.funcStack.get(i).getrefVars();
+            }
+        }
+        return null;
+    }
+
+
+
 
     public void deleteFuncStack(){
         this.funcStack.clear();
@@ -489,6 +597,10 @@ class SymbolTable {
 
     public Map<String, List> getRefPar() {
         return refPar;
+    }
+
+    public Stack<FuncScope> getFuncStack() {
+        return funcStack;
     }
 }
 

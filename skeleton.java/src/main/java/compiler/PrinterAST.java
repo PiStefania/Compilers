@@ -35,7 +35,10 @@ public class PrinterAST extends DepthFirstAdapter{
         List<String> par = new ArrayList<String>();
         par.add("n");
         parType.put("int",par);
-        FuncScope funcObj = new FuncScope("puti",parType,"nothing",par.size());
+        List<String> listTypes = new ArrayList<String>();
+        listTypes.add("int");
+        List<Integer> refVars = new ArrayList<Integer>();
+        FuncScope funcObj = new FuncScope("puti",parType,"nothing",par.size(),table.getPosition(),listTypes,refVars);
         table.insertFuncStack(funcObj);
 
 
@@ -44,7 +47,10 @@ public class PrinterAST extends DepthFirstAdapter{
         par = new ArrayList<String>();
         par.add("c");
         parType.put("char",par);
-        funcObj = new FuncScope("putc",parType,"nothing",par.size());
+        listTypes = new ArrayList<String>();
+        listTypes.add("char");
+        refVars = new ArrayList<Integer>();
+        funcObj = new FuncScope("putc",parType,"nothing",par.size(),table.getPosition(),listTypes,refVars);
         table.insertFuncStack(funcObj);
 
 
@@ -53,21 +59,29 @@ public class PrinterAST extends DepthFirstAdapter{
         par = new ArrayList<String>();
         par.add("s");
         parType.put("char[]",par);
-        funcObj = new FuncScope("puts",parType,"nothing",par.size());
+        listTypes = new ArrayList<String>();
+        listTypes.add("char[]");
+        refVars = new ArrayList<Integer>();
+        refVars.add(0);
+        funcObj = new FuncScope("puts",parType,"nothing",par.size(),table.getPosition(),listTypes,refVars);
         table.insertFuncStack(funcObj);
 
 
         //fun geti ():int;
         parType = new HashMap<String,List>();
         par = new ArrayList<String>();
-        funcObj = new FuncScope("geti",parType,"int",par.size());
+        listTypes = new ArrayList<String>();
+        refVars = new ArrayList<Integer>();
+        funcObj = new FuncScope("geti",parType,"int",par.size(),table.getPosition(),listTypes,refVars);
         table.insertFuncStack(funcObj);
 
 
         //fun getc ():char;
         parType = new HashMap<String,List>();
         par = new ArrayList<String>();
-        funcObj = new FuncScope("getc",parType,"char",par.size());
+        listTypes = new ArrayList<String>();
+        refVars = new ArrayList<Integer>();
+        funcObj = new FuncScope("getc",parType,"char",par.size(),table.getPosition(),listTypes,refVars);
         table.insertFuncStack(funcObj);
 
 
@@ -79,7 +93,12 @@ public class PrinterAST extends DepthFirstAdapter{
         par.remove("n");
         par.add("s");
         parType.put("char[]",par);
-        funcObj = new FuncScope("gets",parType,"nothing",par.size());
+        listTypes = new ArrayList<String>();
+        listTypes.add("int");
+        listTypes.add("char[]");
+        refVars = new ArrayList<Integer>();
+        refVars.add(1);
+        funcObj = new FuncScope("gets",parType,"nothing",par.size(),table.getPosition(),listTypes,refVars);
         table.insertFuncStack(funcObj);
 
 
@@ -88,7 +107,10 @@ public class PrinterAST extends DepthFirstAdapter{
         par = new ArrayList<String>();
         par.add("n");
         parType.put("int",par);
-        funcObj = new FuncScope("abs",parType,"int",par.size());
+        listTypes = new ArrayList<String>();
+        listTypes.add("int");
+        refVars = new ArrayList<Integer>();
+        funcObj = new FuncScope("abs",parType,"int",par.size(),table.getPosition(),listTypes,refVars);
         table.insertFuncStack(funcObj);
 
 
@@ -97,7 +119,10 @@ public class PrinterAST extends DepthFirstAdapter{
         par = new ArrayList<String>();
         par.add("c");
         parType.put("char",par);
-        funcObj = new FuncScope("ord",parType,"int",par.size());
+        listTypes = new ArrayList<String>();
+        listTypes.add("char");
+        refVars = new ArrayList<Integer>();
+        funcObj = new FuncScope("ord",parType,"int",par.size(),table.getPosition(),listTypes,refVars);
         table.insertFuncStack(funcObj);
 
 
@@ -106,7 +131,10 @@ public class PrinterAST extends DepthFirstAdapter{
         par = new ArrayList<String>();
         par.add("n");
         parType.put("int",par);
-        funcObj = new FuncScope("chr",parType,"char",par.size());
+        listTypes = new ArrayList<String>();
+        listTypes.add("int");
+        refVars = new ArrayList<Integer>();
+        funcObj = new FuncScope("chr",parType,"char",par.size(),table.getPosition(),listTypes,refVars);
         table.insertFuncStack(funcObj);
 
 
@@ -115,7 +143,11 @@ public class PrinterAST extends DepthFirstAdapter{
         par = new ArrayList<String>();
         par.add("s");
         parType.put("char[]",par);
-        funcObj = new FuncScope("strlen",parType,"int",par.size());
+        listTypes = new ArrayList<String>();
+        listTypes.add("char[]");
+        refVars = new ArrayList<Integer>();
+        refVars.add(0);
+        funcObj = new FuncScope("strlen",parType,"int",par.size(),table.getPosition(),listTypes,refVars);
         table.insertFuncStack(funcObj);
 
 
@@ -125,7 +157,13 @@ public class PrinterAST extends DepthFirstAdapter{
         par.add("s1");
         par.add("s2");
         parType.put("char[]",par);
-        funcObj = new FuncScope("strcmp",parType,"int",par.size());
+        listTypes = new ArrayList<String>();
+        listTypes.add("char[]");
+        listTypes.add("char[]");
+        refVars = new ArrayList<Integer>();
+        refVars.add(0);
+        refVars.add(1);
+        funcObj = new FuncScope("strcmp",parType,"int",par.size(),table.getPosition(),listTypes,refVars);
         table.insertFuncStack(funcObj);
 
 
@@ -135,7 +173,13 @@ public class PrinterAST extends DepthFirstAdapter{
         par.add("trg");
         par.add("src");
         parType.put("char[]",par);
-        funcObj = new FuncScope("strcpy",parType,"nothing",par.size());
+        listTypes = new ArrayList<String>();
+        listTypes.add("char[]");
+        listTypes.add("char[]");
+        refVars = new ArrayList<Integer>();
+        refVars.add(0);
+        refVars.add(1);
+        funcObj = new FuncScope("strcpy",parType,"nothing",par.size(),table.getPosition(),listTypes,refVars);
         table.insertFuncStack(funcObj);
 
 
@@ -145,13 +189,20 @@ public class PrinterAST extends DepthFirstAdapter{
         par.add("trg");
         par.add("src");
         parType.put("char[]",par);
-        funcObj = new FuncScope("strcat",parType,"nothing",par.size());
+        listTypes = new ArrayList<String>();
+        listTypes.add("char[]");
+        listTypes.add("char[]");
+        refVars = new ArrayList<Integer>();
+        refVars.add(0);
+        refVars.add(1);
+        funcObj = new FuncScope("strcat",parType,"nothing",par.size(),table.getPosition(),listTypes,refVars);
         table.insertFuncStack(funcObj);
 
     }
 
     @Override
     public void outAProgram(AProgram node){
+
         //exit function stack
         table.deleteFuncStack();
 
@@ -231,8 +282,22 @@ public class PrinterAST extends DepthFirstAdapter{
             }
         }
 
+
+
         String function = myList.get(0).trim();
         table.insertRefList(function,refVars);
+        List<Integer> posRefs = new ArrayList<Integer>();
+
+        for(int refCounter = 0;refCounter < refVars.size();refCounter++){
+            for(int parCounter = 0; parCounter < firstList.size();parCounter++){
+                if(refVars.get(refCounter).equals(firstList.get(parCounter))){
+                    posRefs.add(parCounter);
+                }
+            }
+        }
+
+        System.out.println("POSITIONS: " + posRefs);
+
 
 
         List<String> parList = new ArrayList<String>();
@@ -346,7 +411,7 @@ public class PrinterAST extends DepthFirstAdapter{
         }
 
 
-        ScopeObject obj =   new ScopeObject(myList.get(0).trim(),myList.get(myList.size()-1).trim(),"func", false) ;
+        ScopeObject obj =   new ScopeObject(myList.get(0).trim(),myList.get(myList.size()-1).trim(),"func", false,table.getPosition()) ;
         table.enter(obj);
 
         //insert to funcStack
@@ -374,23 +439,37 @@ public class PrinterAST extends DepthFirstAdapter{
 
         }
 
-        FuncScope funcObj = new FuncScope(myList.get(0).trim(),parType,myList.get(myList.size()-1).trim(),firstList.size());
+        //System.out.println("PARAMETERS and TYPES: " + parType);
+        //System.out.println("PARAMETERS: " + firstList);
+        String parameter;
+        List<String> keySet = new ArrayList<String>(parType.keySet());
+        List<String> listTypes = new ArrayList<String>();
+        for(int counterParam=0;counterParam < firstList.size();counterParam++){
+            parameter = firstList.get(counterParam);
+            for(int counterKeys = 0; counterKeys<parType.keySet().size();counterKeys++){
+                if(parType.get(keySet.get(counterKeys)).contains(parameter)){
+                    listTypes.add(keySet.get(counterKeys));
+                    break;
+                }
+            }
+        }
 
+
+
+
+        FuncScope funcObj = new FuncScope(myList.get(0).trim(),parType,myList.get(myList.size()-1).trim(),firstList.size(),table.getPosition(),listTypes,posRefs);
         table.insertFuncStack(funcObj);
 
 
         List<String> keys = new ArrayList<String>(parType.keySet());
-
         for(int n= 0; n<keys.size();n++){
             String key = keys.get(n);
             for(int v=0;v<parType.get(key).size();v++){
                 String var = parType.get(key).get(v).toString();
-                ScopeObject vars =   new ScopeObject(var,key,"par",false) ;
+                ScopeObject vars =   new ScopeObject(var,key,"par",false,table.getPosition()) ;
                 table.insert(vars);
             }
-
         }
-
 
 
         for (int a=0; a<firstList.size(); a++){     //gia kathe parametro
@@ -403,6 +482,8 @@ public class PrinterAST extends DepthFirstAdapter{
 
         im.genQuad(im.getOpCode().getUnit(),myList.get(0).trim(),null,null);
 
+
+
     }
 
 
@@ -411,12 +492,21 @@ public class PrinterAST extends DepthFirstAdapter{
     {
         List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
 
-       // List<String> fullList = myList;
         List<String> rightList = new ArrayList<String>(Arrays.asList(node.getR().toString().split(" ")));
+
+        try{
+            if(!table.checkFuncDeclExistance()){
+                throw new MyException("ERROR! DECLARATION WITHOUT DEFINITION");
+            }
+        }catch (MyException e){
+            throw new IllegalStateException("ERROR! DECLARATION WITHOUT DEFINITION");
+        }
 
         table.exit();
         Set list = table.getMap().entrySet();
         im.genQuad(im.getOpCode().getEndu(),myList.get(0).trim(),null,null);
+
+
 
     }
 
@@ -428,7 +518,7 @@ public class PrinterAST extends DepthFirstAdapter{
         String type = node.getR().toString();
         List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
         for(int i=0;i<myList.size();i++){
-            ScopeObject obj =   new ScopeObject(myList.get(i).trim(),type.trim(),"var",false) ;
+            ScopeObject obj =   new ScopeObject(myList.get(i).trim(),type.trim(),"var",false,table.getPosition()) ;
             table.insert(obj);
             Set list = table.getMap().entrySet();
         }
@@ -449,7 +539,7 @@ public class PrinterAST extends DepthFirstAdapter{
             throw new IllegalStateException("ERROR! MULTIPLE DECLARATIONS FOR FUNCTION  \"" +myList.get(0).toString().trim() +"\" IN SAME SCOPE");
         }
 
-        ScopeObject obj = new ScopeObject(myList.get(0).toString().trim(),myList.get(myList.size()-1).toString().trim(),"decl", false);
+        ScopeObject obj = new ScopeObject(myList.get(0).toString().trim(),myList.get(myList.size()-1).toString().trim(),"decl", false,table.getPosition());
         table.insert(obj);
 
         Set list = table.getMap().entrySet();
@@ -610,7 +700,7 @@ public class PrinterAST extends DepthFirstAdapter{
                 throw new IllegalStateException("ERROR! VARIABLE DOESN'T EXIST");
             }
 
-            ScopeObject obj = new ScopeObject(finalS,type,"var", false);
+            ScopeObject obj = new ScopeObject(finalS,type,"var", false,table.getPosition());
             try{
                 if (table.lookupVarAndTypeOnlyForVariables(obj)){
                     throw new MyException("ERROR INCORECT TYPE OF VARIABLE");
@@ -642,7 +732,7 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
 
-        ScopeObject obj = new ScopeObject(name,type,"var", false);
+        ScopeObject obj = new ScopeObject(name,type,"var", false,table.getPosition());
         try{
             if (table.lookupVarAndType(obj)){
                 throw new MyException("ERROR INCORECT TYPE OF VARIABLE");
@@ -1441,17 +1531,28 @@ public class PrinterAST extends DepthFirstAdapter{
     public void inAFuncCallWithStmt(AFuncCallWithStmt node){
 
         String funcName = node.getL().toString().trim();
+        System.out.println("MESA EDO:" + funcName);
 
         String nodeRight = node.getR().toString().trim();
+
+        System.out.println("PARAMETROI XORIS EPEKSERGASIA: " + nodeRight);
 
         List <String> parameters = new ArrayList<String>(Arrays.asList(nodeRight.replaceAll("\\s+","").split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1)));
 
         List paramType = new ArrayList();
 
+        System.out.println("PARAMETROI ME EPEKSERGASIA: " + parameters);
+
+        String[] insideFuncs = {"puti","puts","putc","geti","gets","getc","abs","ord","chr","strlen","strcmp","strcpy","strcat"};
+        List<String> primFuncs = Arrays.asList(insideFuncs);
+
+
+
         for (int i=0; i<parameters.size(); i++){
 
             if (parameters.get(i).contains("\"")){
                 paramType.add("char[]");
+                System.out.println("STRING");
             }
             else if (parameters.get(i).contains("'")){
                 paramType.add("char");
@@ -1511,19 +1612,46 @@ public class PrinterAST extends DepthFirstAdapter{
                     im.genQuad(im.getOpCode().getArray(),finalS,numb,"$" + im.getCount());
 
                 }
-
                 paramType.add("int");
-
-
             }
             else if (table.isNumeric(parameters.get(i))){
+                List<Integer> posRefs = table.getFuncRefs(funcName);
+                try{
+                    if(posRefs.contains(i)){
+                        throw new MyException("PARAMETER MUST BE VARIABLE(ARITHMETIC GIVEN)");
+                    }
+                }catch (MyException e){
+                    throw new IllegalStateException("PARAMETER MUST BE VARIABLE(ARITHMETIC GIVEN)");
+                }
+
                 paramType.add("int");
             }
             else if (parameters.get(i).contains("+") || parameters.get(i).contains("-") || parameters.get(i).contains("*")|| parameters.get(i).contains("/")|| parameters.get(i).contains("mod"))
                 paramType.add("int");
             else{
                 //variable
+                System.out.println("PARAMETROS: " + parameters.get(i));
+                boolean prim = false;
+
                 String type = table.FindVariableType(parameters.get(i));
+
+                if(type == null){
+                    System.out.println("PSAKSE GIA FUNC");
+                    for(int j=0;j < primFuncs.size();j++){
+                        if(parameters.get(i).contains(primFuncs.get(j)))
+                        {
+                            type = table.getFuncType(primFuncs.get(j));
+                            prim = true;
+                            break;
+                        }
+                    }
+                }
+
+                if(!prim && type==null){
+                    type = table.getFuncType(parameters.get(i));
+                }
+
+                System.out.println(type);
                 try{
                     if(type == null){
                         throw new MyException("VARIABLE NOT DECLARED");
@@ -1531,11 +1659,11 @@ public class PrinterAST extends DepthFirstAdapter{
                 }catch (MyException e){
                     throw new IllegalStateException("VARIABLE NOT DECLARED");
                 }
-
                 paramType.add(type);
             }
 
         }
+
         try{
             if(!table.checkScopeWith(funcName,paramType)){
 
@@ -2790,7 +2918,7 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
 
-        ScopeObject obj = new ScopeObject(name,type,"var", false);
+        ScopeObject obj = new ScopeObject(name,type,"var", false,table.getPosition());
         try{
             if (table.lookupVarAndType(obj)){
                 throw new MyException("ERROR INCORECT TYPE OF VARIABLE");

@@ -6,12 +6,14 @@ class ScopeObject {
     private String type;
     private String genre;
     private boolean ref;
+    private int scope;
 
-    public ScopeObject(String name, String type,String genre, boolean ref ){
+    public ScopeObject(String name, String type,String genre, boolean ref ,int scope){
         this.name = name;
         this.type = type;
         this.genre = genre;
         this.ref = ref;
+        this.scope = scope;
     }
 
     public String getName() {
@@ -67,5 +69,9 @@ class ScopeObject {
 
     public void setRef(boolean ref) {
         this.ref = ref;
+    }
+
+    public int getScope() {
+        return scope;
     }
 }
