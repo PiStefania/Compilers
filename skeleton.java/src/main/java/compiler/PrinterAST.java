@@ -410,6 +410,10 @@ public class PrinterAST extends DepthFirstAdapter{
     public void outAAllFuncDef(AAllFuncDef node)            //exit functions
     {
         List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
+
+       // List<String> fullList = myList;
+        List<String> rightList = new ArrayList<String>(Arrays.asList(node.getR().toString().split(" ")));
+
         table.exit();
         Set list = table.getMap().entrySet();
         im.genQuad(im.getOpCode().getEndu(),myList.get(0).trim(),null,null);
@@ -434,6 +438,16 @@ public class PrinterAST extends DepthFirstAdapter{
     public void inAFuncDeclFuncDef(AFuncDeclFuncDef node)
     {
         List<String> myList = new ArrayList<String>(Arrays.asList(node.getFuncDef().toString().split(" ")));
+
+        boolean decl = table.checkDeclaration(myList.get(0).toString().trim());
+        try{
+            if(decl==true){
+                throw new MyException("ERROR! MULTIPLE DECLARATIONS FOR FUNCTION  \"" +myList.get(0).toString().trim() +"\" IN SAME SCOPE");
+            }
+        }
+        catch (MyException e){
+            throw new IllegalStateException("ERROR! MULTIPLE DECLARATIONS FOR FUNCTION  \"" +myList.get(0).toString().trim() +"\" IN SAME SCOPE");
+        }
 
         ScopeObject obj = new ScopeObject(myList.get(0).toString().trim(),myList.get(myList.size()-1).toString().trim(),"decl", false);
         table.insert(obj);
@@ -474,6 +488,17 @@ public class PrinterAST extends DepthFirstAdapter{
             }
             finalS=finalS.trim();
             numb=numb.trim();
+
+
+            try{
+                if(table.isNumeric(numb)==false){
+                    throw new MyException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
+            }
+
+
 
             String type = table.FindVariableType(finalS);
             try{
@@ -568,6 +593,14 @@ public class PrinterAST extends DepthFirstAdapter{
             finalS=finalS.trim();
             numb=numb.trim();
 
+            try{
+                if(table.isNumeric(numb)==false){
+                    throw new MyException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
+            }
+
             type = table.FindVariableType(finalS);
             try{
                 if(type==null){
@@ -576,6 +609,22 @@ public class PrinterAST extends DepthFirstAdapter{
             }catch (MyException e){
                 throw new IllegalStateException("ERROR! VARIABLE DOESN'T EXIST");
             }
+
+            ScopeObject obj = new ScopeObject(finalS,type,"var", false);
+            try{
+                if (table.lookupVarAndTypeOnlyForVariables(obj)){
+                    throw new MyException("ERROR INCORECT TYPE OF VARIABLE");
+                }
+            }
+            catch (MyException e){
+                throw new IllegalStateException("ERROR INCORECT TYPE OF VARIABLE");
+            }
+
+            return;
+
+
+
+
         }
         else {
 
@@ -641,6 +690,14 @@ public class PrinterAST extends DepthFirstAdapter{
             }
             finalS=finalS.trim();
             numb=numb.trim();
+
+            try{
+                if(table.isNumeric(numb)==false){
+                    throw new MyException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
+            }
 
             String type = table.FindVariableType(finalS);
             try{
@@ -741,6 +798,14 @@ public class PrinterAST extends DepthFirstAdapter{
                 im.genQuad(im.getOpCode().getAssignment(),"$" + (im.getCount()-1),null,name);
             }
             else{
+                System.err.println("TEMPSTRING NUMERIC "+tempString);
+                /* try{
+                if(table.isNumeric(numb)==false){
+                    throw new MyException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
+            }*/
                 String tempString2 = tempString;
                 while (tempString2.contains("[") || tempString2.contains("]")){
                     tempString2 = tempString2.replace("[","");
@@ -1037,6 +1102,8 @@ public class PrinterAST extends DepthFirstAdapter{
 
         List<String> myListLeft = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
         List<String> myListRight = new ArrayList<String>(Arrays.asList(node.getR().toString().split(" ")));
+
+
         for(int i=0;i<myListLeft.size();i++) {
 
             if (myListLeft.get(i).equals("=") || myListLeft.get(i).equals("#")  || myListLeft.get(i).equals("<") || myListLeft.get(i).equals(">") || myListLeft.get(i).equals("<=") || myListLeft.get(i).equals(">=")) {
@@ -1057,6 +1124,20 @@ public class PrinterAST extends DepthFirstAdapter{
                     throw new IllegalStateException("ERROR WRONG EXPR TYPE");
                 }
             }
+            else {
+                String retType = table.getFuncType(name);
+                if (retType != null) {
+                    try{
+                        if (!retType.equals("int")){
+                            throw new MyException("ERROR WRONG EXPR TYPE");
+                        }
+                    }
+                catch (MyException e){
+                        throw new IllegalStateException("ERROR WRONG EXPR TYPE");
+                    }
+                }
+            }
+
         }
         if (myListRight.size()==1){
             String name = myListRight.get(0).trim();
@@ -1069,6 +1150,19 @@ public class PrinterAST extends DepthFirstAdapter{
                 }
                 catch (MyException e){
                     throw new IllegalStateException("ERROR WRONG EXPR TYPE");
+                }
+            }
+            else {
+                String retType = table.getFuncType(name);
+                if (retType != null) {
+                    try{
+                        if (!retType.equals("int")){
+                            throw new MyException("ERROR WRONG EXPR TYPE");
+                        }
+                    }
+                    catch (MyException e){
+                        throw new IllegalStateException("ERROR WRONG EXPR TYPE");
+                    }
                 }
             }
         }
@@ -1158,6 +1252,15 @@ public class PrinterAST extends DepthFirstAdapter{
                }
 
            }
+           else{
+               try{
+                   if(table.isNumeric(numb)==false){
+                       throw new MyException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
+                   }
+               }catch (MyException e){
+                   throw new IllegalStateException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
+               }
+           }
 
            im.insertPlaceHelper(left,"$" + im.getCount());
 
@@ -1207,6 +1310,15 @@ public class PrinterAST extends DepthFirstAdapter{
                     throw new IllegalStateException("ERROR! WRONG EXPRESSION");
                 }
 
+            }
+            else{
+                try{
+                    if(table.isNumeric(numb)==false){
+                        throw new MyException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
+                    }
+                }catch (MyException e){
+                    throw new IllegalStateException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
+                }
             }
             im.insertPlaceHelper(right, "$" + im.getCount());
             im.genQuad(im.getOpCode().getArray(), finalS, numb, "$" + im.getCount());
@@ -1384,6 +1496,15 @@ public class PrinterAST extends DepthFirstAdapter{
                         }
 
                     }
+                    else{
+                        try{
+                            if(table.isNumeric(numb)==false){
+                                throw new MyException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
+                            }
+                        }catch (MyException e){
+                            throw new IllegalStateException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
+                        }
+                    }
 
                     im.insertPlaceHelper(left,"$" + im.getCount());
 
@@ -1496,6 +1617,15 @@ public class PrinterAST extends DepthFirstAdapter{
                     }
 
                 }
+                else{
+                      try{
+                          if(table.isNumeric(numb)==false){
+                              throw new MyException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
+                          }
+                      }catch (MyException e){
+                          throw new IllegalStateException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
+                      }
+                  }
 
                 im.insertPlaceHelper(left,"$" + im.getCount());
 
@@ -1563,7 +1693,7 @@ public class PrinterAST extends DepthFirstAdapter{
     @Override
     public void inAReturnWithStmt(AReturnWithStmt node) {
 
-        System.out.println("Return stmt" + node.getAllExpr().toString());
+
         String type = node.getAllExpr().getClass().getSimpleName();
         String ourType = null;
         String retType = null;
@@ -1599,9 +1729,6 @@ public class PrinterAST extends DepthFirstAdapter{
 
             retType = ourType;
 
-            System.err.println("1");
-            System.err.println(retType);
-            System.err.println("RET:"+node.getAllExpr().toString());
             String retExpr =node.getAllExpr().toString();
             int i=0;
             char c;
@@ -1618,7 +1745,6 @@ public class PrinterAST extends DepthFirstAdapter{
                 }
                 i++;
             }
-            System.err.println("DIMENS:" + counterRet);
             i=0;
             int retCounter=0;
 
@@ -1751,7 +1877,6 @@ public class PrinterAST extends DepthFirstAdapter{
     @Override
     public void inAReturnWith2Stmt(AReturnWith2Stmt node) {
 
-        System.out.println("Return stmt" + node.getAllExpr().toString());
         String type = node.getAllExpr().getClass().getSimpleName();
         String ourType = null;
         String retType = null;
@@ -1787,9 +1912,6 @@ public class PrinterAST extends DepthFirstAdapter{
 
             retType = ourType;
 
-            System.err.println("2");
-            System.err.println(retType);
-            System.err.println("RET:"+node.getAllExpr().toString());
             String retExpr =node.getAllExpr().toString();
             int i=0;
             char c;
@@ -1806,7 +1928,6 @@ public class PrinterAST extends DepthFirstAdapter{
                 }
                 i++;
             }
-            System.err.println("DIMENS:" + counterRet);
             i=0;
             int retCounter=0;
 
@@ -1938,7 +2059,6 @@ public class PrinterAST extends DepthFirstAdapter{
     @Override
     public void inAReturnExprStmt(AReturnExprStmt node) {
 
-        System.out.println("Return stmt" + node.getAllExpr().toString());
         String type = node.getAllExpr().getClass().getSimpleName();
         String ourType = null;
         String retType = null;
@@ -1967,6 +2087,10 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
         }
+        else if (type.equals("AAddSubAllExpr") || type.equals("ARestSignsAllExpr")|| type.equals("APlusPlusMinus")){
+            ourType = "Integer";
+            retType = "int";
+        }
         else if (node.getAllExpr().toString().contains("[")){
             //array
             List<String> nameList = new ArrayList<String>(Arrays.asList( node.getAllExpr().toString().split(" ")));
@@ -1974,9 +2098,7 @@ public class PrinterAST extends DepthFirstAdapter{
 
             retType = ourType;
 
-            System.err.println("3");
-            System.err.println(retType);
-            System.err.println("RET:"+node.getAllExpr().toString());
+
             String retExpr =node.getAllExpr().toString();
             int i=0;
             char c;
@@ -1993,7 +2115,6 @@ public class PrinterAST extends DepthFirstAdapter{
                 }
                 i++;
             }
-            System.err.println("DIMENS:" + counterRet);
             i=0;
             int retCounter=0;
 
@@ -2124,7 +2245,7 @@ public class PrinterAST extends DepthFirstAdapter{
 
     @Override
     public void inAReturnExpr2Stmt(AReturnExpr2Stmt node) {
-        System.out.println("Return stmt" + node.getAllExpr().toString());
+
         String type = node.getAllExpr().getClass().getSimpleName();
         String ourType = null;
         String retType = null;
@@ -2160,9 +2281,7 @@ public class PrinterAST extends DepthFirstAdapter{
 
             retType = ourType;
 
-            System.err.println("4");
-            System.err.println(retType);
-            System.err.println("RET:"+node.getAllExpr().toString());
+
             String retExpr =node.getAllExpr().toString();
             int i=0;
             char c;
@@ -2179,7 +2298,6 @@ public class PrinterAST extends DepthFirstAdapter{
                 }
                 i++;
             }
-            System.err.println("DIMENS:" + counterRet);
             i=0;
             int retCounter=0;
 
@@ -2538,6 +2656,14 @@ public class PrinterAST extends DepthFirstAdapter{
             finalS=finalS.trim();
             numb=numb.trim();
 
+            try{
+                if(table.isNumeric(numb)==false){
+                    throw new MyException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
+            }
+
             String type = table.FindVariableType(finalS);
             try{
                 if(type==null){
@@ -2631,6 +2757,14 @@ public class PrinterAST extends DepthFirstAdapter{
             finalS=finalS.trim();
             numb=numb.trim();
 
+            try{
+                if(table.isNumeric(numb)==false){
+                    throw new MyException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
+            }
+
             type = table.FindVariableType(finalS);
             try{
                 if(type==null){
@@ -2704,6 +2838,14 @@ public class PrinterAST extends DepthFirstAdapter{
             finalS = finalS.trim();
             numb = numb.trim();
 
+
+            try{
+                if(table.isNumeric(numb)==false){
+                    throw new MyException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
+                }
+            }catch (MyException e){
+                throw new IllegalStateException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
+            }
             String type = table.FindVariableType(finalS);
             try {
                 if (type == null) {

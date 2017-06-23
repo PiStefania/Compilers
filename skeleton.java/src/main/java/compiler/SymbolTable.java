@@ -178,19 +178,49 @@ class SymbolTable {
 
     public boolean lookupVarAndFunc(ScopeObject obj){               //search for same function and variable names in all stack
 
-        for(int i = mystack.size()-1;i>=0;i--){
+        int value = map.get(position);
+        int value2 = 0;
+        if (position != 0) {
+            value2 = map.get(position - 1);
+            for (int i = value; i > value2; i--) {
+                ScopeObject obj2 = (ScopeObject) mystack.get(i);
+                if (obj.getName().equals(obj2.getName())) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            for (int i = value; i >= 0; i--) {
+                ScopeObject obj2 = (ScopeObject) mystack.get(i);
+                if (obj.getName().equals(obj2.getName())) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+    }
+
+    public boolean lookupVarAndType(ScopeObject obj){                   //search variable in order to find the same variable in stack with diff type(true)
+
+        int value = map.get(position);
+
+
+        for(int i=value;i>=0;i--){
             ScopeObject obj2 = (ScopeObject) mystack.get(i);
-            if (obj.sameObjectFunc(obj2.getName(),obj2.getGenre()) ){
-                return true;
+            if (obj.getName().trim().equals(obj2.getName().trim())){
+                if (!obj.getType().equals(obj2.getType())){
+                    return true;
+                }
+                else return false;
             }
         }
-        return false;
-
+        return true;  //not found
     }
 
 
 
-    public boolean lookupVarAndType(ScopeObject obj){                   //search variable in order to find the same variable in stack with diff type(true)
+    public boolean lookupVarAndTypeOnlyForVariables(ScopeObject obj){                   //search variable in order to find the same variable in stack with diff type(true)
 
         int value = map.get(position);
 
@@ -240,6 +270,31 @@ class SymbolTable {
     }
 
 
+    public boolean checkDeclaration(String name){           //return true if there are more than one declarations for function in same scope
+        int value = map.get(position);
+        int value2 = 0;
+        if (position != 0) {
+            value2 = map.get(position - 1);
+            for (int i = value; i > value2; i--) {
+                ScopeObject obj = (ScopeObject) mystack.get(i);
+                if (name.equals(obj.getName())) {
+                    if (obj.getGenre().equals("decl"))
+                        return true;
+                }
+            }
+        }
+        else {
+            for (int i = value; i >= 0; i--) {
+                ScopeObject obj = (ScopeObject) mystack.get(i);
+                if (name.equals(obj.getName())) {
+                    if (obj.getGenre().equals("decl"))
+                        return true;
+                }
+            }
+
+        }
+        return false;
+    }
 
 
 
