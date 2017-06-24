@@ -205,8 +205,8 @@ public class PrinterAST extends DepthFirstAdapter{
     @Override
     public void outAProgram(AProgram node){
 
-        //exit function stack
-        table.deleteFuncStack();
+
+
 
         System.out.println("\nSuccessful compilation!");
 
@@ -214,9 +214,12 @@ public class PrinterAST extends DepthFirstAdapter{
 
         im.printPlace();
 
-        JB= new JavaBytecode(im.getQuadList());
+        JB= new JavaBytecode(im.getQuadList(), table.getFuncStack());
 
         JB.produceJavaBytecode();
+
+        //exit function stack
+        table.deleteFuncStack();
 
     }
 
@@ -228,8 +231,6 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
         List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
-
-        //System.out.println("FUNCTION: " + myList);
 
         List<String> listParam = new ArrayList<String>(myList);
 
@@ -304,9 +305,6 @@ public class PrinterAST extends DepthFirstAdapter{
                 }
             }
         }
-
-        //System.out.println("POSITIONS: " + posRefs);
-
 
 
         List<String> parList = new ArrayList<String>();
@@ -448,8 +446,7 @@ public class PrinterAST extends DepthFirstAdapter{
 
         }
 
-        //System.out.println("PARAMETERS and TYPES: " + parType);
-        //System.out.println("PARAMETERS: " + firstList);
+
         String parameter;
         List<String> keySet = new ArrayList<String>(parType.keySet());
         List<String> listTypes = new ArrayList<String>();
@@ -499,7 +496,6 @@ public class PrinterAST extends DepthFirstAdapter{
     @Override
     public void outAAllFuncDef(AAllFuncDef node)            //exit functions
     {
-        System.out.println("fd "+ node.getL().toString() + " " +node.getR().toString());
         List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
 
         List<String> rightList = new ArrayList<String>(Arrays.asList(node.getR().toString().split(" ")));
@@ -1541,17 +1537,14 @@ public class PrinterAST extends DepthFirstAdapter{
     public void inAFuncCallWithStmt(AFuncCallWithStmt node){
 
         String funcName = node.getL().toString().trim();
-        System.out.println("MESA EDO:" + funcName);
 
         String nodeRight = node.getR().toString().trim();
 
-        System.out.println("PARAMETROI XORIS EPEKSERGASIA: " + nodeRight);
 
         List <String> parameters = new ArrayList<String>(Arrays.asList(nodeRight.replaceAll("\\s+","").split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1)));
 
         List paramType = new ArrayList();
 
-        System.out.println("PARAMETROI ME EPEKSERGASIA: " + parameters);
 
 
 
@@ -1572,7 +1565,6 @@ public class PrinterAST extends DepthFirstAdapter{
 
             if (parameters.get(i).contains("\"")){
                 paramType.add("char[]");
-                System.out.println("STRING");
             }
             else if (parameters.get(i).contains("'")){
                 paramType.add("char");
@@ -1643,7 +1635,6 @@ public class PrinterAST extends DepthFirstAdapter{
                 paramType.add("int");
             else{
                 //variable
-                System.out.println("PARAMETROS: " + parameters.get(i));
                 boolean prim = false;
 
                 String type = table.FindVariableType(parameters.get(i));
@@ -1652,8 +1643,6 @@ public class PrinterAST extends DepthFirstAdapter{
                     type = table.getFuncType(parameters.get(i));
                 }
 
-
-                System.out.println(type);
                 try{
                     if(type == null){
                         throw new MyException("VARIABLE NOT DECLARED");

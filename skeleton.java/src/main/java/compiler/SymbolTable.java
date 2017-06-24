@@ -470,9 +470,7 @@ class SymbolTable {
 
 
 
-            System.out.println("BRE8HKE " + funcName + name);
             if(name.equals(funcName)){
-                System.out.println("prin t scopes " + this.funcStack.get(i).getScope() + " tora:" + this.position);
                 if(this.funcStack.get(i).getScope() - this.position <=1)
                 {
                     if(numParams == 0) {
@@ -497,14 +495,10 @@ class SymbolTable {
             funcName = this.funcStack.get(i).getFuncName();
             numParams = this.funcStack.get(i).getNumOfParams();
             typeOfParams = this.funcStack.get(i).getTypesOfPatameters();
-            //System.out.println(funcName);
 
             if(name.equals(funcName)){
-                System.out.println("BRE8HKE " + funcName);
-                System.out.println("prin t scopes " + this.funcStack.get(i).getScope() + " tora:" + this.position);
 
                 if(this.funcStack.get(i).getScope() - this.position <=1) {
-                    System.out.println("KOMPLE SCOPE");
 
                     if (numParams == par.size()) {
                         for (int j = 0; j < par.size(); j++) {
@@ -535,8 +529,6 @@ class SymbolTable {
                             }
                         }
 
-                        System.out.println("PAR TYPES: " +  par);
-                        System.out.println("typeOfParams TYPES: " +  typeOfParams);
                         int flag = 0;
                         for (int j=0; j < par.size();j++) {
                             if (par.get(j).contains("char[") && typeOfParams.get(j).contains("char["))
@@ -580,11 +572,10 @@ class SymbolTable {
     public String getFuncType(String name){
 
         String funcName;
-        for (int i=0; i<this.funcStack.size();i++){
+        for (int i=this.funcStack.size()-1; i>=0;i--){
 
             funcName = this.funcStack.get(i).getFuncName();
 
-            //System.out.println("FUNCNAMES: " + funcName);
 
             if(name.equals(funcName)){
                 return this.funcStack.get(i).getType();
@@ -596,7 +587,7 @@ class SymbolTable {
     public List<Integer> getFuncRefs(String name){
 
         String funcName;
-        for (int i=0; i<this.funcStack.size();i++){
+        for (int i=this.funcStack.size()-1; i>=0;i--){
 
             funcName = this.funcStack.get(i).getFuncName();
 

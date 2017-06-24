@@ -8,6 +8,13 @@ public class Quad {
     private Object arg2;
     private Object arg3;
 
+    public Quad(Quad obj){
+        this.op=obj.op;
+        this.arg1=obj.arg1;
+        this.arg2=obj.arg2;
+        this.arg3=obj.arg3;
+    }
+
 
     public Quad(Object op, Object arg1, Object arg2, Object arg3) {
         this.op=op;
