@@ -23,6 +23,8 @@ public class PrinterAST extends DepthFirstAdapter{
 
     Intermediate im = new Intermediate();
 
+    JavaBytecode JB;
+
     boolean globalFlagNot = false;
 
 
@@ -211,6 +213,10 @@ public class PrinterAST extends DepthFirstAdapter{
         im.print();
 
         im.printPlace();
+
+        JB= new JavaBytecode(im.getQuadList());
+
+        JB.produceJavaBytecode();
 
     }
 
@@ -1296,7 +1302,7 @@ public class PrinterAST extends DepthFirstAdapter{
         }
         left = left.trim();
 
-        operator myOp = new operator("op",op);
+        operator myOp = new operator("relop",op);
         Object w = im.newTemp("Integer");
         String name2 = "$" + im.getCount();
 
