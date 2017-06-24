@@ -1,3 +1,18 @@
-0 : aload 3
-1 : aload 2
-2 : iadd $1
+.class public Grace
+.super java/lang/Object
+.method public static main([Ljava/lang/String;)V
+.limit stack 2
+.methodf()V
+.limit stack 2
+.methodk()V
+.limit stack 2
+return
+.end method
+.methodhello()V
+.limit stack 2
+return
+.end method
+return
+.end method
+return
+.end method

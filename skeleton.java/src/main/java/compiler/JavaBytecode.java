@@ -25,6 +25,11 @@ public class JavaBytecode {
     }
 
     public void produceJavaBytecode(){
+
+        this.bytecodeList.add(".class public Grace");
+        this.bytecodeList.add(".super java/lang/Object");
+        boolean mainExists = true;
+
         for (int i=0; i<this.quadList.size(); i++){     //for each element of quadlist produce bytecode
             //System.out.println(quadList.get(i).getOp() + " " + quadList.get(i).getArg1() + " " + quadList.get(i).getArg2() + " " + quadList.get(i).getArg3());
 
@@ -139,6 +144,39 @@ public class JavaBytecode {
             else{
                 if (quadList.get(i).getOp().equals("unit")){
 
+                    String method;
+                    String methodName = (String) quadList.get(i).getArg1();
+                    if(getMostNestedMethod(methodName)==-1){
+
+
+                    }
+
+                    if(i==0 && !quadList.get(i).getArg1().equals("main"))
+                    {
+                        mainExists = false;
+                        method = ".method public static main";
+                        method += "([Ljava/lang/String;)V";
+                        this.bytecodeList.add(method);
+                        this.bytecodeList.add(".limit stack 2");
+
+                        String invokedMethod = "invokevirtual " + quadList.get(i).getArg1();
+                        invokedMethod += "()V";
+                        this.bytecodeList.add(invokedMethod);
+
+                    }
+                    else if(quadList.get(i).getArg1().equals("main")){
+                        mainExists = true;
+                        method = ".method public static " + quadList.get(i).getArg1();
+                        method += "([Ljava/lang/String;)V";
+                        this.bytecodeList.add(method);
+                        this.bytecodeList.add(".limit stack 2");
+                    }
+                    else if (i!=0){
+                        method = ".method" + quadList.get(i).getArg1();
+                        method += "()V";
+                        this.bytecodeList.add(method);
+                        this.bytecodeList.add(".limit stack 2");
+                    }
                 }
                 else if (quadList.get(i).getOp().equals("par")){
 
@@ -148,6 +186,26 @@ public class JavaBytecode {
                 }
                 else if (quadList.get(i).getOp().equals("endu")){
 
+                    String method;
+                    if(!mainExists){
+
+                        this.bytecodeList.add("return");
+                        this.bytecodeList.add(".end method");
+
+                        method = ".method " + quadList.get(i).getArg1();
+                        method += "()V";
+                        this.bytecodeList.add(method);
+                        this.bytecodeList.add(".limit stack 2");
+
+
+                        this.bytecodeList.add("return");
+                        this.bytecodeList.add(".end method");
+                    }
+                    else {
+                        this.bytecodeList.add("return");
+                        this.bytecodeList.add(".end method");
+                    }
+
                 }
             }
 
@@ -156,7 +214,6 @@ public class JavaBytecode {
             PrintWriter writer = new PrintWriter("bytecode.j", "ASCII");
             for (int j = 0; j < this.bytecodeList.size(); j++) {
                 writer.println(this.bytecodeList.get(j));
-                System.out.println(this.bytecodeList.get(j));
             }
             writer.close();
         }
@@ -164,4 +221,31 @@ public class JavaBytecode {
             e.printStackTrace();
         }
     }
+
+    public int nestedMethods(String name){
+        int i = 0;
+        while(i<quadList.size())
+        {
+            if(quadList.get(i).getOp().equals("endu") && quadList.get(i).getArg1().equals(name))
+                return -1;
+            if(quadList.get(i).getOp().equals("unit"))
+            {
+               return i;
+            }
+            i++;
+        }
+        return -1;
+    }
+
+    public int getMostNestedMethod(String name){
+        int flag=nestedMethods(name);
+        int flagHelper = flag;
+        while(flag!=-1){
+            flagHelper = flag;
+            name = (String) quadList.get(flagHelper).getArg1();
+            flag= nestedMethods(name);
+        }
+        return flagHelper;
+    }
+
 }
