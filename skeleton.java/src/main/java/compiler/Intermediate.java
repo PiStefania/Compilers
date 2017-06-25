@@ -20,6 +20,10 @@ public class Intermediate {
         return helpList.size();
     }
 
+    public List<placeHelper> getHelpList(){
+        return this.helpList;
+    }
+
     public Intermediate(){
         this.count=0;
         this.quadList = new ArrayList<Quad>();
@@ -278,8 +282,8 @@ public class Intermediate {
     }
 
     public void printPlace(){
-        System.out.println();
-        System.out.println("Printing Expressions in Variables");
+
+        System.out.println("\nPrinting Expressions in Variables");
         for (int i=0; i<this.helpList.size();i++){
             System.out.println("EXPRESSION: \"" + helpList.get(i).getExpr() + "\" is in variable: \"" + helpList.get(i).getPosition() +"\"");
         }

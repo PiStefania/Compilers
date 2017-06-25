@@ -16,6 +16,7 @@ class SymbolTable {
     private Map<String, List> refPar;
     private int position;                       //position of map
     private int ifWhileScope;                   //scope of ifs and whiles
+    private List<ScopeObject> allVars;
 
     public SymbolTable() {   //constructor
         map = new HashMap<Integer, Integer>();
@@ -24,6 +25,11 @@ class SymbolTable {
         refPar = new HashMap<String, List>();
         position = -1;
         ifWhileScope = -1;
+        allVars = new ArrayList<ScopeObject>();
+    }
+
+    public List<ScopeObject> getAllVars() {
+        return allVars;
     }
 
     public int getIfWhileScope() {
@@ -226,11 +232,13 @@ class SymbolTable {
 
         int value = map.get(position);
 
-
-
         for(int i=value;i>=0;i--){
             ScopeObject obj2 = (ScopeObject) mystack.get(i);
             if (obj.getName().trim().equals(obj2.getName().trim())){
+                if(obj.getType().contains("char[") && obj.getType().contains("char["))
+                    return false;
+                if(obj.getType().contains("int[") && obj.getType().contains("int["))
+                    return false;
                 if (!obj.getType().equals(obj2.getType())){
                     return true;
                 }
@@ -239,7 +247,6 @@ class SymbolTable {
         }
         return true;  //not found
     }
-
 
 
     public boolean lookupVarAndTypeOnlyForVariables(ScopeObject obj){                   //search variable in order to find the same variable in stack with diff type(true)

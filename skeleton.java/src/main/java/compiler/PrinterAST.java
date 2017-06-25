@@ -214,7 +214,7 @@ public class PrinterAST extends DepthFirstAdapter{
 
         im.printPlace();
 
-        JB= new JavaBytecode(im.getQuadList(), table.getFuncStack());
+        JB= new JavaBytecode(im.getQuadList(), table.getFuncStack(),im.getHelpList(),table.getAllVars());
 
         JB.produceJavaBytecode();
 
@@ -526,7 +526,7 @@ public class PrinterAST extends DepthFirstAdapter{
         for(int i=0;i<myList.size();i++){
             ScopeObject obj =   new ScopeObject(myList.get(i).trim(),type.trim(),"var",false,table.getPosition()) ;
             table.insert(obj);
-            Set list = table.getMap().entrySet();
+            table.getAllVars().add(obj);
         }
     }
 
@@ -547,20 +547,25 @@ public class PrinterAST extends DepthFirstAdapter{
 
         ScopeObject obj = new ScopeObject(myList.get(0).toString().trim(),myList.get(myList.size()-1).toString().trim(),"decl", false,table.getPosition());
         table.insert(obj);
+        table.getAllVars().add(obj);
 
-        Set list = table.getMap().entrySet();
+
     }
 
 
     @Override
     public void inAExpressionStmt(AExpressionStmt node)
     {
+
+        System.out.println("node is "+ node.getL().toString() + " "+ node.getR().toString());
         List<?> newl = (List) node.getL();
         String name = newl.get(0).toString();
 
         String initialName=name;
 
         if (name.contains("[")){
+
+            System.out.println("name contains " +name);
 
             int i=0;
             String finalS="";
@@ -597,6 +602,7 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
             String type = table.FindVariableType(finalS);
+            System.out.println("type "+ type);
             try{
                 if(type==null){
                     throw new MyException("ERROR! VARIABLE DOESN'T EXIST");
@@ -607,10 +613,12 @@ public class PrinterAST extends DepthFirstAdapter{
 
             Object w = im.newTemp(type);
             String name2 = "$" + im.getCount();
-
-            InterReg reg = new InterReg(w,im.getCount(),im.getOpCode().getArray(),w.getClass().getSimpleName(),name2);
-            im.insertReg(reg);
             name=finalS;
+
+            im.genQuad(im.getOpCode().getArray(),finalS,numb, "$" + im.getCount());
+            im.insertPlaceHelper((finalS+ "["+ numb+ "]"),"$" + (im.getCount()-1));
+
+
         }
 
         String type;
@@ -707,6 +715,7 @@ public class PrinterAST extends DepthFirstAdapter{
             }
 
             ScopeObject obj = new ScopeObject(finalS,type,"var", false,table.getPosition());
+            table.getAllVars().add(obj);
             try{
                 if (table.lookupVarAndTypeOnlyForVariables(obj)){
                     throw new MyException("ERROR INCORECT TYPE OF VARIABLE");
@@ -736,9 +745,13 @@ public class PrinterAST extends DepthFirstAdapter{
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
         }
 
+        if (initialName.contains("[")){
+            type = type + "[]";
+        }
 
 
         ScopeObject obj = new ScopeObject(name,type,"var", false,table.getPosition());
+        table.getAllVars().add(obj);
         try{
             if (table.lookupVarAndType(obj)){
                 throw new MyException("ERROR INCORECT TYPE OF VARIABLE");
@@ -807,13 +820,9 @@ public class PrinterAST extends DepthFirstAdapter{
             Object w = im.newTemp(type);
             String name2 = "$" + im.getCount();
 
-            InterReg reg = new InterReg(w,im.getCount(),im.getOpCode().getArray(),w.getClass().getSimpleName(),name2);
-            im.insertReg(reg);
 
-
-
-            im.genQuad(im.getOpCode().getArray(),finalS,numb, "$" + im.getCount());
-            im.insertPlaceHelper((finalS+numb),"$" + im.getCount());
+            //im.genQuad(im.getOpCode().getArray(),finalS,numb, "$" + im.getCount());
+            //im.insertPlaceHelper((finalS+numb),"$" + im.getCount());
             name=finalS;
         }
 
@@ -875,8 +884,6 @@ public class PrinterAST extends DepthFirstAdapter{
                 Object w = im.newTemp("Integer");
                 String name2 = "$" + im.getCount();
 
-                InterReg reg2 = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name2);
-                im.insertReg(reg2);
                 String myReg = im.Place(numb);
                 try{
                     if(myReg==null){
@@ -887,6 +894,7 @@ public class PrinterAST extends DepthFirstAdapter{
                     throw new IllegalStateException("FOUND VARIABLE NOT DECLARED");
                 }
 
+                //System.out.println("TEMPSTRING: " + tempString + " pos: " + im.getCount());
                 im.insertPlaceHelper(tempString,"$" + im.getCount());
 
 
@@ -916,6 +924,7 @@ public class PrinterAST extends DepthFirstAdapter{
                 InterReg reg2 = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name2);
                 im.insertReg(reg2);
                 im.genQuad(im.getOpCode().getArray(),tempList.get(0),tempList2.get(tempList2.size()-1),name2);
+                im.insertPlaceHelper(tempString.replace(" ", ""),"$" + (im.getCount()-1));
                 im.genQuad(im.getOpCode().getAssignment(),"$" + (im.getCount()-1),null,name);
             }
         }
@@ -1530,6 +1539,7 @@ public class PrinterAST extends DepthFirstAdapter{
             throw new IllegalStateException("INCORRECT FUNCTION CALL.");
         }
 
+
         im.genQuad(im.getOpCode().getCall(),null,null,funcName);
     }
 
@@ -1671,7 +1681,7 @@ public class PrinterAST extends DepthFirstAdapter{
     public void outAFuncCallWithoutStmt(AFuncCallWithoutStmt node){
         String funcName = node.toString().trim();
         im.insertPlaceHelper(funcName,"$" + im.getCount());
-        im.genQuad(im.getOpCode().getCall(),null,null,funcName);
+        //im.genQuad(im.getOpCode().getCall(),null,null,funcName);
     }
 
     @Override
@@ -2910,6 +2920,7 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
         ScopeObject obj = new ScopeObject(name,type,"var", false,table.getPosition());
+        table.getAllVars().add(obj);
         try{
             if (table.lookupVarAndType(obj)){
                 throw new MyException("ERROR INCORECT TYPE OF VARIABLE");

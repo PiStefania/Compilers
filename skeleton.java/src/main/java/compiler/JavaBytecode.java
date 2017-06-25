@@ -1,5 +1,6 @@
 package compiler;
 
+import javax.xml.bind.ValidationEvent;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
@@ -19,13 +20,21 @@ public class JavaBytecode {
     private List <funcBeggining> funcScope;
     private List <FuncScopeHelper> myFuncScopeHelperList;
     private Stack<FuncScope> funcStack;         //stack of obj:FuncScope
+    private int istoreCounter;
+    private int loadCounter;
+    private List<placeHelper> registers;
+    private List <VarLocal> VarLocalList;
+    private List<ScopeObject> allVars;
 
-    public JavaBytecode(List<Quad> quadList,Stack<FuncScope> funcStack ){
+    public JavaBytecode(List<Quad> quadList,Stack<FuncScope> funcStack ,List<placeHelper> registers,List<ScopeObject> allVars ){
         this.quadList=new ArrayList<Quad>(quadList);
         this.bytecodeList = new ArrayList<String>();
         this.counter = 0;
         this.InitialQuadList = new ArrayList<Quad>(quadList);
         this.funcStack = new Stack<FuncScope>();
+        this.registers= new ArrayList<placeHelper>(registers);
+        this.allVars = new ArrayList<ScopeObject>(allVars);
+
 
 
         for ( int i=0; i<funcStack.size(); i++){
@@ -44,32 +53,51 @@ public class JavaBytecode {
         this.bytecodeList.add(".class public Grace");
         this.bytecodeList.add(".super java/lang/Object");
 
+        //constructor
+        this.bytecodeList.add(".method public <init>()V");
+        this.bytecodeList.add(" aload_0");
+        this.bytecodeList.add("invokenonvirtual java/lang/Object/<init>()V");
+        this.bytecodeList.add("return");
+        this.bytecodeList.add(".end method");
+
         this.createFuncScope();
         this.findFunctionScope();
 
         for (int i=0; i<this.funcScope.size(); i++){     //for each function
+            this.counter = 0;
+
+            VarLocalList = new ArrayList<VarLocal>();
             String method;
+
             //entolh first
 
             int first = funcScope.get(i).getFirst();
 
-            //unit
-            if (first==0){
-                if (!quadList.get(first).getArg1().equals("main")){     //must create main
+            istoreCounter = getNoOfParams(quadList.get(first).getArg1().toString()) + 1;
+            System.out.println("istoreCounter " + istoreCounter);
 
-                }
-                else{
+            //unit
+            if (first==0) {
+                if (!quadList.get(first).getArg1().equals("main")) {     //must create main
+
+                } else {
                     method = ".method public static " + quadList.get(first).getArg1();
                     method += "([Ljava/lang/String;)V";
                     this.bytecodeList.add(method);
-                    this.bytecodeList.add(".limit stack 2");
+                    this.bytecodeList.add(".limit stack 100");
+                    this.bytecodeList.add(".limit locals 2");
+                    this.bytecodeList.add(this.counter + " : aload_0 ");    //stack: this
+                    this.counter++;
                 }
             }
             else{
                 method = ".method " + quadList.get(first).getArg1();
                 method += this.setMethodPar((String) quadList.get(first).getArg1()) + this.setMethodRet((String) quadList.get(first).getArg1()) ;
                 this.bytecodeList.add(method);
-                this.bytecodeList.add(".limit stack 2");
+                this.bytecodeList.add(".limit stack 100");
+                this.bytecodeList.add(".limit locals 10");
+                this.bytecodeList.add(this.counter + " : aload_0 ");    //stack: this
+                this.counter++;
             }
 
 
@@ -79,6 +107,7 @@ public class JavaBytecode {
             for (int counter=second; counter<last; counter++){
                 //entoles
                 Quad command = new Quad(quadList.get(counter));
+                handleQuad(command);
             }
 
             //endu
@@ -89,14 +118,18 @@ public class JavaBytecode {
             else if(retType.equals("I")){
                 this.bytecodeList.add("ireturn");
             }
-            else if(retType.equals("C"))
+            else if(retType.equals("C"))                            //8elei fix (to idio alla me entoles bytecode)
             {
-                this.bytecodeList.add("return");
+                char d ='A';
+                String charInt = Integer.toBinaryString(d);
+                if(charInt.length()<8){
+                    charInt = "0" + charInt;
+                }
+                int temp = Integer.parseInt(charInt);
+                this.bytecodeList.add("ireturn");
             }
 
             this.bytecodeList.add(".end method");
-
-
 
         }
         try {
@@ -115,6 +148,19 @@ public class JavaBytecode {
     public void changeQuadList(){
         if (quadList.get(0).getOp().equals("unit") && !quadList.get(0).getArg1().equals("main")){
             //must change quadlist
+
+            int noOfParams = this.getNoOfParamsForQuad(quadList.get(0).getArg1().toString().trim());
+            System.out.println(noOfParams + " " +quadList.get(0).getArg1().toString() );
+                try{
+                    if(noOfParams!=0){
+                        throw new MyException("ERROR! INITIAL FUNCTION IS NOT MAIN AND HAS PARAMETERS");
+                    }
+                }
+                catch (MyException e){
+                    throw new IllegalStateException("ERROR! INITIAL FUNCTION IS NOT MAIN AND HAS PARAMETERS");
+                }
+
+
             Quad q1 = new Quad("unit", "main", null, null);
             Quad q2 = new Quad("call", null, null, quadList.get(0).getArg1());
             Quad q3 = new Quad("endu", "main", null, null);
@@ -164,7 +210,6 @@ public class JavaBytecode {
 
 
     public void printQuadList(){            //print list
-        System.out.println();
         for (int i=0; i<this.quadList.size();i++){
             if(this.quadList.get(i).getOp().getClass().getSimpleName().equals("operator")){
                 operator myOp = (operator) this.quadList.get(i).getOp();
@@ -217,7 +262,6 @@ public class JavaBytecode {
 
     public void orderFuncScope(){
 
-        System.out.println("ORDERING");
         int n = funcScope.size();
         int temp = 0;
 
@@ -238,10 +282,8 @@ public class JavaBytecode {
     }
 
     public void handleQuad(Quad q) {
-        //System.out.println(quadList.get(i).getOp() + " " + quadList.get(i).getArg1() + " " + quadList.get(i).getArg2() + " " + quadList.get(i).getArg3());
 
         operator p;
-        //System.out.println("OPP: " + this.quadList.get(i).getOp().getClass().getSimpleName());
         if (q.getOp().getClass().getSimpleName().equals("operator")) {
             p = (operator) q.getOp();
             if (p.getName().equals("relop")) {
@@ -336,28 +378,177 @@ public class JavaBytecode {
                 }
 
             }
-        } else {
+        }
+        else {
 
             if (q.getOp().equals("par")) {              //load parametrous analoga me tupo
 
+                if (isNumeric(q.getArg1().toString().trim()) || q.getArg1().toString().trim().contains("'")){
+                    this.bytecodeList.add(this.counter + " : ldc " + q.getArg1());
+                    this.counter++;
+                }
+                else {
+
+                    boolean flag = false;
+                    for (int j = VarLocalList.size() - 1; j >= 0; j--) {
+
+                        if (VarLocalList.get(j).getName().trim().equals(q.getArg1().toString())) {
+
+                            this.bytecodeList.add(this.counter + " : iload " + VarLocalList.get(j).getStoreCounter());
+                            this.counter++;
+
+                            flag = true;
+                            break;
+                        }
+                    }
+
+                    try {
+                        if (!flag) {
+                            throw new MyException("ERROR! VARIABLE NOT INITIALIZED");
+                        }
+                    } catch (MyException e) {
+                        throw new IllegalStateException("ERROR! VARIABLE NOT INITIALIZED");
+                    }
+                }
             }
             else if (q.getOp().equals("call")) {        //invoke function
+
+
+                bytecodeList.add(this.counter + " : new Grace");
+                this.counter++;
+
+                bytecodeList.add(this.counter + " : dup");
+                this.counter++;
+
+                bytecodeList.add(this.counter + " : invokespecial Grace/<init>()V");
+                this.counter++;
+
+                bytecodeList.add(this.counter + " : invokespecial Grace/" + q.getArg3()+ setMethodPar((String)q.getArg3()) + setMethodRet((String)q.getArg3()));
+                this.counter++;
 
             }
             else if(q.getOp().equals(":=")){            //store
 
+                if( this.isNumeric(q.getArg1().toString().trim()) || q.getArg1().toString().contains("'")) {
+                    this.bytecodeList.add(this.counter + " : ldc " + q.getArg1());      //stack: this, arg1   /local:-
+                    this.counter++;
+                }
+                else{
+                    boolean flag=false;
+                    for(int j = VarLocalList.size()-1; j>=0;j--){
+                        System.out.println("1 "+VarLocalList.get(j).getName().trim());
+                        System.out.println("2 "+q.getArg1().toString());
+                        if(VarLocalList.get(j).getName().trim().equals(q.getArg1().toString())) {
+
+                            this.bytecodeList.add(this.counter + " : iload " + VarLocalList.get(j).getStoreCounter());
+                            this.counter++;
+
+                            flag = true;
+                            break;
+                        }
+                    }
+
+                    for(int k = 0; k<registers.size() ;k++){
+                        if(registers.get(k).getPosition().equals(q.getArg1().toString())) {
+
+                            flag = true;
+                            break;
+                        }
+                    }
+
+
+
+
+
+                    try{
+                        if(!flag ){
+                            throw new MyException("ERROR! VARIABLE NOT INITIALIZED");
+                        }
+                    }
+                    catch (MyException e){
+                        throw new IllegalStateException("ERROR! VARIABLE NOT INITIALIZED");
+                    }
+
+
+
+                }
+
+
+                VarLocal obj = new VarLocal(q.getArg3().toString().trim(), istoreCounter);
+                int sc = VarLocalExists(q.getArg3().toString());
+                if(sc!=-1) {
+
+                    this.bytecodeList.add(this.counter + " : istore " + sc);
+
+                }
+                else{
+                    VarLocalList.add(obj);
+                    this.bytecodeList.add(this.counter + " : istore " + istoreCounter);
+                    this.counter++;
+                    this.istoreCounter++;
+                }
+
             }
             else if(q.getOp().equals("array")){         //store se arg3 to arg1[arg2]
+                System.out.println("inarray " +istoreCounter);
+                String count = q.getArg2().toString();
+                System.out.println("count " +count);
+                this.bytecodeList.add(this.counter + " : ldc " + count);
+                this.counter++;
+
+                System.out.println("Type: " + this.getTypeArray(q.getArg1().toString().trim()));
+                this.bytecodeList.add(this.counter + " : newarray " + this.getTypeArray(q.getArg1().toString().trim()));
+                this.counter++;
+
+                this.bytecodeList.add(this.counter + " : istore " + this.istoreCounter);
+                this.counter++;
+                this.istoreCounter++;
+
+                System.out.println("after array " +istoreCounter);
 
             }
             else if(q.getOp().equals("ifb")){       //isos dn xreiazetai
 
             }
             else if(q.getOp().equals("ret")){       // ireturn/return
-
+                this.bytecodeList.add(this.counter + " : iload " + (istoreCounter-1));
+                this.counter++;
             }
 
         }
+    }
+
+    public String getTypeArray(String name){
+        String type="";
+        for(int i=0; i < this.allVars.size(); i++){
+            if(this.allVars.get(i).getName().equals(name)){
+                type = this.allVars.get(i).getType();
+            }
+        }
+
+        if(type.contains("int")){
+            type = "int";
+        }
+        else if(type.contains("char")){
+            type = "char";
+        }
+
+        return type;
+    }
+
+    public int VarLocalExists(String name){
+        for (int i=0; i<VarLocalList.size(); i++){
+            if (VarLocalList.get(i).getName().equals(name))
+                return VarLocalList.get(i).getStoreCounter();
+        }
+        return -1;      //doesn't exist
+
+
+    }
+
+
+    public boolean isNumeric(String s) {
+        return s != null && s.matches("[-+]?\\d*\\.?\\d+");
     }
 
     public void findFunctionScope(){
@@ -393,8 +584,6 @@ public class JavaBytecode {
             }
         }
 
-        System.out.println(type);
-
         if(type.equals("int")){
             return "I";
         }
@@ -405,6 +594,40 @@ public class JavaBytecode {
             return "V";
     }
 
+
+
+    public int getNoOfParamsForQuad (String name) {
+        int scope = 0;
+
+
+        for (int i = 0; i < funcStack.size(); i++) {
+            if (funcStack.get(i).getFuncName().equals(name) && funcStack.get(i).getScope() == scope) {
+                return  funcStack.get(i).getTypesOfPatameters().size();
+                //parametersList = funcStack.get(i).ge
+            }
+        }
+        return 0;
+    }
+
+
+    public int getNoOfParams (String name) {
+        int scope = 0;
+
+        for (int i = 0; i < this.myFuncScopeHelperList.size(); i++) {
+            if (this.myFuncScopeHelperList.get(i).getFuncName().equals(name)) {
+                scope = myFuncScopeHelperList.get(i).getScope();
+            }
+        }
+
+        for (int i = 0; i < funcStack.size(); i++) {
+            if (funcStack.get(i).getFuncName().equals(name) && funcStack.get(i).getScope() == scope) {
+                return  funcStack.get(i).getTypesOfPatameters().size();
+                //parametersList = funcStack.get(i).ge
+            }
+        }
+        return 0;
+    }
+
     public String setMethodPar(String name){
         int scope = 0;
         for(int i=0;i<this.myFuncScopeHelperList.size();i++){
@@ -413,9 +636,11 @@ public class JavaBytecode {
             }
         }
         List<String> types = new ArrayList<String>();
+        //List<String> parametersList = new ArrayList<String>();
         for(int i=0;i<funcStack.size();i++){
             if(funcStack.get(i).getFuncName().equals(name) && funcStack.get(i).getScope()==scope){
                 types = funcStack.get(i).getTypesOfPatameters();
+                //parametersList = funcStack.get(i).ge
             }
         }
         String parameters = "(";
@@ -430,6 +655,7 @@ public class JavaBytecode {
                     if(c=='['){
                         counterBr++;
                     }
+                    j++;
                 }
             }
 
@@ -455,6 +681,8 @@ public class JavaBytecode {
             }
         }
         parameters += ")";
+
+
         return parameters;
 
     }
