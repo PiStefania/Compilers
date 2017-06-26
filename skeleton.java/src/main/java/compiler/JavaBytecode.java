@@ -63,6 +63,8 @@ public class JavaBytecode {
         this.createFuncScope();
         this.findFunctionScope();
 
+
+
         for (int i=0; i<this.funcScope.size(); i++){     //for each function
             this.counter = 0;
 
@@ -74,7 +76,6 @@ public class JavaBytecode {
             int first = funcScope.get(i).getFirst();
 
             istoreCounter = getNoOfParams(quadList.get(first).getArg1().toString()) + 1;
-            System.out.println("istoreCounter " + istoreCounter);
 
             //unit
             if (first==0) {
@@ -110,6 +111,8 @@ public class JavaBytecode {
                 handleQuad(command);
             }
 
+            this.PrintVarLocal();
+
             //endu
             String retType = setMethodRet((String) quadList.get(first).getArg1());
             if(retType.equals("V")){
@@ -142,6 +145,13 @@ public class JavaBytecode {
         catch (IOException e) {
             e.printStackTrace();
         }
+
+
+
+
+
+
+
     }
 
 
@@ -150,7 +160,6 @@ public class JavaBytecode {
             //must change quadlist
 
             int noOfParams = this.getNoOfParamsForQuad(quadList.get(0).getArg1().toString().trim());
-            System.out.println(noOfParams + " " +quadList.get(0).getArg1().toString() );
                 try{
                     if(noOfParams!=0){
                         throw new MyException("ERROR! INITIAL FUNCTION IS NOT MAIN AND HAS PARAMETERS");
@@ -249,8 +258,6 @@ public class JavaBytecode {
                 }
                 int second= k+1;
                 funcBeggining obj = new funcBeggining(name, first, second, last);
-                obj.print();
-
                 funcScope.add(obj);
             }
         }
@@ -275,9 +282,6 @@ public class JavaBytecode {
             }
         }
 
-        for (int i=0; i<n; i++){
-            funcScope.get(i).print();
-        }
 
     }
 
@@ -433,31 +437,42 @@ public class JavaBytecode {
                     this.bytecodeList.add(this.counter + " : ldc " + q.getArg1());      //stack: this, arg1   /local:-
                     this.counter++;
                 }
-                else{
-                    boolean flag=false;
-                    for(int j = VarLocalList.size()-1; j>=0;j--){
-                        System.out.println("1 "+VarLocalList.get(j).getName().trim());
-                        System.out.println("2 "+q.getArg1().toString());
-                        if(VarLocalList.get(j).getName().trim().equals(q.getArg1().toString())) {
+                else {
 
-                            this.bytecodeList.add(this.counter + " : iload " + VarLocalList.get(j).getStoreCounter());
+                    System.out.println("inside else if else " + q.getArg1().toString());
+                    boolean flag = false;
+                    if(!q.getArg1().toString().contains("$")) {
+                        int sc = this.VarLocalExists(q.getArg1().toString().trim());
+                        System.out.println("store counter is " + sc);
+
+                        if (sc!=-1){
+                            System.out.println("loaded" );
+                            this.bytecodeList.add(this.counter + " : iload " + sc);
+                            //this.PrintVarLocal();
                             this.counter++;
-
                             flag = true;
-                            break;
                         }
+
                     }
+                    else {
+                        String expr="";
 
-                    for(int k = 0; k<registers.size() ;k++){
-                        if(registers.get(k).getPosition().equals(q.getArg1().toString())) {
+                        for (int k = 0; k < registers.size(); k++) {
+                            if (registers.get(k).getPosition().equals(q.getArg1().toString())) {
 
-                            flag = true;
-                            break;
+                                expr = registers.get(k).getExpr();
+                                flag = true;
+                                break;
+                            }
                         }
+
+                        String count = this.getArrayDim(expr);
+
+
+
+
+
                     }
-
-
-
 
 
                     try{
@@ -469,42 +484,113 @@ public class JavaBytecode {
                         throw new IllegalStateException("ERROR! VARIABLE NOT INITIALIZED");
                     }
 
-
-
                 }
 
+                System.out.println("Name of n "  + q.getArg3().toString() );
 
-                VarLocal obj = new VarLocal(q.getArg3().toString().trim(), istoreCounter);
-                int sc = VarLocalExists(q.getArg3().toString());
+
+                VarLocal obj;
+                if(q.getArg3().toString().trim().contains("$")) { //is register
+                    String value = returnRegExpr(q.getArg3().toString().trim());
+                    obj = new VarLocal(q.getArg3().toString().trim(), istoreCounter,value);
+                }
+                else
+                    obj = new VarLocal(q.getArg3().toString().trim(), istoreCounter);
+                int sc = VarLocalExists(q.getArg3().toString().trim());
+
                 if(sc!=-1) {
 
-                    this.bytecodeList.add(this.counter + " : istore " + sc);
+                    //array already exists
+                    if(obj.getValue()!=null)
+                    {
+                        if(obj.getValue().contains("[")){
+
+                            this.bytecodeList.add(this.counter + " : iastore ");
+                            this.counter++;
+
+                        }
+                    }
+                    else {
+                        if (this.isNumeric(q.getArg1().toString().trim())) {
+                            this.bytecodeList.add(this.counter + " : istore " + sc);
+                            //this.istoreCounter++;
+                            this.counter++;
+                        }
+                        else {
+                            System.out.println("aaaaaaaaaaaaaa");
+                            this.bytecodeList.add(this.counter + " : istore " + sc);
+                            // this.istoreCounter++;
+                            this.counter++;
+                        }
+
+                    }
 
                 }
                 else{
+                    if(this.isNumeric(q.getArg1().toString().trim())){
+                        this.bytecodeList.add(this.counter + " : istore " + istoreCounter);
+                        this.istoreCounter++;
+                    }
+                    else {
+                        System.out.println("bbbbbbbbbbbbbbbbbbb");
+                        this.bytecodeList.add(this.counter + " : istore " + istoreCounter);
+                        this.istoreCounter++;
+                    }
                     VarLocalList.add(obj);
-                    this.bytecodeList.add(this.counter + " : istore " + istoreCounter);
                     this.counter++;
-                    this.istoreCounter++;
+
                 }
 
             }
             else if(q.getOp().equals("array")){         //store se arg3 to arg1[arg2]
-                System.out.println("inarray " +istoreCounter);
-                String count = q.getArg2().toString();
-                System.out.println("count " +count);
-                this.bytecodeList.add(this.counter + " : ldc " + count);
-                this.counter++;
 
-                System.out.println("Type: " + this.getTypeArray(q.getArg1().toString().trim()));
-                this.bytecodeList.add(this.counter + " : newarray " + this.getTypeArray(q.getArg1().toString().trim()));
-                this.counter++;
+                //if array doesnt exist
 
-                this.bytecodeList.add(this.counter + " : istore " + this.istoreCounter);
-                this.counter++;
-                this.istoreCounter++;
+                if(this.VarLocalExists(q.getArg3().toString().trim())==-1)
+                {
+                    String dimensionOfArray = this.getArrayDim(q.getArg1().toString().trim());
+                    System.out.println("dim: " + dimensionOfArray);
+                    this.bytecodeList.add(this.counter + " : ldc " + dimensionOfArray);
+                    this.counter++;
 
-                System.out.println("after array " +istoreCounter);
+                    this.bytecodeList.add(this.counter + " : newarray " + this.getTypeArray(q.getArg1().toString().trim()));
+                    this.counter++;
+
+                    this.bytecodeList.add(this.counter + " : astore " + this.istoreCounter);
+                    this.counter++;
+                    this.istoreCounter++;
+
+                    //then assign in the given index a value(numeric/char or not)
+
+                    //get arrayref
+                    this.bytecodeList.add(this.counter + " : aload " + (istoreCounter-1));
+                    this.counter++;
+
+                    //get index
+                    String count = q.getArg2().toString();
+                    this.bytecodeList.add(this.counter + " : ldc " + count);
+                    this.counter++;
+
+                    VarLocal obj;
+
+                    //value = apo i[3] to i -> getArg2()
+
+                    String value = this.returnRegExpr(q.getArg3().toString().trim());
+                    obj = new VarLocal(q.getArg3().toString().trim(), istoreCounter,value);
+                    VarLocalList.add(obj);
+                }
+                else{
+                    //then assign in the given index a value(numeric/char or not)
+
+                    //get arrayref
+                    this.bytecodeList.add(this.counter + " : aload " + istoreCounter);
+                    this.counter++;
+
+                    //get index
+                    String count = q.getArg2().toString();
+                    this.bytecodeList.add(this.counter + " : ldc " + count);
+                    this.counter++;
+                }
 
             }
             else if(q.getOp().equals("ifb")){       //isos dn xreiazetai
@@ -536,14 +622,66 @@ public class JavaBytecode {
         return type;
     }
 
+    public String getArrayDim(String name){
+        String type="";
+        for(int i=0; i < this.allVars.size(); i++){
+            if(this.allVars.get(i).getName().equals(name)){
+                type = this.allVars.get(i).getType();
+                break;
+            }
+        }
+
+        int j = 0;
+        String dim = "";
+        while(j<type.length()){
+            char c = type.charAt(j);
+            if(c=='['){
+                while(c != ']'){
+                    j++;
+                    c = type.charAt(j);
+                    if(c == ']')
+                    {
+                        break;
+                    }
+                    dim += c;
+                }
+                break;
+            }
+            j++;
+        }
+        return dim;
+    }
+
+
+
+    public String getVar(String name) {
+
+        int j = 0;
+        String varName = "";
+        while (j < name.length()) {
+            char c = name.charAt(j);
+            if (c == '[') {
+                break;
+            }
+            varName += c;
+            j++;
+        }
+        return varName;
+    }
+
+
+
     public int VarLocalExists(String name){
         for (int i=0; i<VarLocalList.size(); i++){
-            if (VarLocalList.get(i).getName().equals(name))
+            if (VarLocalList.get(i).getName().equals(name) && !name.contains("$"))
                 return VarLocalList.get(i).getStoreCounter();
+            else if(name.contains(("$"))){
+                if(returnRegExpr(name).equals(VarLocalList.get(i).getValue())){
+                    return VarLocalList.get(i).getStoreCounter();
+                }
+            }
         }
         return -1;      //doesn't exist
-
-
     }
 
 
@@ -565,8 +703,6 @@ public class JavaBytecode {
                 scope--;
             }
         }
-
-        this.printFuncScopeHelper();
 
     }
 
@@ -622,7 +758,6 @@ public class JavaBytecode {
         for (int i = 0; i < funcStack.size(); i++) {
             if (funcStack.get(i).getFuncName().equals(name) && funcStack.get(i).getScope() == scope) {
                 return  funcStack.get(i).getTypesOfPatameters().size();
-                //parametersList = funcStack.get(i).ge
             }
         }
         return 0;
@@ -691,6 +826,24 @@ public class JavaBytecode {
     public void printFuncScopeHelper(){
         for(int i=0;i<myFuncScopeHelperList.size();i++){
             System.out.println("Name: " + myFuncScopeHelperList.get(i).getFuncName() + " scope: " + myFuncScopeHelperList.get(i).getScope());
+        }
+    }
+
+
+    public String returnRegExpr(String name){
+        for (int i=0; i<this.registers.size(); i++){
+            if(this.registers.get(i).getPosition().equals(name))
+                return this.registers.get(i).getExpr();
+        }
+        return null;
+    }
+
+    public void PrintVarLocal (){
+
+        System.out.println("\n\n Printing VarLocalList \n");
+        for (int i=0; i<VarLocalList.size(); i++){
+            String forPrint = VarLocalList.get(i).getName() + " " + VarLocalList.get(i).getStoreCounter() + " " + VarLocalList.get(i).getValue();
+            System.out.println(forPrint);
         }
     }
 
