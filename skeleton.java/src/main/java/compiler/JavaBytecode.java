@@ -466,12 +466,11 @@ public class JavaBytecode {
                             }
                         }
 
+                        System.out.println("EXPR = " + expr);
+
                         String count = this.getArrayDim(expr);
 
-
-
-
-
+                        System.out.println("count = " + count);
                     }
 
 
@@ -624,6 +623,25 @@ public class JavaBytecode {
 
     public String getArrayDim(String name){
         String type="";
+
+        int k=0;
+        String newName = "";
+        while(k<name.length()){
+
+            char c = name.charAt(k);
+
+            if(c=='['){
+
+                break;
+            }
+            newName+=c;
+            k++;
+        }
+
+        name = newName;
+
+
+
         for(int i=0; i < this.allVars.size(); i++){
             if(this.allVars.get(i).getName().equals(name)){
                 type = this.allVars.get(i).getType();
@@ -633,7 +651,9 @@ public class JavaBytecode {
 
         int j = 0;
         String dim = "";
+
         while(j<type.length()){
+
             char c = type.charAt(j);
             if(c=='['){
                 while(c != ']'){

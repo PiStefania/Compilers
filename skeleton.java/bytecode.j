@@ -22,6 +22,9 @@ return
 11 : ldc 3
 12 : ldc 2
 13 : iastore 
+14 : aload 4
+15 : ldc 3
+16 : istore 1
 return
 .end method
 .method public static main([Ljava/lang/String;)V
