@@ -113,6 +113,8 @@ public class JavaBytecode {
 
             this.PrintVarLocal();
 
+            this.printAllVars();
+
             //endu
             String retType = setMethodRet((String) quadList.get(first).getArg1());
             if(retType.equals("V")){
@@ -344,54 +346,669 @@ public class JavaBytecode {
                 String value = p.getValue();
 
                 if (value.equals("+")) {
-                    this.bytecodeList.add(this.counter + " : aload " + q.getArg1());
-                    this.counter++;
-                    this.bytecodeList.add(this.counter + " : aload " + q.getArg2());
-                    this.counter++;
-                    this.bytecodeList.add(this.counter + " : iadd ");
-                    this.counter++;
+
+                    this.VarLocalList.add(new VarLocal(q.getArg3().toString(), istoreCounter, returnRegExpr(q.getArg3().toString())));
+
+                    if (returnRegExpr(q.getArg1().toString().trim()) != null) {
+                        String expr = returnRegExpr(q.getArg1().toString().trim());
+
+                        if (expr.contains("[")) {
+                            if (!(expr.contains("+") || expr.contains("-") || expr.contains("*") || expr.contains("/") || expr.contains("mod"))) {
+
+                                System.out.println(expr);
+                                String var = this.getVar(expr);
+                                String dim = this.getArrayDim(expr);
+
+                                System.out.println("var " + var + "dim " + dim);
+
+                                int sc = this.VarLocalExists(var);
+
+                                this.bytecodeList.add(this.counter + " : aload " + sc);
+                                this.counter++;
+
+                                this.bytecodeList.add(this.counter + " : ldc " + dim);
+                                this.counter++;
+
+
+                                this.bytecodeList.add(this.counter + " : iaload ");
+                                this.counter++;
+                            }
+                        }
+                    }
+
+                    if (returnRegExpr(q.getArg2().toString().trim()) != null) {
+
+                        String expr2 = returnRegExpr(q.getArg2().toString().trim());
+                        if (expr2.contains("[") ) {
+                            if(!(expr2.contains("+") || expr2.contains("-") || expr2.contains("*") || expr2.contains("/") || expr2.contains("mod"))){
+
+                                System.out.println(expr2);
+                                String var = this.getVar(expr2);
+                                String dim = this.getArrayDim(expr2);
+
+                                System.out.println("var " + var + "dim " + dim);
+
+                                int sc = this.VarLocalExists(var);
+
+                                this.bytecodeList.add(this.counter + " : aload " + sc);
+                                this.counter++;
+
+                                this.bytecodeList.add(this.counter + " : ldc " + dim);
+                                this.counter++;
+
+
+                                this.bytecodeList.add(this.counter + " : iaload ");
+                                this.counter++;
+                            }
+                        }
+                    }
+
+                    int sc1 = this.VarLocalExists(q.getArg1().toString().trim());
+                    int sc2 = this.VarLocalExists(q.getArg2().toString().trim());
+
+                    if (this.isNumeric(q.getArg1().toString().trim()) && this.isNumeric(q.getArg2().toString().trim())) {
+                        this.bytecodeList.add(this.counter + " : ldc " + q.getArg1());
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : ldc " + q.getArg2());
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : iadd ");
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : istore " + this.istoreCounter);
+                        this.counter++;
+                        this.istoreCounter++;
+
+                    } else if (sc1 != -1 && this.isNumeric(q.getArg2().toString().trim())) {
+
+                        if (returnRegExpr(q.getArg1().toString().trim())!=null) {
+                            String myexpr = returnRegExpr(q.getArg1().toString().trim());
+                            if (myexpr.contains("+") || myexpr.contains("-") ||myexpr.contains("*") ||myexpr.contains("/") ||myexpr.contains("mod") ) {
+                                this.bytecodeList.add(this.counter + " : iload " + sc1);
+                                this.counter++;
+                            }
+                        }
+                        this.bytecodeList.add(this.counter + " : ldc " + q.getArg2());
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : iadd ");
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : istore " + this.istoreCounter);
+                        this.counter++;
+                        this.istoreCounter++;
+                    } else if (this.isNumeric(q.getArg1().toString().trim()) && sc2 != -1) {
+
+                        this.bytecodeList.add(this.counter + " : ldc " + q.getArg1());
+                        this.counter++;
+                        if (returnRegExpr(q.getArg2().toString().trim())!=null) {
+                            String myexpr = returnRegExpr(q.getArg2().toString().trim());
+                            if (myexpr.contains("+") || myexpr.contains("-") ||myexpr.contains("*") ||myexpr.contains("/") ||myexpr.contains("mod") ) {
+                                this.bytecodeList.add(this.counter + " : iload " + sc2);
+                                this.counter++;
+                            }
+                        }
+
+
+                        this.bytecodeList.add(this.counter + " : iadd ");
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : istore " + this.istoreCounter);
+                        this.counter++;
+                        this.istoreCounter++;
+                    } else if (sc1 != -1 && sc2 != -1) {
+
+                        if (returnRegExpr(q.getArg1().toString().trim())!=null) {
+                            String myexpr = returnRegExpr(q.getArg1().toString().trim());
+                            if (myexpr.contains("+") || myexpr.contains("-") ||myexpr.contains("*") ||myexpr.contains("/") ||myexpr.contains("mod") ) {
+                                this.bytecodeList.add(this.counter + " : iload " + sc1);
+                                this.counter++;
+                            }
+                        }
+
+                        if (returnRegExpr(q.getArg2().toString().trim())!=null) {
+                            String myexpr = returnRegExpr(q.getArg2().toString().trim());
+                            if (myexpr.contains("+") || myexpr.contains("-") || myexpr.contains("*") || myexpr.contains("/") || myexpr.contains("mod") ) {
+                                this.bytecodeList.add(this.counter + " : iload " + sc2);
+                                this.counter++;
+                            }
+                        }
+
+
+                        this.bytecodeList.add(this.counter + " : iadd ");
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : istore " + this.istoreCounter);
+                        this.counter++;
+                        this.istoreCounter++;
+                    }
+
+
                 } else if (value.equals("-")) {
-                    bytecodeList.add(this.counter + " : aload " + q.getArg1());
-                    this.counter++;
-                    bytecodeList.add(this.counter + " : aload " + q.getArg2());
-                    this.counter++;
-                    bytecodeList.add(this.counter + " : isub " + q.getArg3());
-                    this.counter++;
+                    this.VarLocalList.add(new VarLocal(q.getArg3().toString(), istoreCounter, returnRegExpr(q.getArg3().toString())));
+
+                    if (returnRegExpr(q.getArg1().toString().trim()) != null) {
+                        String expr = returnRegExpr(q.getArg1().toString().trim());
+
+                        if (expr.contains("[")) {
+                            if (!(expr.contains("+") || expr.contains("-") || expr.contains("*") || expr.contains("/") || expr.contains("mod"))) {
+
+                                System.out.println(expr);
+                                String var = this.getVar(expr);
+                                String dim = this.getArrayDim(expr);
+
+                                System.out.println("var " + var + "dim " + dim);
+
+                                int sc = this.VarLocalExists(var);
+
+                                this.bytecodeList.add(this.counter + " : aload " + sc);
+                                this.counter++;
+
+                                this.bytecodeList.add(this.counter + " : ldc " + dim);
+                                this.counter++;
+
+
+                                this.bytecodeList.add(this.counter + " : iaload ");
+                                this.counter++;
+                            }
+                        }
+                    }
+
+                    if (returnRegExpr(q.getArg2().toString().trim()) != null) {
+
+                        String expr2 = returnRegExpr(q.getArg2().toString().trim());
+                        if (expr2.contains("[") ) {
+                            if(!(expr2.contains("+") || expr2.contains("-") || expr2.contains("*") || expr2.contains("/") || expr2.contains("mod"))){
+
+                                System.out.println(expr2);
+                                String var = this.getVar(expr2);
+                                String dim = this.getArrayDim(expr2);
+
+                                System.out.println("var " + var + "dim " + dim);
+
+                                int sc = this.VarLocalExists(var);
+
+                                this.bytecodeList.add(this.counter + " : aload " + sc);
+                                this.counter++;
+
+                                this.bytecodeList.add(this.counter + " : ldc " + dim);
+                                this.counter++;
+
+
+                                this.bytecodeList.add(this.counter + " : iaload ");
+                                this.counter++;
+                            }
+                        }
+                    }
+
+                    int sc1 = this.VarLocalExists(q.getArg1().toString().trim());
+                    int sc2 = this.VarLocalExists(q.getArg2().toString().trim());
+
+                    if (this.isNumeric(q.getArg1().toString().trim()) && this.isNumeric(q.getArg2().toString().trim())) {
+                        this.bytecodeList.add(this.counter + " : ldc " + q.getArg1());
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : ldc " + q.getArg2());
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : isub ");
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : istore " + this.istoreCounter);
+                        this.counter++;
+                        this.istoreCounter++;
+
+                    } else if (sc1 != -1 && this.isNumeric(q.getArg2().toString().trim())) {
+
+                        if (returnRegExpr(q.getArg1().toString().trim())!=null) {
+                            String myexpr = returnRegExpr(q.getArg1().toString().trim());
+                            if (myexpr.contains("+") || myexpr.contains("-") ||myexpr.contains("*") ||myexpr.contains("/") ||myexpr.contains("mod") ) {
+                                this.bytecodeList.add(this.counter + " : iload " + sc1);
+                                this.counter++;
+                            }
+                        }
+                        this.bytecodeList.add(this.counter + " : ldc " + q.getArg2());
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : isub ");
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : istore " + this.istoreCounter);
+                        this.counter++;
+                        this.istoreCounter++;
+                    } else if (this.isNumeric(q.getArg1().toString().trim()) && sc2 != -1) {
+
+                        this.bytecodeList.add(this.counter + " : ldc " + q.getArg1());
+                        this.counter++;
+                        if (returnRegExpr(q.getArg2().toString().trim())!=null) {
+                            String myexpr = returnRegExpr(q.getArg2().toString().trim());
+                            if (myexpr.contains("+") || myexpr.contains("-") ||myexpr.contains("*") ||myexpr.contains("/") ||myexpr.contains("mod") ) {
+                                this.bytecodeList.add(this.counter + " : iload " + sc2);
+                                this.counter++;
+                            }
+                        }
+
+
+                        this.bytecodeList.add(this.counter + " : isub ");
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : istore " + this.istoreCounter);
+                        this.counter++;
+                        this.istoreCounter++;
+                    } else if (sc1 != -1 && sc2 != -1) {
+                        if (returnRegExpr(q.getArg1().toString().trim())!=null) {
+                            String myexpr = returnRegExpr(q.getArg1().toString().trim());
+                            if (myexpr.contains("+") || myexpr.contains("-") ||myexpr.contains("*") ||myexpr.contains("/") ||myexpr.contains("mod") ) {
+                                this.bytecodeList.add(this.counter + " : iload " + sc1);
+                                this.counter++;
+                            }
+                        }
+                        if (returnRegExpr(q.getArg2().toString().trim())!=null) {
+                            String myexpr = returnRegExpr(q.getArg2().toString().trim());
+                            if (myexpr.contains("+") || myexpr.contains("-") ||myexpr.contains("*") ||myexpr.contains("/") ||myexpr.contains("mod") ) {
+                                this.bytecodeList.add(this.counter + " : iload " + sc2);
+                                this.counter++;
+                            }
+                        }
+
+
+                        this.bytecodeList.add(this.counter + " : isub ");
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : istore " + this.istoreCounter);
+                        this.counter++;
+                        this.istoreCounter++;
+                    }
 
                 } else if (value.equals("*")) {
-                    bytecodeList.add(this.counter + " : aload " + q.getArg1());
-                    this.counter++;
-                    bytecodeList.add(this.counter + " : aload " + q.getArg2());
-                    this.counter++;
-                    bytecodeList.add(this.counter + " : imul " + q.getArg3());
-                    this.counter++;
-                } else if (value.equals("/")) {
-                    bytecodeList.add(this.counter + " : aload " + q.getArg1());
-                    this.counter++;
-                    bytecodeList.add(this.counter + " : aload " + q.getArg2());
-                    this.counter++;
-                    bytecodeList.add(this.counter + " : idiv " + q.getArg3());
-                    this.counter++;
-                } else if (value.equals("mod")) {
-                    bytecodeList.add(this.counter + " : aload " + q.getArg1());
-                    this.counter++;
-                    bytecodeList.add(this.counter + " : aload " + q.getArg2());
-                    this.counter++;
-                    bytecodeList.add(this.counter + " : irem " + q.getArg3());
-                    this.counter++;
-                }
+                    this.VarLocalList.add(new VarLocal(q.getArg3().toString(), istoreCounter, returnRegExpr(q.getArg3().toString())));
 
+                    if (returnRegExpr(q.getArg1().toString().trim()) != null) {
+                        String expr = returnRegExpr(q.getArg1().toString().trim());
+
+                        if (expr.contains("[")) {
+                            if (!(expr.contains("+") || expr.contains("-") || expr.contains("*") || expr.contains("/") || expr.contains("mod"))) {
+
+                                System.out.println(expr);
+                                String var = this.getVar(expr);
+                                String dim = this.getArrayDim(expr);
+
+                                System.out.println("var " + var + "dim " + dim);
+
+                                int sc = this.VarLocalExists(var);
+
+                                this.bytecodeList.add(this.counter + " : aload " + sc);
+                                this.counter++;
+
+                                this.bytecodeList.add(this.counter + " : ldc " + dim);
+                                this.counter++;
+
+
+                                this.bytecodeList.add(this.counter + " : iaload ");
+                                this.counter++;
+                            }
+                        }
+                    }
+
+                    if (returnRegExpr(q.getArg2().toString().trim()) != null) {
+
+                        String expr2 = returnRegExpr(q.getArg2().toString().trim());
+                        if (expr2.contains("[") ) {
+                            if(!(expr2.contains("+") || expr2.contains("-") || expr2.contains("*") || expr2.contains("/") || expr2.contains("mod"))){
+
+                                System.out.println(expr2);
+                                String var = this.getVar(expr2);
+                                String dim = this.getArrayDim(expr2);
+
+                                System.out.println("var " + var + "dim " + dim);
+
+                                int sc = this.VarLocalExists(var);
+
+                                this.bytecodeList.add(this.counter + " : aload " + sc);
+                                this.counter++;
+
+                                this.bytecodeList.add(this.counter + " : ldc " + dim);
+                                this.counter++;
+
+
+                                this.bytecodeList.add(this.counter + " : iaload ");
+                                this.counter++;
+                            }
+                        }
+                    }
+                    int sc1 = this.VarLocalExists(q.getArg1().toString().trim());
+                    int sc2 = this.VarLocalExists(q.getArg2().toString().trim());
+
+                    if (this.isNumeric(q.getArg1().toString().trim()) && this.isNumeric(q.getArg2().toString().trim())) {
+                        this.bytecodeList.add(this.counter + " : ldc " + q.getArg1());
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : ldc " + q.getArg2());
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : imul ");
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : istore " + this.istoreCounter);
+                        this.counter++;
+                        this.istoreCounter++;
+
+                    } else if (sc1 != -1 && this.isNumeric(q.getArg2().toString().trim())) {
+
+                        if (returnRegExpr(q.getArg1().toString().trim())!=null) {
+                            String myexpr = returnRegExpr(q.getArg1().toString().trim());
+                            if (myexpr.contains("+") || myexpr.contains("-") ||myexpr.contains("*") ||myexpr.contains("/") ||myexpr.contains("mod") ) {
+                                this.bytecodeList.add(this.counter + " : iload " + sc1);
+                                this.counter++;
+                            }
+                        }
+                        this.bytecodeList.add(this.counter + " : ldc " + q.getArg2());
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : imul ");
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : istore " + this.istoreCounter);
+                        this.counter++;
+                        this.istoreCounter++;
+                    } else if (this.isNumeric(q.getArg1().toString().trim()) && sc2 != -1) {
+
+                        this.bytecodeList.add(this.counter + " : ldc " + q.getArg1());
+                        this.counter++;
+
+                        if (returnRegExpr(q.getArg2().toString().trim())!=null) {
+                            String myexpr = returnRegExpr(q.getArg2().toString().trim());
+                            if (myexpr.contains("+") || myexpr.contains("-") ||myexpr.contains("*") ||myexpr.contains("/") ||myexpr.contains("mod") ) {
+                                this.bytecodeList.add(this.counter + " : iload " + sc2);
+                                this.counter++;
+                            }
+                        }
+
+
+                        this.bytecodeList.add(this.counter + " : imul ");
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : istore " + this.istoreCounter);
+                        this.counter++;
+                        this.istoreCounter++;
+                    } else if (sc1 != -1 && sc2 != -1) {
+
+                        if (returnRegExpr(q.getArg1().toString().trim())!=null) {
+                            String myexpr = returnRegExpr(q.getArg1().toString().trim());
+                            if (myexpr.contains("+") || myexpr.contains("-") ||myexpr.contains("*") ||myexpr.contains("/") ||myexpr.contains("mod") ) {
+                                this.bytecodeList.add(this.counter + " : iload " + sc1);
+                                this.counter++;
+                            }
+                        }
+                        if (returnRegExpr(q.getArg2().toString().trim())!=null) {
+                            String myexpr = returnRegExpr(q.getArg2().toString().trim());
+                            if (myexpr.contains("+") || myexpr.contains("-") ||myexpr.contains("*") ||myexpr.contains("/") ||myexpr.contains("mod") ) {
+                                this.bytecodeList.add(this.counter + " : iload " + sc2);
+                                this.counter++;
+                            }
+                        }
+
+
+                        this.bytecodeList.add(this.counter + " : imul ");
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : istore " + this.istoreCounter);
+                        this.counter++;
+                        this.istoreCounter++;
+                    }
+
+                } else if (value.equals("/")) {
+                    this.VarLocalList.add(new VarLocal(q.getArg3().toString(), istoreCounter, returnRegExpr(q.getArg3().toString())));
+
+                    if (returnRegExpr(q.getArg1().toString().trim()) != null) {
+                        String expr = returnRegExpr(q.getArg1().toString().trim());
+
+                        if (expr.contains("[")) {
+                            if (!(expr.contains("+") || expr.contains("-") || expr.contains("*") || expr.contains("/") || expr.contains("mod"))) {
+
+                                System.out.println(expr);
+                                String var = this.getVar(expr);
+                                String dim = this.getArrayDim(expr);
+
+                                System.out.println("var " + var + "dim " + dim);
+
+                                int sc = this.VarLocalExists(var);
+
+                                this.bytecodeList.add(this.counter + " : aload " + sc);
+                                this.counter++;
+
+                                this.bytecodeList.add(this.counter + " : ldc " + dim);
+                                this.counter++;
+
+
+                                this.bytecodeList.add(this.counter + " : iaload ");
+                                this.counter++;
+                            }
+                        }
+                    }
+
+                    if (returnRegExpr(q.getArg2().toString().trim()) != null) {
+
+                        String expr2 = returnRegExpr(q.getArg2().toString().trim());
+                        if (expr2.contains("[") ) {
+                            if(!(expr2.contains("+") || expr2.contains("-") || expr2.contains("*") || expr2.contains("/") || expr2.contains("mod"))){
+
+                                System.out.println(expr2);
+                                String var = this.getVar(expr2);
+                                String dim = this.getArrayDim(expr2);
+
+                                System.out.println("var " + var + "dim " + dim);
+
+                                int sc = this.VarLocalExists(var);
+
+                                this.bytecodeList.add(this.counter + " : aload " + sc);
+                                this.counter++;
+
+                                this.bytecodeList.add(this.counter + " : ldc " + dim);
+                                this.counter++;
+
+
+                                this.bytecodeList.add(this.counter + " : iaload ");
+                                this.counter++;
+                            }
+                        }
+                    }
+                    int sc1 = this.VarLocalExists(q.getArg1().toString().trim());
+                    int sc2 = this.VarLocalExists(q.getArg2().toString().trim());
+
+                    if (this.isNumeric(q.getArg1().toString().trim()) && this.isNumeric(q.getArg2().toString().trim())) {
+                        this.bytecodeList.add(this.counter + " : ldc " + q.getArg1());
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : ldc " + q.getArg2());
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : idiv ");
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : istore " + this.istoreCounter);
+                        this.counter++;
+                        this.istoreCounter++;
+
+                    } else if (sc1 != -1 && this.isNumeric(q.getArg2().toString().trim())) {
+                        if (returnRegExpr(q.getArg1().toString().trim())!=null) {
+                            String myexpr = returnRegExpr(q.getArg1().toString().trim());
+                            if (myexpr.contains("+") || myexpr.contains("-") ||myexpr.contains("*") ||myexpr.contains("/") ||myexpr.contains("mod") ) {
+                                this.bytecodeList.add(this.counter + " : iload " + sc1);
+                                this.counter++;
+                            }
+                        }
+                        this.bytecodeList.add(this.counter + " : ldc " + q.getArg2());
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : idiv ");
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : istore " + this.istoreCounter);
+                        this.counter++;
+                        this.istoreCounter++;
+                    } else if (this.isNumeric(q.getArg1().toString().trim()) && sc2 != -1) {
+
+                        this.bytecodeList.add(this.counter + " : ldc " + q.getArg1());
+                        this.counter++;
+                        if (returnRegExpr(q.getArg2().toString().trim())!=null) {
+                            String myexpr = returnRegExpr(q.getArg2().toString().trim());
+                            if (myexpr.contains("+") || myexpr.contains("-") ||myexpr.contains("*") ||myexpr.contains("/") ||myexpr.contains("mod") ) {
+                                this.bytecodeList.add(this.counter + " : iload " + sc2);
+                                this.counter++;
+                            }
+                        }
+
+
+                        this.bytecodeList.add(this.counter + " : idiv ");
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : istore " + this.istoreCounter);
+                        this.counter++;
+                        this.istoreCounter++;
+                    } else if (sc1 != -1 && sc2 != -1) {
+                        if (returnRegExpr(q.getArg1().toString().trim())!=null) {
+                            String myexpr = returnRegExpr(q.getArg1().toString().trim());
+                            if (myexpr.contains("+") || myexpr.contains("-") ||myexpr.contains("*") ||myexpr.contains("/") ||myexpr.contains("mod") ) {
+                                this.bytecodeList.add(this.counter + " : iload " + sc1);
+                                this.counter++;
+                            }
+                        }
+                        if (returnRegExpr(q.getArg2().toString().trim())!=null) {
+                            String myexpr = returnRegExpr(q.getArg2().toString().trim());
+                            if (myexpr.contains("+") || myexpr.contains("-") ||myexpr.contains("*") ||myexpr.contains("/") ||myexpr.contains("mod") ) {
+                                this.bytecodeList.add(this.counter + " : iload " + sc2);
+                                this.counter++;
+                            }
+                        }
+
+
+                        this.bytecodeList.add(this.counter + " : idiv ");
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : istore " + this.istoreCounter);
+                        this.counter++;
+                        this.istoreCounter++;
+                    }
+
+                } else if (value.equals("mod")) {
+                    this.VarLocalList.add(new VarLocal(q.getArg3().toString(), istoreCounter, returnRegExpr(q.getArg3().toString())));
+
+                    if (returnRegExpr(q.getArg1().toString().trim()) != null) {
+                        String expr = returnRegExpr(q.getArg1().toString().trim());
+
+                        if (expr.contains("[")) {
+                            if (!(expr.contains("+") || expr.contains("-") || expr.contains("*") || expr.contains("/") || expr.contains("mod"))) {
+
+                                System.out.println(expr);
+                                String var = this.getVar(expr);
+                                String dim = this.getArrayDim(expr);
+
+                                System.out.println("var " + var + "dim " + dim);
+
+                                int sc = this.VarLocalExists(var);
+
+                                this.bytecodeList.add(this.counter + " : aload " + sc);
+                                this.counter++;
+
+                                this.bytecodeList.add(this.counter + " : ldc " + dim);
+                                this.counter++;
+
+
+                                this.bytecodeList.add(this.counter + " : iaload ");
+                                this.counter++;
+                            }
+                        }
+                    }
+
+                    if (returnRegExpr(q.getArg2().toString().trim()) != null) {
+
+                        String expr2 = returnRegExpr(q.getArg2().toString().trim());
+                        if (expr2.contains("[") ) {
+                            if(!(expr2.contains("+") || expr2.contains("-") || expr2.contains("*") || expr2.contains("/") || expr2.contains("mod"))){
+
+                                System.out.println(expr2);
+                                String var = this.getVar(expr2);
+                                String dim = this.getArrayDim(expr2);
+
+                                System.out.println("var " + var + "dim " + dim);
+
+                                int sc = this.VarLocalExists(var);
+
+                                this.bytecodeList.add(this.counter + " : aload " + sc);
+                                this.counter++;
+
+                                this.bytecodeList.add(this.counter + " : ldc " + dim);
+                                this.counter++;
+
+
+                                this.bytecodeList.add(this.counter + " : iaload ");
+                                this.counter++;
+                            }
+                        }
+                    }
+                    int sc1 = this.VarLocalExists(q.getArg1().toString().trim());
+                    int sc2 = this.VarLocalExists(q.getArg2().toString().trim());
+
+                    if (this.isNumeric(q.getArg1().toString().trim()) && this.isNumeric(q.getArg2().toString().trim())) {
+                        this.bytecodeList.add(this.counter + " : ldc " + q.getArg1());
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : ldc " + q.getArg2());
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : irem ");
+                        this.counter++;
+                        System.out.println("1 irem "+ this.istoreCounter);
+                        this.bytecodeList.add(this.counter + " : istore " + this.istoreCounter);
+                        this.counter++;
+                        this.istoreCounter++;
+
+                    } else if (sc1 != -1 && this.isNumeric(q.getArg2().toString().trim())) {
+
+                        if (returnRegExpr(q.getArg1().toString().trim())!=null) {
+                            String myexpr = returnRegExpr(q.getArg1().toString().trim());
+                            if (myexpr.contains("+") || myexpr.contains("-") ||myexpr.contains("*") ||myexpr.contains("/") ||myexpr.contains("mod") ) {
+                                this.bytecodeList.add(this.counter + " : iload " + sc1);
+                                this.counter++;
+                            }
+                        }
+                        this.bytecodeList.add(this.counter + " : ldc " + q.getArg2());
+                        this.counter++;
+                        this.bytecodeList.add(this.counter + " : irem ");
+                        this.counter++;
+                        System.out.println("2 irem "+ this.istoreCounter);
+                        this.bytecodeList.add(this.counter + " : istore " + this.istoreCounter);
+                        this.counter++;
+                        this.istoreCounter++;
+                    } else if (this.isNumeric(q.getArg1().toString().trim()) && sc2 != -1) {
+
+                        this.bytecodeList.add(this.counter + " : ldc " + q.getArg1());
+                        this.counter++;
+                        if (returnRegExpr(q.getArg2().toString().trim())!=null) {
+                            String myexpr = returnRegExpr(q.getArg2().toString().trim());
+                            if (myexpr.contains("+") || myexpr.contains("-") ||myexpr.contains("*") ||myexpr.contains("/") ||myexpr.contains("mod") ) {
+                                this.bytecodeList.add(this.counter + " : iload " + sc2);
+                                this.counter++;
+                            }
+                        }
+
+
+                        this.bytecodeList.add(this.counter + " : irem ");
+                        this.counter++;
+                        System.out.println("3  irem "+ this.istoreCounter);
+                        this.bytecodeList.add(this.counter + " : istore " + this.istoreCounter);
+                        this.counter++;
+                        this.istoreCounter++;
+                    } else if (sc1 != -1 && sc2 != -1) {
+
+                        if (returnRegExpr(q.getArg1().toString().trim())!=null) {
+                            String myexpr = returnRegExpr(q.getArg1().toString().trim());
+                            if (myexpr.contains("+") || myexpr.contains("-") ||myexpr.contains("*") ||myexpr.contains("/") ||myexpr.contains("mod") ) {
+                                this.bytecodeList.add(this.counter + " : iload " + sc1);
+                                this.counter++;
+                            }
+                        }
+
+                        if (returnRegExpr(q.getArg2().toString().trim())!=null) {
+                            String myexpr = returnRegExpr(q.getArg2().toString().trim());
+                            if (myexpr.contains("+") || myexpr.contains("-") ||myexpr.contains("*") ||myexpr.contains("/") ||myexpr.contains("mod") ) {
+                                this.bytecodeList.add(this.counter + " : iload " + sc2);
+                                this.counter++;
+                            }
+                        }
+
+
+                        this.bytecodeList.add(this.counter + " : irem ");
+                        this.counter++;
+                        System.out.println("4 irem "+ this.istoreCounter);
+                        this.bytecodeList.add(this.counter + " : istore " + this.istoreCounter);
+                        this.counter++;
+                        this.istoreCounter++;
+                    }
+
+                }
             }
         }
-        else {
+           else {
 
             if (q.getOp().equals("par")) {              //load parametrous analoga me tupo
 
-                if (isNumeric(q.getArg1().toString().trim()) || q.getArg1().toString().trim().contains("'")){
+                if (isNumeric(q.getArg1().toString().trim()) || q.getArg1().toString().trim().contains("'")) {
                     this.bytecodeList.add(this.counter + " : ldc " + q.getArg1());
                     this.counter++;
-                }
-                else {
+                } else {
 
                     boolean flag = false;
                     for (int j = VarLocalList.size() - 1; j >= 0; j--) {
@@ -414,8 +1031,7 @@ public class JavaBytecode {
                         throw new IllegalStateException("ERROR! VARIABLE NOT INITIALIZED");
                     }
                 }
-            }
-            else if (q.getOp().equals("call")) {        //invoke function
+            } else if (q.getOp().equals("call")) {        //invoke function
 
 
                 bytecodeList.add(this.counter + " : new Grace");
@@ -427,35 +1043,33 @@ public class JavaBytecode {
                 bytecodeList.add(this.counter + " : invokespecial Grace/<init>()V");
                 this.counter++;
 
-                bytecodeList.add(this.counter + " : invokespecial Grace/" + q.getArg3()+ setMethodPar((String)q.getArg3()) + setMethodRet((String)q.getArg3()));
+                bytecodeList.add(this.counter + " : invokespecial Grace/" + q.getArg3() + setMethodPar((String) q.getArg3()) + setMethodRet((String) q.getArg3()));
                 this.counter++;
 
-            }
-            else if(q.getOp().equals(":=")){            //store
+            } else if (q.getOp().equals(":=")) {            //store
 
-                if( this.isNumeric(q.getArg1().toString().trim()) || q.getArg1().toString().contains("'")) {
+                //get value
+                System.out.println("GET VALUE: " + q.getArg1().toString());
+                if (this.isNumeric(q.getArg1().toString().trim()) || q.getArg1().toString().contains("'")) {
                     this.bytecodeList.add(this.counter + " : ldc " + q.getArg1());      //stack: this, arg1   /local:-
                     this.counter++;
-                }
-                else {
+                } else {
 
-                    System.out.println("inside else if else " + q.getArg1().toString());
+
                     boolean flag = false;
-                    if(!q.getArg1().toString().contains("$")) {
-                        int sc = this.VarLocalExists(q.getArg1().toString().trim());
-                        System.out.println("store counter is " + sc);
+                    if (!q.getArg1().toString().contains("$")) {
 
-                        if (sc!=-1){
-                            System.out.println("loaded" );
+                        int sc = this.VarLocalExists(q.getArg1().toString().trim());
+                        if (sc != -1) {
+                            System.out.println("loaded");
                             this.bytecodeList.add(this.counter + " : iload " + sc);
-                            //this.PrintVarLocal();
                             this.counter++;
                             flag = true;
                         }
 
-                    }
-                    else {
-                        String expr="";
+                    } else {
+
+                        String expr = "";
 
                         for (int k = 0; k < registers.size(); k++) {
                             if (registers.get(k).getPosition().equals(q.getArg1().toString())) {
@@ -465,89 +1079,109 @@ public class JavaBytecode {
                                 break;
                             }
                         }
+                        int sc = this.VarLocalExists(q.getArg1().toString().trim());
 
-                        System.out.println("EXPR = " + expr);
+                        if (!(expr.contains("+") || expr.contains("-") || expr.contains("*") || expr.contains("/") || expr.contains("mod"))) {
+                            if (expr.contains("[")) {
+                                this.bytecodeList.add(this.counter + " : iaload ");
+                                this.counter++;
+                            }
+                        } else if (expr.contains("+") || expr.contains("-") || expr.contains("*") || expr.contains("/") || expr.contains("mod")) {
 
-                        String count = this.getArrayDim(expr);
+                            this.bytecodeList.add(this.counter + " : iload " + sc);
+                            System.out.println("LOADDDDDDD");
+                            this.counter++;
 
-                        System.out.println("count = " + count);
+
+                        }
+
                     }
 
 
-                    try{
-                        if(!flag ){
+                    try {
+                        if (!flag) {
                             throw new MyException("ERROR! VARIABLE NOT INITIALIZED");
                         }
-                    }
-                    catch (MyException e){
+                    } catch (MyException e) {
                         throw new IllegalStateException("ERROR! VARIABLE NOT INITIALIZED");
                     }
 
                 }
 
-                System.out.println("Name of n "  + q.getArg3().toString() );
 
-
+                System.out.println("PUT VALUE TO: " + q.getArg3().toString().trim());
                 VarLocal obj;
-                if(q.getArg3().toString().trim().contains("$")) { //is register
+                if (q.getArg3().toString().trim().contains("$")) { //is register
                     String value = returnRegExpr(q.getArg3().toString().trim());
-                    obj = new VarLocal(q.getArg3().toString().trim(), istoreCounter,value);
+                    obj = new VarLocal(q.getArg3().toString().trim(), istoreCounter, value);
                 }
                 else
+                {
                     obj = new VarLocal(q.getArg3().toString().trim(), istoreCounter);
+                }
+
                 int sc = VarLocalExists(q.getArg3().toString().trim());
 
-                if(sc!=-1) {
+                System.out.println("SC = " + sc);
+                if (sc != -1) {
+
+                    System.out.println("if(sc!=-1)");
 
                     //array already exists
-                    if(obj.getValue()!=null)
-                    {
-                        if(obj.getValue().contains("[")){
+                    if (obj.getValue() != null) {
+                        System.out.println(" if(obj.getValue()!=null)" + obj.getValue());
 
+
+                        if (obj.getValue().contains("[")) {
+
+                            System.out.println("  if(obj.getValue().contains(\"[\")){");
                             this.bytecodeList.add(this.counter + " : iastore ");
                             this.counter++;
+                            this.istoreCounter++;
 
+                        } else if (obj.getValue().contains("+") || obj.getValue().contains("-") || obj.getValue().contains("*") || obj.getValue().contains("/") || obj.getValue().contains("mod")) {
+                            System.out.println("  elseif");
+                            this.bytecodeList.add(this.counter + " : iastore ");
+                            this.counter++;
+                            this.istoreCounter++;
                         }
-                    }
-                    else {
+                    } else {
                         if (this.isNumeric(q.getArg1().toString().trim())) {
                             this.bytecodeList.add(this.counter + " : istore " + sc);
-                            //this.istoreCounter++;
                             this.counter++;
-                        }
-                        else {
-                            System.out.println("aaaaaaaaaaaaaa");
+                        } else {
                             this.bytecodeList.add(this.counter + " : istore " + sc);
-                            // this.istoreCounter++;
                             this.counter++;
                         }
 
                     }
 
-                }
-                else{
-                    if(this.isNumeric(q.getArg1().toString().trim())){
+                } else {
+
+                    System.out.println("STORE" + returnRegExpr(q.getArg3().toString().trim()));
+                    if (this.isNumeric(q.getArg3().toString().trim())) {
+                        System.out.println("istore 1 " + istoreCounter);
                         this.bytecodeList.add(this.counter + " : istore " + istoreCounter);
                         this.istoreCounter++;
-                    }
-                    else {
-                        System.out.println("bbbbbbbbbbbbbbbbbbb");
-                        this.bytecodeList.add(this.counter + " : istore " + istoreCounter);
-                        this.istoreCounter++;
+                    } else if (returnRegExpr(q.getArg3().toString().trim()) != null) {
+                        if (returnRegExpr(q.getArg3().toString().trim()).contains("[")) {
+                            this.bytecodeList.add(this.counter + " : iastore ");
+                            this.istoreCounter++;
+                        }
                     }
                     VarLocalList.add(obj);
                     this.counter++;
 
                 }
 
-            }
-            else if(q.getOp().equals("array")){         //store se arg3 to arg1[arg2]
+            } else if (q.getOp().equals("array")) {         //store se arg3 to arg1[arg2]
 
                 //if array doesnt exist
 
-                if(this.VarLocalExists(q.getArg3().toString().trim())==-1)
-                {
-                    String dimensionOfArray = this.getArrayDim(q.getArg1().toString().trim());
+                //System.out.println("SSSSS " + q.getArg3().toString());
+                int sc = this.VarLocalExists(q.getArg1().toString().trim());
+                if (sc == -1) {
+                    String dimensionOfArray = this.getArrayDimVar(q.getArg1().toString().trim());
                     System.out.println("dim: " + dimensionOfArray);
                     this.bytecodeList.add(this.counter + " : ldc " + dimensionOfArray);
                     this.counter++;
@@ -556,13 +1190,15 @@ public class JavaBytecode {
                     this.counter++;
 
                     this.bytecodeList.add(this.counter + " : astore " + this.istoreCounter);
+                    this.VarLocalList.add(new VarLocal(q.getArg1().toString(), istoreCounter));
                     this.counter++;
                     this.istoreCounter++;
 
                     //then assign in the given index a value(numeric/char or not)
 
                     //get arrayref
-                    this.bytecodeList.add(this.counter + " : aload " + (istoreCounter-1));
+
+                    this.bytecodeList.add(this.counter + " : aload " + (istoreCounter - 1));
                     this.counter++;
 
                     //get index
@@ -575,14 +1211,13 @@ public class JavaBytecode {
                     //value = apo i[3] to i -> getArg2()
 
                     String value = this.returnRegExpr(q.getArg3().toString().trim());
-                    obj = new VarLocal(q.getArg3().toString().trim(), istoreCounter,value);
+                    obj = new VarLocal(q.getArg3().toString().trim(), istoreCounter, value);
                     VarLocalList.add(obj);
-                }
-                else{
+                } else {
                     //then assign in the given index a value(numeric/char or not)
 
                     //get arrayref
-                    this.bytecodeList.add(this.counter + " : aload " + istoreCounter);
+                    this.bytecodeList.add(this.counter + " : aload " + sc);
                     this.counter++;
 
                     //get index
@@ -591,16 +1226,16 @@ public class JavaBytecode {
                     this.counter++;
                 }
 
-            }
-            else if(q.getOp().equals("ifb")){       //isos dn xreiazetai
+            } else if (q.getOp().equals("ifb")) {       //isos dn xreiazetai
 
-            }
-            else if(q.getOp().equals("ret")){       // ireturn/return
-                this.bytecodeList.add(this.counter + " : iload " + (istoreCounter-1));
+            } else if (q.getOp().equals("ret")) {       // ireturn/return
+                this.bytecodeList.add(this.counter + " : iload " + (istoreCounter - 1));
                 this.counter++;
             }
 
         }
+
+
     }
 
     public String getTypeArray(String name){
@@ -622,26 +1257,33 @@ public class JavaBytecode {
     }
 
     public String getArrayDim(String name){
-        String type="";
 
-        int k=0;
-        String newName = "";
-        while(k<name.length()){
+        int j = 0;
+        String dim = "";
 
-            char c = name.charAt(k);
+        while(j<name.length()){
 
+            char c = name.charAt(j);
             if(c=='['){
-
+                while(c != ']'){
+                    j++;
+                    c = name.charAt(j);
+                    if(c == ']')
+                    {
+                        break;
+                    }
+                    dim += c;
+                }
                 break;
             }
-            newName+=c;
-            k++;
+            j++;
         }
+        return dim;
+    }
 
-        name = newName;
+    public String getArrayDimVar(String name){
 
-
-
+        String type = "";
         for(int i=0; i < this.allVars.size(); i++){
             if(this.allVars.get(i).getName().equals(name)){
                 type = this.allVars.get(i).getType();
@@ -673,6 +1315,13 @@ public class JavaBytecode {
     }
 
 
+    public void printAllVars(){
+        System.out.println("\n Printing all vars\n");
+        for(int i=0; i<this.allVars.size();i++){
+            System.out.println(this.allVars.get(i).getName() + " "+ this.allVars.get(i).getType());
+        }
+    }
+
 
     public String getVar(String name) {
 
@@ -692,7 +1341,9 @@ public class JavaBytecode {
 
 
     public int VarLocalExists(String name){
+        //System.out.println("INSIDE SEARCH: " + name );
         for (int i=0; i<VarLocalList.size(); i++){
+            //System.out.println("NAME: " + name + "!" + "search: " + VarLocalList.get(i).getName() + "!");
             if (VarLocalList.get(i).getName().equals(name) && !name.contains("$"))
                 return VarLocalList.get(i).getStoreCounter();
             else if(name.contains(("$"))){

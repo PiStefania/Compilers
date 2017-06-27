@@ -9,22 +9,46 @@ return
 .limit stack 100
 .limit locals 10
 0 : aload_0 
-1 : ldc 7
-2 : istore 1
-3 : ldc 3
-4 : istore 2
-5 : iload 2
-6 : istore 1
-7 : ldc 5
-8 : newarray int
-9 : astore 3
-10 : aload 3
-11 : ldc 3
-12 : ldc 2
-13 : iastore 
-14 : aload 4
-15 : ldc 3
-16 : istore 1
+1 : ldc 5
+2 : newarray int
+3 : astore 1
+4 : aload 1
+5 : ldc 3
+6 : ldc 5
+7 : iastore 
+8 : aload 1
+9 : ldc 2
+10 : ldc 7
+11 : iastore 
+12 : aload 1
+13 : ldc 3
+14 : iaload 
+16 : ldc 2
+17 : irem 
+18 : istore 4
+19 : aload 1
+20 : ldc 2
+21 : iaload 
+22 : iload 4
+23 : imul 
+24 : istore 5
+25 : aload 1
+26 : ldc 2
+27 : iaload 
+28 : ldc 10
+29 : isub 
+30 : istore 6
+31 : iload 5
+32 : iload 6
+33 : idiv 
+34 : istore 7
+35 : aload 1
+36 : ldc 3
+37 : iaload 
+38 : iload 7
+39 : iadd 
+40 : istore 8
+41 : iload 8
 return
 .end method
 .method public static main([Ljava/lang/String;)V

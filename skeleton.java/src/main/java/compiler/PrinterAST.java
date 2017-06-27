@@ -521,6 +521,7 @@ public class PrinterAST extends DepthFirstAdapter{
     public void inAVarDefFuncDef(AVarDefFuncDef node)
     {
 
+
         String type = node.getR().toString();
         List<String> myList = new ArrayList<String>(Arrays.asList(node.getL().toString().split(" ")));
         for(int i=0;i<myList.size();i++){
@@ -547,7 +548,7 @@ public class PrinterAST extends DepthFirstAdapter{
 
         ScopeObject obj = new ScopeObject(myList.get(0).toString().trim(),myList.get(myList.size()-1).toString().trim(),"decl", false,table.getPosition());
         table.insert(obj);
-        table.getAllVars().add(obj);
+        //table.getAllVars().add(obj);
 
 
     }
@@ -715,7 +716,7 @@ public class PrinterAST extends DepthFirstAdapter{
             }
 
             ScopeObject obj = new ScopeObject(finalS,type,"var", false,table.getPosition());
-            table.getAllVars().add(obj);
+           // table.getAllVars().add(obj);
             try{
                 if (table.lookupVarAndTypeOnlyForVariables(obj)){
                     throw new MyException("ERROR INCORECT TYPE OF VARIABLE");
@@ -751,7 +752,7 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
         ScopeObject obj = new ScopeObject(name,type,"var", false,table.getPosition());
-        table.getAllVars().add(obj);
+       // table.getAllVars().add(obj);
         try{
             if (table.lookupVarAndType(obj)){
                 throw new MyException("ERROR INCORECT TYPE OF VARIABLE");
@@ -953,9 +954,18 @@ public class PrinterAST extends DepthFirstAdapter{
     public void inAAddSubAllExpr(AAddSubAllExpr node)
     {
 
+        System.out.println("nodee " + node.getL().toString() + " "+ node.getR().toString());
+
         String ournode = node.getL().toString() + node.getR().toString();
 
         List<String> myList = new ArrayList<String>(Arrays.asList(ournode.split(" ")));
+
+        for(int kk=0; kk< myList.size(); kk++){
+            System.out.println("item  is "+ myList.get(kk).trim());
+        }
+
+
+
         for(int i=0;i<myList.size();i++) {
 
             if (myList.get(i).equals("+") || myList.get(i).equals("-")) {
@@ -972,10 +982,24 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
         }
+
+        for(int kk=0; kk< myList.size(); kk++){
+            System.out.println("item2  is "+ myList.get(kk).trim());
+        }
+
+
+
+
         for(int i=0;i<myList.size();i++) {
 
             String type = table.FindVariableType(myList.get(i).trim());
+
             if (type != null) {
+
+                if(type.contains("int[")  && myList.contains("[")){
+                    type = "int";
+                }
+
                 try{
                     if (!type.equals("int")){
                         throw new MyException("ERROR WRONG EXPR TYPE");
@@ -1156,6 +1180,10 @@ public class PrinterAST extends DepthFirstAdapter{
 
             String type = table.FindVariableType(myList.get(i).trim());
             if (type != null) {
+                if(type.contains("int[")  && myList.contains("[")){
+                    type = "int";
+                }
+
                 try{
                     if (!type.equals("int")){
                         throw new MyException("ERROR WRONG EXPR TYPE");
@@ -1187,6 +1215,9 @@ public class PrinterAST extends DepthFirstAdapter{
 
         String type = table.FindVariableType(node.getR().toString().trim());
         if(type != null){
+
+
+
             try{
                 if (!type.equals("int")){
                     throw new MyException("ERROR WRONG EXPR TYPE");
@@ -2920,7 +2951,7 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
         ScopeObject obj = new ScopeObject(name,type,"var", false,table.getPosition());
-        table.getAllVars().add(obj);
+       // table.getAllVars().add(obj);
         try{
             if (table.lookupVarAndType(obj)){
                 throw new MyException("ERROR INCORECT TYPE OF VARIABLE");
