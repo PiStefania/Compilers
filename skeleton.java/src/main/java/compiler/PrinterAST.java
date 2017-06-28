@@ -650,17 +650,23 @@ public class PrinterAST extends DepthFirstAdapter{
             int length=str.length()-1;
             type = "char[" +length+"]";
 
+            //im.insertPlaceHelper(str,reg);
+
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
 
         }
         else if (node.getR().getClass().getSimpleName().equals("ALetterAllExpr")) {
 
             type= "char";
+            //im.insertPlaceHelper(str,reg);
+
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
         }
         else if (node.getR().getClass().getSimpleName().equals("AConstantAllExpr")){
 
             type= "int";
+            //im.insertPlaceHelper(str,reg);
+
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
         }
         else if (node.getR().getClass().getSimpleName().equals("AAddSubAllExpr")){
@@ -671,6 +677,8 @@ public class PrinterAST extends DepthFirstAdapter{
         }
         else if (node.getR().getClass().getSimpleName().equals("AWithPlminAllExpr")){
             type= "int";
+            //im.insertPlaceHelper(str,reg);
+
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
         }
         else if (node.getR().toString().contains("[")){
@@ -743,6 +751,8 @@ public class PrinterAST extends DepthFirstAdapter{
             }catch (MyException e){
                 throw new IllegalStateException("ERROR! A VARIABLE WITH NO TYPE");
             }
+            //im.insertPlaceHelper(str,reg);
+
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
         }
 
@@ -838,16 +848,23 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
         if (node.getR().getClass().getSimpleName().equals("AFuncAllExpr")) {
+            //im.insertPlaceHelper(myString.get(0).toString(),reg);
+
 
             im.genQuad(im.getOpCode().getAssignment(),myString.get(0),null,reg);
         }
         else if (node.getR().getClass().getSimpleName().equals("AAddSubAllExpr")){
+
+            //im.insertPlaceHelper("$" + (im.getCount()-1),reg);
 
             im.genQuad(im.getOpCode().getAssignment(),"$" + (im.getCount()-1),null,reg);
 
         }
 
         else if (node.getR().getClass().getSimpleName().equals("ARestSignsAllExpr")){
+
+            //im.insertPlaceHelper("$" + (im.getCount()-1),reg);
+
 
             im.genQuad(im.getOpCode().getAssignment(),"$" + (im.getCount()-1),null,reg);
 
@@ -898,8 +915,12 @@ public class PrinterAST extends DepthFirstAdapter{
                 //System.out.println("TEMPSTRING: " + tempString + " pos: " + im.getCount());
                 im.insertPlaceHelper(tempString,"$" + im.getCount());
 
+                //im.insertPlaceHelper(tempList.get(0).toString(),name2);
+
+
 
                 im.genQuad(im.getOpCode().getArray(),tempList.get(0), myReg,name2);
+
                 im.genQuad(im.getOpCode().getAssignment(),"$" + (im.getCount()-1),null,name);
             }
             else{
@@ -922,8 +943,10 @@ public class PrinterAST extends DepthFirstAdapter{
                 Object w = im.newTemp("Integer");
                 String name2 = "$" + im.getCount();
 
-                InterReg reg2 = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name2);
-                im.insertReg(reg2);
+
+                //im.insertPlaceHelper("$" + (im.getCount()-1),name);
+
+
                 im.genQuad(im.getOpCode().getArray(),tempList.get(0),tempList2.get(tempList2.size()-1),name2);
                 im.insertPlaceHelper(tempString.replace(" ", ""),"$" + (im.getCount()-1));
                 im.genQuad(im.getOpCode().getAssignment(),"$" + (im.getCount()-1),null,name);
@@ -1975,6 +1998,8 @@ public class PrinterAST extends DepthFirstAdapter{
             reg = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name2);
             im.insertReg(reg);
 
+            im.insertPlaceHelper(prevName,name2);
+
             im.genQuad(im.getOpCode().getAssignment(),prevName,null, name2);
 
             im.genQuad(im.getOpCode().getRet(),null,null,null);
@@ -2025,8 +2050,8 @@ public class PrinterAST extends DepthFirstAdapter{
         Object w = im.newTemp(ourType);
         String name = "$" + im.getCount();
 
-        InterReg reg = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name);
-        im.insertReg(reg);
+        im.insertPlaceHelper(node.getAllExpr().toString(),name);
+
 
         im.genQuad(im.getOpCode().getAssignment(),node.getAllExpr(),null, name);
 
@@ -2157,6 +2182,7 @@ public class PrinterAST extends DepthFirstAdapter{
 
             reg = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name2);
             im.insertReg(reg);
+            im.insertPlaceHelper(prevName,name2);
 
             im.genQuad(im.getOpCode().getAssignment(),prevName,null, name2);
 
@@ -2210,6 +2236,8 @@ public class PrinterAST extends DepthFirstAdapter{
 
         InterReg reg = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name);
         im.insertReg(reg);
+
+        im.insertPlaceHelper(node.getAllExpr().toString(),name);
 
         im.genQuad(im.getOpCode().getAssignment(),node.getAllExpr(),null, name);
 
@@ -2345,6 +2373,8 @@ public class PrinterAST extends DepthFirstAdapter{
             reg = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name2);
             im.insertReg(reg);
 
+            im.insertPlaceHelper(prevName,name2);
+
             im.genQuad(im.getOpCode().getAssignment(),prevName,null, name2);
 
             im.genQuad(im.getOpCode().getRet(),null,null,null);
@@ -2395,8 +2425,8 @@ public class PrinterAST extends DepthFirstAdapter{
         Object w = im.newTemp(ourType);
         String name = "$" + im.getCount();
 
-        InterReg reg = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name);
-        im.insertReg(reg);
+
+        im.insertPlaceHelper(node.getAllExpr().toString(),name);
 
         im.genQuad(im.getOpCode().getAssignment(),node.getAllExpr(),null, name);
 
@@ -2525,9 +2555,9 @@ public class PrinterAST extends DepthFirstAdapter{
             w = im.newTemp(ourType);
             String name2 = "$" + im.getCount();
 
-            reg = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name2);
-            im.insertReg(reg);
 
+
+            im.insertPlaceHelper(prevName,name2);
             im.genQuad(im.getOpCode().getAssignment(),prevName,null, name2);
 
             im.genQuad(im.getOpCode().getRet(),null,null,null);
@@ -2580,6 +2610,8 @@ public class PrinterAST extends DepthFirstAdapter{
 
         InterReg reg = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name);
         im.insertReg(reg);
+
+        im.insertPlaceHelper(node.getAllExpr().toString(),name);
 
         im.genQuad(im.getOpCode().getAssignment(),node.getAllExpr(),null, name);
 
@@ -2869,17 +2901,23 @@ public class PrinterAST extends DepthFirstAdapter{
             int length=str.length()-1;
             type = "char[" +length+"]";
 
+            //im.insertPlaceHelper(str,reg);
+
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
 
         }
         else if (node.getR().getClass().getSimpleName().equals("ALetterAllExpr")) {
 
             type= "char";
+            //im.insertPlaceHelper(str,reg);
+
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
         }
         else if (node.getR().getClass().getSimpleName().equals("AConstantAllExpr")){
 
             type= "int";
+            //im.insertPlaceHelper(str,reg);
+
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
         }
         else if (node.getR().getClass().getSimpleName().equals("AAddSubAllExpr")){
@@ -2890,6 +2928,8 @@ public class PrinterAST extends DepthFirstAdapter{
         }
         else if (node.getR().getClass().getSimpleName().equals("AWithPlminAllExpr")){
             type= "int";
+            //im.insertPlaceHelper(str,reg);
+
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
         }
         else if (node.getR().toString().contains("[")){
@@ -2945,6 +2985,8 @@ public class PrinterAST extends DepthFirstAdapter{
             }catch (MyException e){
                 throw new IllegalStateException("ERROR! A VARIABLE WITH NO TYPE");
             }
+            //im.insertPlaceHelper(str,reg);
+
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
         }
 
@@ -3040,12 +3082,18 @@ public class PrinterAST extends DepthFirstAdapter{
 
         if (node.getR().getClass().getSimpleName().equals("AFuncAllExpr")) {
 
+            //im.insertPlaceHelper(myString.get(0).toString(),reg);
+
             im.genQuad(im.getOpCode().getAssignment(), myString.get(0), null, reg);
         } else if (node.getR().getClass().getSimpleName().equals("AAddSubAllExpr")) {
+
+            //im.insertPlaceHelper("$" + (im.getCount() - 1),reg);
 
             im.genQuad(im.getOpCode().getAssignment(), "$" + (im.getCount() - 1), null, reg);
 
         } else if (node.getR().getClass().getSimpleName().equals("ARestSignsAllExpr")) {
+
+            //im.insertPlaceHelper("$" + (im.getCount() - 1),reg);
 
             im.genQuad(im.getOpCode().getAssignment(), "$" + (im.getCount() - 1), null, reg);
 
@@ -3082,8 +3130,7 @@ public class PrinterAST extends DepthFirstAdapter{
                 Object w = im.newTemp("Integer");
                 String name2 = "$" + im.getCount();
 
-                InterReg reg2 = new InterReg(w, im.getCount(), im.getOpCode().getAssignment(), w.getClass().getSimpleName(), name2);
-                im.insertReg(reg2);
+
                 String myReg = im.Place(numb);
                 try {
                     if (myReg == null) {
@@ -3094,6 +3141,9 @@ public class PrinterAST extends DepthFirstAdapter{
                 }
 
                 im.insertPlaceHelper(tempString, "$" + im.getCount());
+
+                //im.insertPlaceHelper("$" + (im.getCount() - 1),name);
+
 
 
                 im.genQuad(im.getOpCode().getArray(), tempList.get(0), myReg, name2);
@@ -3110,9 +3160,15 @@ public class PrinterAST extends DepthFirstAdapter{
                 Object w = im.newTemp("Integer");
                 String name2 = "$" + im.getCount();
 
-                InterReg reg2 = new InterReg(w, im.getCount(), im.getOpCode().getAssignment(), w.getClass().getSimpleName(), name2);
-                im.insertReg(reg2);
+                //im.insertPlaceHelper("$" + (im.getCount() - 1),name);
+
+
+
+
                 im.genQuad(im.getOpCode().getArray(), tempList.get(0), tempList2.get(tempList2.size() - 1), name2);
+
+                im.insertPlaceHelper(tempList.get(0).toString() + tempList2.get(tempList2.size() - 1),name2 );
+
                 im.genQuad(im.getOpCode().getAssignment(), "$" + (im.getCount() - 1), null, name);
             }
         }

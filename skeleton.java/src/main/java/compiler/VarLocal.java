@@ -33,9 +33,4 @@ public class VarLocal {
         return storeCounter;
     }
 
-    public int getSCOfVariable(String name){
-        if (this.name.equals(name))
-            return this.storeCounter;
-        return -1; //not found
-    }
 }
