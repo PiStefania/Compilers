@@ -1,8 +1,6 @@
 package compiler;
 
-/**
- * Created by anton_000 on 25/6/2017.
- */
+
 public class VarLocal {
     private String name;
     private int storeCounter;

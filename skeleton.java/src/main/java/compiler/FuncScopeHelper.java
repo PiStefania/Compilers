@@ -1,8 +1,6 @@
 package compiler;
 
-/**
- * Created by anton_000 on 24/6/2017.
- */
+
 public class FuncScopeHelper {
     private String funcName;                //name of function
     private int scope;                      //scope of function

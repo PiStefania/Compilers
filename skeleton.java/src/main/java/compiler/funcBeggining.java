@@ -1,9 +1,6 @@
 package compiler;
 
-/**
- * Created by anton_000 on 24/6/2017.
- */
-public class funcBeggining {        //first and second line of function
+public class funcBeggining {        //first, second and last line of function
     private String name;
     private int first;
     private int second;

@@ -9,9 +9,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 
-/**
- * Created by anton_000 on 24/6/2017.
- */
 public class JavaBytecode {
     private List<Quad> InitialQuadList;
     private List<Quad> quadList;
@@ -24,6 +21,9 @@ public class JavaBytecode {
     private List<placeHelper> registers;
     private List<VarLocal> VarLocalList;
     private List<ScopeObject> allVars;
+
+    private Stack<quadCounter> jumpStack;
+    private Stack<quadCounter> ifbStack;
 
     public JavaBytecode(List<Quad> quadList, Stack<FuncScope> funcStack, List<placeHelper> registers, List<ScopeObject> allVars) {
         this.quadList = new ArrayList<Quad>(quadList);
@@ -68,6 +68,9 @@ public class JavaBytecode {
             VarLocalList = new ArrayList<VarLocal>();
             String method;
 
+            jumpStack = new Stack<quadCounter>();
+            ifbStack = new Stack<quadCounter>();
+
             //entolh first
 
             int first = funcScope.get(i).getFirst();
@@ -82,8 +85,8 @@ public class JavaBytecode {
                     method = ".method public static " + quadList.get(first).getArg1();
                     method += "([Ljava/lang/String;)V";
                     this.bytecodeList.add(method);
-                    this.bytecodeList.add(".limit stack 100");
-                    this.bytecodeList.add(".limit locals 2");
+                    this.bytecodeList.add(".limit stack 20");
+                    this.bytecodeList.add(".limit locals 100");
                     this.bytecodeList.add(this.counter + " : aload_0 ");    //stack: this
                     this.counter++;
                 }
@@ -91,8 +94,8 @@ public class JavaBytecode {
                 method = ".method " + quadList.get(first).getArg1();
                 method += this.setMethodPar((String) quadList.get(first).getArg1()) + this.setMethodRet((String) quadList.get(first).getArg1());
                 this.bytecodeList.add(method);
-                this.bytecodeList.add(".limit stack 100");
-                this.bytecodeList.add(".limit locals 10");
+                this.bytecodeList.add(".limit stack 20");
+                this.bytecodeList.add(".limit locals 100");
                 this.bytecodeList.add(this.counter + " : aload_0 ");    //stack: this
                 this.counter++;
             }
@@ -100,9 +103,6 @@ public class JavaBytecode {
 
             int second = funcScope.get(i).getSecond();
             int last = funcScope.get(i).getLast();
-
-            this.printRegisters();
-
 
             Quad command = null;
             String retType = setMethodRet((String) quadList.get(first).getArg1());
@@ -118,23 +118,25 @@ public class JavaBytecode {
             }
 
                 if (command != null) {
-                if (!this.previousRet(command)) {
-                    //endu
+                    if (!this.previousRet(command)) {
 
-                    if (retType.equals("I")) {
-                        this.counter--;
-                        this.bytecodeList.add("ireturn");
-                    } else if (retType.equals("C"))                            //8elei fix (to idio alla me entoles bytecode)
-                    {
-                        this.counter--;
+                        if (retType.equals("I")) {
+                            this.counter--;
+                            this.bytecodeList.add("ireturn");
+                        }
+                        else if (retType.equals("C"))
+                        {
+                            this.counter--;
 
-                        this.bytecodeList.add("ireturn");
+                            this.bytecodeList.add("ireturn");
+                        }
                     }
-                }
             }
 
-            this.PrintVarLocal();
-            this.printAllVars();
+            for (int counter = second; counter <= last; counter++) {         //check jumpStack
+                jumpHelper(counter);
+            }
+
             this.bytecodeList.add(".end method");
         }
         try {
@@ -151,211 +153,195 @@ public class JavaBytecode {
     }
 
 
-    public boolean previousRet(Quad q) {
-        if (q.getOp().equals("ret")) {
-            return true;
-        }
-        return false;
-    }
+    public void jumpHelper(int countQuad){
+        String countQuadStr = Integer.toString(countQuad);
 
+        if(jumpStack.size()>0) {
 
-    public void changeQuadList() {
-        if (quadList.get(0).getOp().equals("unit") && !quadList.get(0).getArg1().equals("main")) {
-            //must change quadlist
+            for(int i=this.jumpStack.size()-1; i>=0; i--){
 
-            int noOfParams = this.getNoOfParamsForQuad(quadList.get(0).getArg1().toString().trim());
-            try {
-                if (noOfParams != 0) {
-                    throw new MyException("ERROR! INITIAL FUNCTION IS NOT MAIN AND HAS PARAMETERS");
-                }
-            } catch (MyException e) {
-                throw new IllegalStateException("ERROR! INITIAL FUNCTION IS NOT MAIN AND HAS PARAMETERS");
-            }
+                if (countQuadStr.equals(this.jumpStack.get(i).getQuad().getArg3().toString())) {
 
+                    for (int byteCounter = 0; byteCounter < this.bytecodeList.size(); byteCounter++) {
+                        String line = this.bytecodeList.get(byteCounter);
+                        String tempStr = "*" + this.jumpStack.get(i).getPosition();
 
-            Quad q1 = new Quad("unit", "main", null, null);
-            Quad q2 = new Quad("call", null, null, quadList.get(0).getArg1());
-            Quad q3 = new Quad("endu", "main", null, null);
-
-            quadList.add(0, q1);
-            quadList.add(q2);
-            quadList.add(q3);
-
-            this.setQuadListLabels();
-
-            this.printQuadList();
-
-
-        }
-    }
-
-    public void setQuadListLabels() {
-        for (int i = 0; i < quadList.size(); i++) {
-            if (quadList.get(i).getOp().equals("jump")) {
-                Integer temp = (Integer) quadList.get(i).getArg3() + 1;
-                quadList.get(i).setArg3(temp);
-            } else if (quadList.get(i).getOp().equals("jumpl")) {
-                Integer temp = (Integer) quadList.get(i).getArg3() + 1;
-                quadList.get(i).setArg3(temp);
-            } else if (quadList.get(i).getOp().equals("label")) {
-                Integer temp = (Integer) quadList.get(i).getArg1() + 1;
-                quadList.get(i).setArg1(temp);
-            } else if (quadList.get(i).getOp().equals("ifb")) {
-                Integer temp = (Integer) quadList.get(i).getArg3() + 1;
-                quadList.get(i).setArg3(temp);
-            } else {
-                if (quadList.get(i).getOp().getClass().getSimpleName().equals("operator")) {
-                    operator p = (operator) quadList.get(i).getOp();
-                    if (p.getName().equals("relop")) {
-                        Integer temp = (Integer) quadList.get(i).getArg3() + 1;
-                        quadList.get(i).setArg3(temp);
+                        if (line.contains(tempStr)) {
+                            if(this.quadList.get(countQuad).getOp().toString().equals("endu")){
+                                line = line.replace(tempStr, Integer.toString(counter-1));
+                            }
+                            else{
+                                line = line.replace(tempStr, Integer.toString(counter));
+                            }
+                            this.bytecodeList.set(byteCounter, line);
+                        }
                     }
+                    this.jumpStack.remove(i);
                 }
             }
-
-        }
-    }
-
-    public void printRegisters() {
-        System.out.println("\n Printing Registers\n");
-        for (int i = 0; i < this.registers.size(); i++) {
-            System.out.println(registers.get(i).getPosition() + " " + registers.get(i).getExpr());
-        }
-    }
-
-    public void printQuadList() {            //print list
-        for (int i = 0; i < this.quadList.size(); i++) {
-            if (this.quadList.get(i).getOp().getClass().getSimpleName().equals("operator")) {
-                operator myOp = (operator) this.quadList.get(i).getOp();
-                System.out.println(i + ": " + myOp.getValue() + ", " + this.quadList.get(i).getArg1() + ", " + this.quadList.get(i).getArg2() + ", " + this.quadList.get(i).getArg3());
-
-            } else
-                System.out.println(i + ": " + this.quadList.get(i).getOp() + ", " + this.quadList.get(i).getArg1() + ", " + this.quadList.get(i).getArg2() + ", " + this.quadList.get(i).getArg3());
         }
     }
 
 
-    public void createFuncScope() {
-        this.funcScope = new ArrayList<funcBeggining>();
+    public void ifbHelper(int countQuad){
+        String countQuadStr = Integer.toString(countQuad);
 
-        this.changeQuadList();
+        if(ifbStack.size()>0) {
 
-        for (int i = 0; i < this.quadList.size(); i++) { //get unit
+            for(int i=this.ifbStack.size()-1; i>=0; i--){
 
-            if (quadList.get(i).getOp().equals("unit")) {     //c
-                int first = i;
-                String name = (String) quadList.get(i).getArg1();
-                int j = i;
-                while (j < quadList.size()) {
-                    if (quadList.get(j).getOp().equals("endu") && quadList.get(j).getArg1().equals(name))
-                        break;
-                    j++;
+                if (countQuadStr.equals(this.ifbStack.get(i).getQuad().getArg3().toString())) {
+
+                    for (int byteCounter = 0; byteCounter < this.bytecodeList.size(); byteCounter++) {
+                        String line = this.bytecodeList.get(byteCounter);
+                        String tempStr = "@" + this.ifbStack.get(i).getPosition();
+
+                        if (line.contains(tempStr)) {
+                            line = line.replace(tempStr, Integer.toString(counter));
+                            this.bytecodeList.set(byteCounter, line);
+                        }
+                    }
+                    this.ifbStack.remove(i);
                 }
-                int last = j;
-                int k = last;
-                while (k > first) {
-                    if (quadList.get(k).getOp().equals("endu") && !quadList.get(k).getArg1().equals(name))
-                        break;
-                    k--;
-                }
-                int second = k + 1;
-                funcBeggining obj = new funcBeggining(name, first, second, last);
-                funcScope.add(obj);
             }
         }
-
-
-        this.orderFuncScope();
-
     }
 
-    public void orderFuncScope() {
 
-        int n = funcScope.size();
-        int temp = 0;
-
-        for (int i = 0; i < n; i++) {
-            for (int j = 1; j < (n - i); j++) {
-
-                if (funcScope.get(j - 1).getLast() > funcScope.get(j).getLast()) {
-                    Collections.swap(funcScope, j - 1, j);
-                }
-
-            }
-        }
-
-
-    }
 
     public void handleQuad(Quad q, int countQuad, String retType) {
+
+        this.jumpHelper(countQuad);
+        this.ifbHelper(countQuad);
 
         operator p;
         if (q.getOp().getClass().getSimpleName().equals("operator")) {
             p = (operator) q.getOp();
             if (p.getName().equals("relop")) {
 
-                String value = p.getValue();
-
                 List<String> regExpr = this.getRegRelop(countQuad);
+
                 this.VarLocalList.add(new VarLocal(regExpr.get(0), istoreCounter, regExpr.get(1)));
 
-                this.bytecodeList.add(this.counter + " : ldc " + q.getArg1());
-                this.counter++;
-                this.bytecodeList.add(this.counter + " : ldc " + q.getArg2());
-                this.counter++;
+                if (returnRegExpr(q.getArg1().toString().trim()) != null) {
 
-                /*if (value.equals("<")) {
+                    String expr = returnRegExpr(q.getArg1().toString().trim());
 
-                    //this.VarLocalList.add(new VarLocal());
+                    if (expr.contains("[")) {
+                        if (!(expr.contains("+") || expr.contains("-") || expr.contains("*") || expr.contains("/") || expr.contains("mod"))) {
 
-
-
+                            String var = this.getVar(expr);
+                            String dim = this.getArrayDim(expr);
 
 
-                    this.bytecodeList.add(this.counter + " : aload " + q.getArg1());
+                            int sc = this.VarLocalExists(var);
+
+                            this.bytecodeList.add(this.counter + " : aload " + sc);
+                            this.counter++;
+
+                            this.bytecodeList.add(this.counter + " : ldc " + dim);
+                            this.counter++;
+
+
+                            this.bytecodeList.add(this.counter + " : iaload ");
+                            this.counter++;
+                        }
+                    }
+                }
+
+                if (returnRegExpr(q.getArg2().toString().trim()) != null) {
+
+                    String expr2 = returnRegExpr(q.getArg2().toString().trim());
+                    if (expr2.contains("[")) {
+                        if (!(expr2.contains("+") || expr2.contains("-") || expr2.contains("*") || expr2.contains("/") || expr2.contains("mod"))) {
+
+                            String var = this.getVar(expr2);
+                            String dim = this.getArrayDim(expr2);
+
+
+                            int sc = this.VarLocalExists(var);
+
+                            this.bytecodeList.add(this.counter + " : aload " + sc);
+                            this.counter++;
+
+                            this.bytecodeList.add(this.counter + " : ldc " + dim);
+                            this.counter++;
+
+
+                            this.bytecodeList.add(this.counter + " : iaload ");
+                            this.counter++;
+                        }
+                    }
+                }
+
+                int sc1 = this.VarLocalExists(q.getArg1().toString().trim());
+                int sc2 = this.VarLocalExists(q.getArg2().toString().trim());
+
+                if (this.isNumeric(q.getArg1().toString().trim()) && this.isNumeric(q.getArg2().toString().trim())) {
+                    this.bytecodeList.add(this.counter + " : ldc " + q.getArg1());
                     this.counter++;
-                    this.bytecodeList.add(this.counter + " : aload " + q.getArg2());
-                    this.counter++;
-                    this.bytecodeList.add(this.counter + " : if_icmpge " + q.getArg3());
-                    this.counter++;
-                } else if (value.equals(">")) {
-                    bytecodeList.add(this.counter + " : aload " + q.getArg1());
-                    this.counter++;
-                    bytecodeList.add(this.counter + " : aload " + q.getArg2());
-                    this.counter++;
-                    bytecodeList.add(this.counter + " : if_icmple " + q.getArg3());
+                    this.bytecodeList.add(this.counter + " : ldc " + q.getArg2());
                     this.counter++;
 
-                } else if (value.equals("<=")) {
-                    bytecodeList.add(this.counter + " : aload " + q.getArg1());
-                    this.counter++;
-                    bytecodeList.add(this.counter + " : aload " + q.getArg2());
-                    this.counter++;
-                    bytecodeList.add(this.counter + " : if_icmpgt " + q.getArg3());
-                    this.counter++;
-                } else if (value.equals(">=")) {
-                    bytecodeList.add(this.counter + " : aload " + q.getArg1());
-                    this.counter++;
-                    bytecodeList.add(this.counter + " : aload " + q.getArg2());
-                    this.counter++;
-                    bytecodeList.add(this.counter + " : if_icmplt " + q.getArg3());
-                    this.counter++;
-                } else if (value.equals("=")) {
-                    bytecodeList.add(this.counter + " : aload " + q.getArg1());
-                    this.counter++;
-                    bytecodeList.add(this.counter + " : aload " + q.getArg2());
-                    this.counter++;
-                    bytecodeList.add(this.counter + " : if_icmpne " + q.getArg3());
-                    this.counter++;
-                } else if (value.equals("#")) {
-                    bytecodeList.add(this.counter + " : aload " + q.getArg1());
-                    this.counter++;
-                    bytecodeList.add(this.counter + " : aload " + q.getArg2());
-                    this.counter++;
-                    bytecodeList.add(this.counter + " : if_icmpeq " + q.getArg3());
-                    this.counter++;
-                }*/
+                } else if (sc1 != -1 && this.isNumeric(q.getArg2().toString().trim())) {
 
+                    if (returnRegExpr(q.getArg1().toString().trim()) != null) {
+
+                        String myexpr = returnRegExpr(q.getArg1().toString().trim());
+                        if (myexpr.contains("+") || myexpr.contains("-") || myexpr.contains("*") || myexpr.contains("/") || myexpr.contains("mod")) {
+                            this.bytecodeList.add(this.counter + " : iload " + sc1);
+                            this.counter++;
+                        }
+                    }
+                    else {
+                        this.bytecodeList.add(this.counter + " : iload " + sc1);
+                        this.counter++;
+                    }
+                    this.bytecodeList.add(this.counter + " : ldc " + q.getArg2());
+                    this.counter++;
+
+                } else if (this.isNumeric(q.getArg1().toString().trim()) && sc2 != -1) {
+
+                    this.bytecodeList.add(this.counter + " : ldc " + q.getArg1());
+                    this.counter++;
+                    if (returnRegExpr(q.getArg2().toString().trim()) != null) {
+                        String myexpr = returnRegExpr(q.getArg2().toString().trim());
+                        if (myexpr.contains("+") || myexpr.contains("-") || myexpr.contains("*") || myexpr.contains("/") || myexpr.contains("mod")) {
+                            this.bytecodeList.add(this.counter + " : iload " + sc2);
+                            this.counter++;
+                        }
+                    }
+                    else {
+                        this.bytecodeList.add(this.counter + " : iload " + sc2);
+                        this.counter++;
+                    }
+                } else if (sc1 != -1 && sc2 != -1) {
+
+                    if (returnRegExpr(q.getArg1().toString().trim()) != null) {
+                        String myexpr = returnRegExpr(q.getArg1().toString().trim());
+                        if (myexpr.contains("+") || myexpr.contains("-") || myexpr.contains("*") || myexpr.contains("/") || myexpr.contains("mod")) {
+                            this.bytecodeList.add(this.counter + " : iload " + sc1);
+                            this.counter++;
+                        }
+                    }
+                    else {
+                        this.bytecodeList.add(this.counter + " : iload " + sc1);
+                        this.counter++;
+                    }
+
+                    if (returnRegExpr(q.getArg2().toString().trim()) != null) {
+                        String myexpr = returnRegExpr(q.getArg2().toString().trim());
+                        if (myexpr.contains("+") || myexpr.contains("-") || myexpr.contains("*") || myexpr.contains("/") || myexpr.contains("mod")) {
+                            this.bytecodeList.add(this.counter + " : iload " + sc2);
+                            this.counter++;
+                        }
+                    }
+                    else {
+                        this.bytecodeList.add(this.counter + " : iload " + sc2);
+                        this.counter++;
+                    }
+
+                }
             } else if (p.getName().equals("op")) {
 
                 String value = p.getValue();
@@ -423,11 +409,11 @@ public class JavaBytecode {
                 bytecodeList.add(this.counter + " : invokespecial Grace/" + q.getArg3() + setMethodPar((String) q.getArg3()) + setMethodRet((String) q.getArg3()));
                 this.counter++;
 
-            } else if (q.getOp().equals(":=")) {            //store
+            } else if (q.getOp().equals(":=")) {
 
                 //get value
                 if (this.isNumeric(q.getArg1().toString().trim()) || q.getArg1().toString().contains("'")) {
-                    this.bytecodeList.add(this.counter + " : ldc " + q.getArg1());      //stack: this, arg1   /local:-
+                    this.bytecodeList.add(this.counter + " : ldc " + q.getArg1());
                     this.counter++;
                 } else {
 
@@ -590,14 +576,44 @@ public class JavaBytecode {
                     String count = q.getArg2().toString();
                     this.bytecodeList.add(this.counter + " : ldc " + count);
                     this.counter++;
+
+                    VarLocal obj;
+                    String value = this.returnRegExpr(q.getArg3().toString().trim());
+                    obj = new VarLocal(q.getArg3().toString().trim(), istoreCounter, value);
+                    VarLocalList.add(obj);
                 }
 
             } else if (q.getOp().equals("ifb")) {
 
                 String expr = returnRegExpr(q.getArg1().toString());
                 if (expr.contains("<")) {
-                    Integer branch = (Integer) q.getArg3();
-                    this.bytecodeList.add(this.counter + " : if_icmplt " + (branch+1));
+                    this.bytecodeList.add(this.counter + " : if_icmplt " + "@" + countQuad);
+                    ifbStack.push(new quadCounter(q,countQuad));
+                    this.counter++;
+                }
+                else if (expr.contains(">")) {
+                    this.bytecodeList.add(this.counter + " : if_icmpgt " + "@" + countQuad);
+                    ifbStack.push(new quadCounter(q,countQuad));
+                    this.counter++;
+                }
+                else if (expr.contains("<=")) {
+                    this.bytecodeList.add(this.counter + " : if_icmple " + "@" + countQuad);
+                    ifbStack.push(new quadCounter(q,countQuad));
+                    this.counter++;
+                }
+                else if (expr.contains(">=")) {
+                    this.bytecodeList.add(this.counter + " : if_icmpge " + "@" + countQuad);
+                    ifbStack.push(new quadCounter(q,countQuad));
+                    this.counter++;
+                }
+                else if (expr.contains("=")) {
+                    this.bytecodeList.add(this.counter + " : if_icmpeq " + "@" + countQuad);
+                    ifbStack.push(new quadCounter(q,countQuad));
+                    this.counter++;
+                }
+                else if (expr.contains("#")) {
+                    this.bytecodeList.add(this.counter + " : if_icmpne " + "@" + countQuad);
+                    ifbStack.push(new quadCounter(q,countQuad));
                     this.counter++;
                 }
 
@@ -610,15 +626,18 @@ public class JavaBytecode {
                 } else if (retType.equals("I")) {
                     this.counter--;
                     this.bytecodeList.add("ireturn");
-                } else if (retType.equals("C"))                            //8elei fix (to idio alla me entoles bytecode)
+                }
+                else if (retType.equals("C"))
                 {
                     this.counter--;
                     this.bytecodeList.add("ireturn");
                 }
             }
             else if(q.getOp().equals("jump")){
-                Integer branch = (Integer) q.getArg3();
-                this.bytecodeList.add(this.counter + " : jsr " + branch);
+
+                this.bytecodeList.add(this.counter + " : goto " + "*" + countQuad);
+                jumpStack.push(new quadCounter(q,countQuad));
+
                 this.counter++;
             }
 
@@ -626,6 +645,149 @@ public class JavaBytecode {
 
 
     }
+
+
+
+
+
+
+
+
+
+    public boolean previousRet(Quad q) {
+        if (q.getOp().equals("ret")) {
+            return true;
+        }
+        return false;
+    }
+
+
+    public void changeQuadList() {
+        if (quadList.get(0).getOp().equals("unit") && !quadList.get(0).getArg1().equals("main")) {
+            //must change quadlist
+
+            int noOfParams = this.getNoOfParamsForQuad(quadList.get(0).getArg1().toString().trim());
+            try {
+                if (noOfParams != 0) {
+                    throw new MyException("ERROR! INITIAL FUNCTION IS NOT MAIN AND HAS PARAMETERS");
+                }
+            } catch (MyException e) {
+                throw new IllegalStateException("ERROR! INITIAL FUNCTION IS NOT MAIN AND HAS PARAMETERS");
+            }
+
+
+            Quad q1 = new Quad("unit", "main", null, null);
+            Quad q2 = new Quad("call", null, null, quadList.get(0).getArg1());
+            Quad q3 = new Quad("endu", "main", null, null);
+
+            quadList.add(0, q1);
+            quadList.add(q2);
+            quadList.add(q3);
+
+            this.setQuadListLabels();
+
+        }
+    }
+
+    public void setQuadListLabels() {
+        for (int i = 0; i < quadList.size(); i++) {
+            if (quadList.get(i).getOp().equals("jump")) {
+                Integer temp = (Integer) quadList.get(i).getArg3() + 1;
+                quadList.get(i).setArg3(temp);
+            } else if (quadList.get(i).getOp().equals("jumpl")) {
+                Integer temp = (Integer) quadList.get(i).getArg3() + 1;
+                quadList.get(i).setArg3(temp);
+            } else if (quadList.get(i).getOp().equals("label")) {
+                Integer temp = (Integer) quadList.get(i).getArg1() + 1;
+                quadList.get(i).setArg1(temp);
+            } else if (quadList.get(i).getOp().equals("ifb")) {
+                Integer temp = (Integer) quadList.get(i).getArg3() + 1;
+                quadList.get(i).setArg3(temp);
+            } else {
+                if (quadList.get(i).getOp().getClass().getSimpleName().equals("operator")) {
+                    operator p = (operator) quadList.get(i).getOp();
+                    if (p.getName().equals("relop")) {
+                        Integer temp = (Integer) quadList.get(i).getArg3() + 1;
+                        quadList.get(i).setArg3(temp);
+                    }
+                }
+            }
+
+        }
+    }
+
+    public void printRegisters() {
+        System.out.println("\n Printing Registers\n");
+        for (int i = 0; i < this.registers.size(); i++) {
+            System.out.println(registers.get(i).getPosition() + " " + registers.get(i).getExpr());
+        }
+    }
+
+    public void printQuadList() {            //print list
+        for (int i = 0; i < this.quadList.size(); i++) {
+            if (this.quadList.get(i).getOp().getClass().getSimpleName().equals("operator")) {
+                operator myOp = (operator) this.quadList.get(i).getOp();
+                System.out.println(i + ": " + myOp.getValue() + ", " + this.quadList.get(i).getArg1() + ", " + this.quadList.get(i).getArg2() + ", " + this.quadList.get(i).getArg3());
+
+            } else
+                System.out.println(i + ": " + this.quadList.get(i).getOp() + ", " + this.quadList.get(i).getArg1() + ", " + this.quadList.get(i).getArg2() + ", " + this.quadList.get(i).getArg3());
+        }
+    }
+
+
+    public void createFuncScope() {
+        this.funcScope = new ArrayList<funcBeggining>();
+
+        this.changeQuadList();
+
+        for (int i = 0; i < this.quadList.size(); i++) { //get unit
+
+            if (quadList.get(i).getOp().equals("unit")) {
+                int first = i;
+                String name = (String) quadList.get(i).getArg1();
+                int j = i;
+                while (j < quadList.size()) {
+                    if (quadList.get(j).getOp().equals("endu") && quadList.get(j).getArg1().equals(name))
+                        break;
+                    j++;
+                }
+                int last = j;
+                int k = last;
+                while (k > first) {
+                    if (quadList.get(k).getOp().equals("endu") && !quadList.get(k).getArg1().equals(name))
+                        break;
+                    k--;
+                }
+                int second = k + 1;
+                funcBeggining obj = new funcBeggining(name, first, second, last);
+                funcScope.add(obj);
+            }
+        }
+
+
+        this.orderFuncScope();
+
+    }
+
+    public void orderFuncScope() {
+
+        int n = funcScope.size();
+        int temp = 0;
+
+        for (int i = 0; i < n; i++) {
+            for (int j = 1; j < (n - i); j++) {
+
+                if (funcScope.get(j - 1).getLast() > funcScope.get(j).getLast()) {
+                    Collections.swap(funcScope, j - 1, j);
+                }
+
+            }
+        }
+
+
+    }
+
+
 
 
     public void op(Quad q, String operator) {
@@ -704,6 +866,10 @@ public class JavaBytecode {
                     this.counter++;
                 }
             }
+            else {
+                this.bytecodeList.add(this.counter + " : iload " + sc1);
+                this.counter++;
+            }
             this.bytecodeList.add(this.counter + " : ldc " + q.getArg2());
             this.counter++;
             this.bytecodeList.add(this.counter + " : " + operator);
@@ -722,6 +888,10 @@ public class JavaBytecode {
                     this.counter++;
                 }
             }
+            else {
+                this.bytecodeList.add(this.counter + " : iload " + sc2);
+                this.counter++;
+            }
 
 
             this.bytecodeList.add(this.counter + " : " + operator);
@@ -738,6 +908,10 @@ public class JavaBytecode {
                     this.counter++;
                 }
             }
+            else {
+                this.bytecodeList.add(this.counter + " : iload " + sc1);
+                this.counter++;
+            }
 
             if (returnRegExpr(q.getArg2().toString().trim()) != null) {
                 String myexpr = returnRegExpr(q.getArg2().toString().trim());
@@ -745,6 +919,10 @@ public class JavaBytecode {
                     this.bytecodeList.add(this.counter + " : iload " + sc2);
                     this.counter++;
                 }
+            }
+            else {
+                this.bytecodeList.add(this.counter + " : iload " + sc2);
+                this.counter++;
             }
 
 
@@ -952,7 +1130,6 @@ public class JavaBytecode {
             }
         }
         List<String> types = new ArrayList<String>();
-        //List<String> parametersList = new ArrayList<String>();
         for (int i = 0; i < funcStack.size(); i++) {
             if (funcStack.get(i).getFuncName().equals(name) && funcStack.get(i).getScope() == scope) {
                 types = funcStack.get(i).getTypesOfPatameters();

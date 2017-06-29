@@ -12,8 +12,6 @@ public class Main
 {
 	public static void main(String[] arguments) throws FileNotFoundException
 	{
-		//File file = new File(arguments[0]);
-		//File file = new File("insert pathname");
 		try
 		{
 			Parser p =

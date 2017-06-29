@@ -6,35 +6,38 @@ invokenonvirtual java/lang/Object/<init>()V
 return
 .end method
 .method f()V
-.limit stack 100
-.limit locals 10
+.limit stack 20
+.limit locals 100
 0 : aload_0 
-1 : ldc 2
-2 : ldc 3
-3 : if_icmplt 6
-4 : jsr 11
-5 : ldc 2
-6 : istore 1
-7 : ldc 3
-8 : istore 1
-9 : ldc 5
-10 : istore 1
-11 : ldc 10
-12 : newarray int
-13 : astore 2
-14 : aload 2
-15 : ldc 1
-16 : iload 1
-17 : iastore 
-18 : ldc 209
-19 : istore 1
-20 : ldc 209
-21 : istore 1
-22 : return
+1 : ldc 10
+2 : newarray int
+3 : astore 1
+4 : aload 1
+5 : ldc 1
+6 : ldc 5
+7 : iastore 
+8 : aload 1
+9 : ldc 1
+10 : aload 1
+11 : ldc 1
+12 : iaload 
+13 : ldc 3
+14 : if_icmplt 16
+15 : goto 25
+16 : ldc 2
+17 : istore 3
+18 : aload 1
+19 : ldc 2
+20 : iload 3
+21 : iastore 
+22 : ldc 20
+23 : istore 3
+24 : goto 26
+25 : return
 .end method
 .method public static main([Ljava/lang/String;)V
-.limit stack 100
-.limit locals 2
+.limit stack 20
+.limit locals 100
 0 : aload_0 
 1 : new Grace
 2 : dup

@@ -548,8 +548,6 @@ public class PrinterAST extends DepthFirstAdapter{
 
         ScopeObject obj = new ScopeObject(myList.get(0).toString().trim(),myList.get(myList.size()-1).toString().trim(),"decl", false,table.getPosition());
         table.insert(obj);
-        //table.getAllVars().add(obj);
-
 
     }
 
@@ -557,16 +555,12 @@ public class PrinterAST extends DepthFirstAdapter{
     @Override
     public void inAExpressionStmt(AExpressionStmt node)
     {
-
-        System.out.println("node is "+ node.getL().toString() + " "+ node.getR().toString());
         List<?> newl = (List) node.getL();
         String name = newl.get(0).toString();
 
         String initialName=name;
 
         if (name.contains("[")){
-
-            System.out.println("name contains " +name);
 
             int i=0;
             String finalS="";
@@ -603,7 +597,6 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
             String type = table.FindVariableType(finalS);
-            System.out.println("type "+ type);
             try{
                 if(type==null){
                     throw new MyException("ERROR! VARIABLE DOESN'T EXIST");
@@ -650,7 +643,6 @@ public class PrinterAST extends DepthFirstAdapter{
             int length=str.length()-1;
             type = "char[" +length+"]";
 
-            //im.insertPlaceHelper(str,reg);
 
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
 
@@ -658,14 +650,12 @@ public class PrinterAST extends DepthFirstAdapter{
         else if (node.getR().getClass().getSimpleName().equals("ALetterAllExpr")) {
 
             type= "char";
-            //im.insertPlaceHelper(str,reg);
 
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
         }
         else if (node.getR().getClass().getSimpleName().equals("AConstantAllExpr")){
 
             type= "int";
-            //im.insertPlaceHelper(str,reg);
 
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
         }
@@ -677,7 +667,6 @@ public class PrinterAST extends DepthFirstAdapter{
         }
         else if (node.getR().getClass().getSimpleName().equals("AWithPlminAllExpr")){
             type= "int";
-            //im.insertPlaceHelper(str,reg);
 
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
         }
@@ -724,7 +713,6 @@ public class PrinterAST extends DepthFirstAdapter{
             }
 
             ScopeObject obj = new ScopeObject(finalS,type,"var", false,table.getPosition());
-           // table.getAllVars().add(obj);
             try{
                 if (table.lookupVarAndTypeOnlyForVariables(obj)){
                     throw new MyException("ERROR INCORECT TYPE OF VARIABLE");
@@ -751,7 +739,6 @@ public class PrinterAST extends DepthFirstAdapter{
             }catch (MyException e){
                 throw new IllegalStateException("ERROR! A VARIABLE WITH NO TYPE");
             }
-            //im.insertPlaceHelper(str,reg);
 
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
         }
@@ -762,7 +749,6 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
         ScopeObject obj = new ScopeObject(name,type,"var", false,table.getPosition());
-       // table.getAllVars().add(obj);
         try{
             if (table.lookupVarAndType(obj)){
                 throw new MyException("ERROR INCORECT TYPE OF VARIABLE");
@@ -831,9 +817,6 @@ public class PrinterAST extends DepthFirstAdapter{
             Object w = im.newTemp(type);
             String name2 = "$" + im.getCount();
 
-
-            //im.genQuad(im.getOpCode().getArray(),finalS,numb, "$" + im.getCount());
-            //im.insertPlaceHelper((finalS+numb),"$" + im.getCount());
             name=finalS;
         }
 
@@ -848,23 +831,16 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
         if (node.getR().getClass().getSimpleName().equals("AFuncAllExpr")) {
-            //im.insertPlaceHelper(myString.get(0).toString(),reg);
-
 
             im.genQuad(im.getOpCode().getAssignment(),myString.get(0),null,reg);
         }
         else if (node.getR().getClass().getSimpleName().equals("AAddSubAllExpr")){
-
-            //im.insertPlaceHelper("$" + (im.getCount()-1),reg);
 
             im.genQuad(im.getOpCode().getAssignment(),"$" + (im.getCount()-1),null,reg);
 
         }
 
         else if (node.getR().getClass().getSimpleName().equals("ARestSignsAllExpr")){
-
-            //im.insertPlaceHelper("$" + (im.getCount()-1),reg);
-
 
             im.genQuad(im.getOpCode().getAssignment(),"$" + (im.getCount()-1),null,reg);
 
@@ -912,26 +888,15 @@ public class PrinterAST extends DepthFirstAdapter{
                     throw new IllegalStateException("FOUND VARIABLE NOT DECLARED");
                 }
 
-                //System.out.println("TEMPSTRING: " + tempString + " pos: " + im.getCount());
                 im.insertPlaceHelper(tempString,"$" + im.getCount());
-
-                //im.insertPlaceHelper(tempList.get(0).toString(),name2);
-
 
 
                 im.genQuad(im.getOpCode().getArray(),tempList.get(0), myReg,name2);
 
-                im.genQuad(im.getOpCode().getAssignment(),"$" + (im.getCount()-1),null,name);
+                im.genQuad(im.getOpCode().getAssignment(),"$" + (im.getCount()-1),null,name2);
             }
             else{
-                System.err.println("TEMPSTRING NUMERIC "+tempString);
-                /* try{
-                if(table.isNumeric(numb)==false){
-                    throw new MyException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
-                }
-            }catch (MyException e){
-                throw new IllegalStateException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
-            }*/
+
                 String tempString2 = tempString;
                 while (tempString2.contains("[") || tempString2.contains("]")){
                     tempString2 = tempString2.replace("[","");
@@ -944,12 +909,11 @@ public class PrinterAST extends DepthFirstAdapter{
                 String name2 = "$" + im.getCount();
 
 
-                //im.insertPlaceHelper("$" + (im.getCount()-1),name);
 
 
                 im.genQuad(im.getOpCode().getArray(),tempList.get(0),tempList2.get(tempList2.size()-1),name2);
                 im.insertPlaceHelper(tempString.replace(" ", ""),"$" + (im.getCount()-1));
-                im.genQuad(im.getOpCode().getAssignment(),"$" + (im.getCount()-1),null,name);
+                im.genQuad(im.getOpCode().getAssignment(),"$" + (im.getCount()-1),null,name2);
             }
         }
     }
@@ -977,17 +941,10 @@ public class PrinterAST extends DepthFirstAdapter{
     public void inAAddSubAllExpr(AAddSubAllExpr node)
     {
 
-        System.out.println("nodee " + node.getL().toString() + " "+ node.getR().toString());
 
         String ournode = node.getL().toString() + node.getR().toString();
 
         List<String> myList = new ArrayList<String>(Arrays.asList(ournode.split(" ")));
-
-        for(int kk=0; kk< myList.size(); kk++){
-            System.out.println("item  is "+ myList.get(kk).trim());
-        }
-
-
 
         for(int i=0;i<myList.size();i++) {
 
@@ -1005,12 +962,6 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
         }
-
-        for(int kk=0; kk< myList.size(); kk++){
-            System.out.println("item2  is "+ myList.get(kk).trim());
-        }
-
-
 
 
         for(int i=0;i<myList.size();i++) {
@@ -1291,7 +1242,7 @@ public class PrinterAST extends DepthFirstAdapter{
                             throw new MyException("ERROR WRONG EXPR TYPE");
                         }
                     }
-                catch (MyException e){
+                    catch (MyException e){
                         throw new IllegalStateException("ERROR WRONG EXPR TYPE");
                     }
                 }
@@ -1374,56 +1325,56 @@ public class PrinterAST extends DepthFirstAdapter{
         InterReg reg = new InterReg(w,im.getCount(),im.getOpCode().getAssignment(),w.getClass().getSimpleName(),name2);
         im.insertReg(reg);
 
-       if (left.contains("[")){             //array
+        if (left.contains("[")){             //array
 
-           int i=0;
-           String finalS="";
-           String numb="";
-           while(i<left.length()){
-               char c = left.charAt(i);
-               if(c == '['){
-                   while(i<left.length()){
-                       i++;
-                       c = left.charAt(i);
-                       if (c == ']')
-                           break;
+            int i=0;
+            String finalS="";
+            String numb="";
+            while(i<left.length()){
+                char c = left.charAt(i);
+                if(c == '['){
+                    while(i<left.length()){
+                        i++;
+                        c = left.charAt(i);
+                        if (c == ']')
+                            break;
 
-                       numb+=c;
+                        numb+=c;
 
-                   }
-                   break;
-               }
-               finalS += c;
-               i++;
-           }
-           finalS=finalS.trim();
-           numb=numb.trim();
+                    }
+                    break;
+                }
+                finalS += c;
+                i++;
+            }
+            finalS=finalS.trim();
+            numb=numb.trim();
 
-           if (numb.contains("+") ||numb.contains("-") || numb.contains("*") || numb.contains("/") || numb.contains("mod")){
-               numb = im.Place(numb);
-               try{
-                   if(numb==null){
-                       throw new MyException("ERROR! WRONG EXPRESSION");
-                   }
-               }
-               catch (MyException e){
-                   throw new IllegalStateException("ERROR! WRONG EXPRESSION");
-               }
+            if (numb.contains("+") ||numb.contains("-") || numb.contains("*") || numb.contains("/") || numb.contains("mod")){
+                numb = im.Place(numb);
+                try{
+                    if(numb==null){
+                        throw new MyException("ERROR! WRONG EXPRESSION");
+                    }
+                }
+                catch (MyException e){
+                    throw new IllegalStateException("ERROR! WRONG EXPRESSION");
+                }
 
-           }
-           else{
-               try{
-                   if(table.isNumeric(numb)==false){
-                       throw new MyException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
-                   }
-               }catch (MyException e){
-                   throw new IllegalStateException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
-               }
-           }
+            }
+            else{
+                try{
+                    if(table.isNumeric(numb)==false){
+                        throw new MyException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
+                    }
+                }catch (MyException e){
+                    throw new IllegalStateException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
+                }
+            }
 
-           im.insertPlaceHelper(left,"$" + im.getCount());
+            im.insertPlaceHelper(left,"$" + im.getCount());
 
-           im.genQuad(im.getOpCode().getArray(),finalS,numb,"$" + im.getCount());
+            im.genQuad(im.getOpCode().getArray(),finalS,numb,"$" + im.getCount());
 
         }
 
@@ -1735,7 +1686,6 @@ public class PrinterAST extends DepthFirstAdapter{
     public void outAFuncCallWithoutStmt(AFuncCallWithoutStmt node){
         String funcName = node.toString().trim();
         im.insertPlaceHelper(funcName,"$" + im.getCount());
-        //im.genQuad(im.getOpCode().getCall(),null,null,funcName);
     }
 
     @Override
@@ -1788,7 +1738,7 @@ public class PrinterAST extends DepthFirstAdapter{
                 finalS=finalS.trim();
                 numb=numb.trim();
 
-                  if (numb.contains("+") ||numb.contains("-") || numb.contains("*") || numb.contains("/") || numb.contains("mod")){
+                if (numb.contains("+") ||numb.contains("-") || numb.contains("*") || numb.contains("/") || numb.contains("mod")){
                     numb = im.Place(numb);
                     try{
                         if(numb==null){
@@ -1801,14 +1751,14 @@ public class PrinterAST extends DepthFirstAdapter{
 
                 }
                 else{
-                      try{
-                          if(table.isNumeric(numb)==false){
-                              throw new MyException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
-                          }
-                      }catch (MyException e){
-                          throw new IllegalStateException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
-                      }
-                  }
+                    try{
+                        if(table.isNumeric(numb)==false){
+                            throw new MyException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
+                        }
+                    }catch (MyException e){
+                        throw new IllegalStateException("ERROR! NON NUMERIC VALUE GIVEN AS ARRAY INDEX");
+                    }
+                }
 
                 im.insertPlaceHelper(left,"$" + im.getCount());
 
@@ -1833,7 +1783,7 @@ public class PrinterAST extends DepthFirstAdapter{
                     return;
                 }
             }
-             im.genQuad(im.getOpCode().getPar(),par,"V",null);
+            im.genQuad(im.getOpCode().getPar(),par,"V",null);
 
 
         }
@@ -2901,22 +2851,18 @@ public class PrinterAST extends DepthFirstAdapter{
             int length=str.length()-1;
             type = "char[" +length+"]";
 
-            //im.insertPlaceHelper(str,reg);
-
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
 
         }
         else if (node.getR().getClass().getSimpleName().equals("ALetterAllExpr")) {
 
             type= "char";
-            //im.insertPlaceHelper(str,reg);
 
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
         }
         else if (node.getR().getClass().getSimpleName().equals("AConstantAllExpr")){
 
             type= "int";
-            //im.insertPlaceHelper(str,reg);
 
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
         }
@@ -2928,7 +2874,6 @@ public class PrinterAST extends DepthFirstAdapter{
         }
         else if (node.getR().getClass().getSimpleName().equals("AWithPlminAllExpr")){
             type= "int";
-            //im.insertPlaceHelper(str,reg);
 
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
         }
@@ -2985,7 +2930,6 @@ public class PrinterAST extends DepthFirstAdapter{
             }catch (MyException e){
                 throw new IllegalStateException("ERROR! A VARIABLE WITH NO TYPE");
             }
-            //im.insertPlaceHelper(str,reg);
 
             im.genQuad(im.getOpCode().getAssignment(),str,null,reg);
         }
@@ -2993,7 +2937,6 @@ public class PrinterAST extends DepthFirstAdapter{
 
 
         ScopeObject obj = new ScopeObject(name,type,"var", false,table.getPosition());
-       // table.getAllVars().add(obj);
         try{
             if (table.lookupVarAndType(obj)){
                 throw new MyException("ERROR INCORECT TYPE OF VARIABLE");
@@ -3082,18 +3025,12 @@ public class PrinterAST extends DepthFirstAdapter{
 
         if (node.getR().getClass().getSimpleName().equals("AFuncAllExpr")) {
 
-            //im.insertPlaceHelper(myString.get(0).toString(),reg);
-
             im.genQuad(im.getOpCode().getAssignment(), myString.get(0), null, reg);
         } else if (node.getR().getClass().getSimpleName().equals("AAddSubAllExpr")) {
-
-            //im.insertPlaceHelper("$" + (im.getCount() - 1),reg);
 
             im.genQuad(im.getOpCode().getAssignment(), "$" + (im.getCount() - 1), null, reg);
 
         } else if (node.getR().getClass().getSimpleName().equals("ARestSignsAllExpr")) {
-
-            //im.insertPlaceHelper("$" + (im.getCount() - 1),reg);
 
             im.genQuad(im.getOpCode().getAssignment(), "$" + (im.getCount() - 1), null, reg);
 
@@ -3142,12 +3079,9 @@ public class PrinterAST extends DepthFirstAdapter{
 
                 im.insertPlaceHelper(tempString, "$" + im.getCount());
 
-                //im.insertPlaceHelper("$" + (im.getCount() - 1),name);
-
-
 
                 im.genQuad(im.getOpCode().getArray(), tempList.get(0), myReg, name2);
-                im.genQuad(im.getOpCode().getAssignment(), "$" + (im.getCount() - 1), null, name);
+                im.genQuad(im.getOpCode().getAssignment(), "$" + (im.getCount() - 1), null, name2);
             } else {
                 String tempString2 = tempString;
                 while (tempString2.contains("[") || tempString2.contains("]")) {
@@ -3160,16 +3094,12 @@ public class PrinterAST extends DepthFirstAdapter{
                 Object w = im.newTemp("Integer");
                 String name2 = "$" + im.getCount();
 
-                //im.insertPlaceHelper("$" + (im.getCount() - 1),name);
-
-
-
 
                 im.genQuad(im.getOpCode().getArray(), tempList.get(0), tempList2.get(tempList2.size() - 1), name2);
 
                 im.insertPlaceHelper(tempList.get(0).toString() + tempList2.get(tempList2.size() - 1),name2 );
 
-                im.genQuad(im.getOpCode().getAssignment(), "$" + (im.getCount() - 1), null, name);
+                im.genQuad(im.getOpCode().getAssignment(), "$" + (im.getCount() - 1), null, name2);
             }
         }
     }
